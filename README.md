@@ -73,6 +73,13 @@ Ngoài các vận mệnh cũ (F1, 1 máu…), hiệp từ thứ 2 trở đi có 
 - **Mê Cung**: tường dày đặc, đánh giáp lá cà.
 - **Hỏa Ngục**: hồ dung nham bùng cháy theo chu kỳ, nháy ⚠ trước khi cháy.
 - **Rừng Rậm**: đầy bụi cỏ. Đứng trong bụi thì đối thủ không thấy, nhưng tiếng chân và dấu chân vẫn lộ.
+- **Đảo Sông**: dòng sông uốn lượn cắt ngang, lội nước chậm 30% (và dập lửa đang cháy trên người), có 2 khúc cạn để băng qua.
+- **Thành Cổ**: tòa thành vuông giữa bản đồ, 4 cổng và 4 tháp góc.
+- **Nhà Kho**: dãy kệ hàng song song và nhiều chồng thùng gỗ phá được.
+- **Sa Mạc**: khối đá lớn và hố cát lún làm chậm 50%.
+- **Băng Nguyên**: mặt băng trơn trượt và tường băng không phá được.
+
+**MC bình luận viên**: quả cầu loa có con mắt. Nó đọc vận mệnh mỗi hiệp và bình luận trong trận (máu đầu tiên, liên tiếp hạ gục, thắng hiệp). Máy có giọng tiếng Việt thì đọc thành lời; không có thì phát tiếng "bíp" kiểu loa. Bật/tắt trong menu tạm dừng.
 
 Đứng ngoài vòng bo càng lâu thì bị đốt càng đau.
 

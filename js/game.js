@@ -112,6 +112,7 @@ function updatePlayer(p, dt) {
     if (p.charge > 0) speed *= w.id === 'SNIPER' ? 1 - 0.65 * p.charge : w.id === 'BOW' ? 1 - 0.4 * p.charge : w.id === 'RAILGUN' ? 0.5 : w.id === 'HAMMER' ? 0.7 : 0.9;
     if (w.spin && p.aiming) speed *= 0.6;
     if (p.saberRush) speed = 175 * p.moveMult * 1.9; // Kiếm Ánh Sáng: lao tới
+    if (p.wading) speed *= 0.7; // lội nước
     if (p.st.root > 0 || p.st.anchor > 0) speed = 0;
     const bush = inBush(p.x, p.y);
     if (bush && p.bushStalker) speed *= 1.2;
@@ -120,7 +121,7 @@ function updatePlayer(p, dt) {
     if (p.lavaWalker && zones.some(z => z.type === 'lava' && lavaActive(z) && dist(p.x, p.y, z.x, z.y) < z.r)) { speed *= 1.3; if (combo(p, 'magma')) p.hp = Math.min(p.maxHp, p.hp + 6 * dt); }
     if (p.st.haste > 0 && Math.random() < 0.3) particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 0.3, maxLife: 0.3, color: hexA(p.color, 0.35), size: p.radius * 0.8 });
     const tvx = input.move.x * speed, tvy = input.move.y * speed;
-    const accel = world.ice ? 2.2 : 16;
+    const accel = (world.ice || p.onIce) ? 2.2 : 16;
     p.vx += (tvx - p.vx) * Math.min(1, accel * dt); p.vy += (tvy - p.vy) * Math.min(1, accel * dt);
     if (p.dashTime > 0) { p.dashTime -= dt; p.vx = Math.cos(p.dashAngle) * 720; p.vy = Math.sin(p.dashAngle) * 720; spark(p.x, p.y, '#7dd3fc', 2, 40, 0.3, 3); }
     // lực đẩy lùi
