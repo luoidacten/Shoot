@@ -25,7 +25,8 @@ Ai thắng 4 hiệp trước sẽ vô địch. Trước mỗi hiệp, mỗi ngư
 ## Vũ khí (kiểu Brawl Stars)
 - Giữ nút đánh để hiện vùng bắn, thả tay là bắn. Trên điện thoại kéo nút đánh để ngắm tay, kéo về giữa để huỷ.
 - Có băng đạn và đạn dự trữ. Hết băng thì tự nạp; chạm nút Ném để nạp chủ động, giữ nút Ném để ném. Hết sạch đạn thì tự ném vũ khí.
-- Vũ khí tụ lực (Sniper, Cung, Railgun): vùng ngắm thu hẹp dần thành một đường thẳng. Người bị ngắm thấy dải cảnh báo đỏ.
+- Vùng ngắm chỉ người bắn thấy và dài đúng bằng tầm bay tối đa của đạn.
+- Vũ khí tụ lực (Sniper, Cung, Railgun): không ngắm thì bắn rất gần (Sniper chỉ khoảng 200, ngắn hơn Shotgun). Ngắm càng lâu thì vùng càng dài ra và hẹp lại, bắn xa và chuẩn hơn.
 - Có 24 vũ khí:
   - **Cận chiến:** Dao, Song Đao, Katana, Giáo, Búa Tạ, Cưa Máy, Khiên, Kiếm Ánh Sáng.
   - **Tầm xa:** Súng lục, Ổ Quay, SMG, Song Súng, Súng Trường, Shotgun, Bắn tỉa, Cung, Pháo, Súng Phóng Lựu, Phun Lửa.

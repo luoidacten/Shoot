@@ -164,18 +164,23 @@ function drawAimZone(p, w, now) {
     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(ang);
     const kind = w.aim || (w.type === 'GUN' ? 'line' : 'arc');
     if (kind === 'line') {
-        let range = Math.min(w.range || 500, 900), spread = (w.spread || 0) * p.spreadMult;
+        let range = chargeRange(w, ch, p), spread = (w.spread || 0) * p.spreadMult;
         if (w.narrow) spread = spreadAt(w, ch);
-        if (w.id === 'SNIPER') range = (700 + 1200 * ch) * (p.sniperNest && p.stillT >= 0.5 ? 1.2 : 1);
-        if (w.id === 'BOW') { range = ch >= 0.35 ? 560 + 940 * ch : w.range; if (ch < 0.35) spread = w.spread; }
+        if (w.id === 'BOW' && ch < 0.35) spread = w.spread;
         if (w.id === 'AR') spread = 0.28;
-        if (w.id === 'RAILGUN') range = 1600;
+        // vạch mờ ở tầm tối đa khi tụ đầy (để biết còn dài được bao nhiêu)
+        if (w.mode === 'charge' && w.narrow) {
+            const maxR = chargeRange(w, 1, p);
+            ctx.strokeStyle = `rgba(${col},0.18)`; ctx.lineWidth = 1; ctx.setLineDash([4, 10]);
+            ctx.beginPath(); ctx.moveTo(range, 0); ctx.lineTo(maxR, 0); ctx.stroke(); ctx.setLineDash([]);
+        }
         const half = Math.max(7, range * Math.tan(Math.max(0.02, spread) / 2));
         const g = ctx.createLinearGradient(p.radius, 0, range, 0);
         g.addColorStop(0, `rgba(${col},0.28)`); g.addColorStop(1, `rgba(${col},0.06)`);
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.moveTo(p.radius, -6); ctx.lineTo(range, -half); ctx.lineTo(range, half); ctx.lineTo(p.radius, 6); ctx.closePath(); ctx.fill();
         ctx.strokeStyle = `rgba(${col},0.55)`; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.strokeStyle = `rgba(${col},0.9)`; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(range, -half - 4); ctx.lineTo(range, half + 4); ctx.stroke();
         if (w.mode === 'charge') {
             // vạch tụ lực
             ctx.strokeStyle = `rgba(${ch >= 0.99 ? '253,224,71' : col},0.9)`; ctx.lineWidth = 3;

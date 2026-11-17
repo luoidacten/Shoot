@@ -65,6 +65,17 @@ function spreadAt(w, c) {
     const e = c * c * (3 - 2 * c); // mượt: hẹp chậm lúc đầu, nhanh dần rồi chốt lại
     return w.narrow[0] + (w.narrow[1] - w.narrow[0]) * e;
 }
+/** Tầm bay tối đa thực tế (vùng ngắm vẽ đúng bằng giá trị này).
+ *  Sniper: không ngắm chỉ bay rất ngắn (ngắn hơn shotgun), ngắm càng lâu càng xa. */
+function chargeRange(w, c, p) {
+    switch (w.id) {
+        case 'SNIPER': return (180 + 1720 * c) * (p && p.sniperNest && p.stillT >= 0.5 ? 1.2 : 1);
+        case 'BOW': return c < 0.35 ? 320 : 320 + 1180 * c;
+        case 'RAILGUN': return 300 + 1700 * c;
+        case 'AR': return 640;
+        default: return w.range || 500;
+    }
+}
 function hasAmmo(w) { return !w.magSize || w.mag > 0 || w.reserve > 0 || world.infiniteAmmo; }
 function ammoText(w) {
     if (w.magSize) {
@@ -197,7 +208,7 @@ function muzzle(p, w, ang, side = 0) {
 function spawnBullet(p, x, y, ang, o) {
     const sp = o.speed || 20;
     const b = {
-        x, y, px: x, py: y, angle: ang, speed: sp, damage: o.damage, life: (o.range || 500) / (sp * 60) + 0.05, owner: p.id,
+        x, y, px: x, py: y, angle: ang, speed: sp, damage: o.damage, life: Math.max(10, (o.range || 500) - dist(p.x, p.y, x, y)) / (sp * 60), owner: p.id, // dừng đúng mép vùng ngắm (tính từ tâm người bắn)
         color: o.color || (p.id === 1 ? '#ffb3a8' : '#bfe3ff'), size: o.size || 2.6, knock: o.knock || 60,
         bounces: o.bounces !== undefined ? o.bounces : (p.bounces || 0), pierce: !!o.pierce, explosive: !!o.explosive, blastSmall: !!o.blastSmall,
         trail: o.trail || 26, burn: o.burn !== undefined ? o.burn : p.pyro, slowHit: o.slow || 0, root: o.root || 0,
@@ -267,17 +278,17 @@ function fireWeapon(p, w, ang, charge, enemy) {
         }
         case 'SNIPER': {
             const c = charge, nest = p.sniperNest && p.stillT >= 0.5 ? 1.2 : 1;
-            gunBullet(p, w, ang + rnd(spreadAt(w, c)), { speed: 30 + 30 * c, damage: w.damage * dmgM, range: (700 + 1200 * c) * nest, size: 4, color: '#e9d5ff', pierce: true, knock: 300, trail: 90 });
+            gunBullet(p, w, ang + rnd(spreadAt(w, c)), { speed: 30 + 30 * c, damage: w.damage * dmgM, range: chargeRange(w, c, p), size: 4, color: '#e9d5ff', pierce: true, knock: 300, trail: 90 });
             AudioSys.playAt('shoot_heavy', p.x, p.y); addShake(5); p.kx -= Math.cos(ang) * 120; p.ky -= Math.sin(ang) * 120; break;
         }
         case 'BOW': {
             if (charge >= 0.35) {
                 const full = charge >= 0.98;
-                spawnBullet(p, m0.x, m0.y, ang + rnd(spreadAt(w, charge)), { speed: 26 + 22 * charge, damage: (22 + 40 * charge) * dmgM, range: 560 + 940 * charge, size: 3 + charge, color: full ? '#f7fee7' : '#d9f99d', pierce: full, knock: 120 + 140 * charge, trail: 40 + 30 * charge, arrow: true });
+                spawnBullet(p, m0.x, m0.y, ang + rnd(spreadAt(w, charge)), { speed: 26 + 22 * charge, damage: (22 + 40 * charge) * dmgM, range: chargeRange(w, charge, p), size: 3 + charge, color: full ? '#f7fee7' : '#d9f99d', pierce: full, knock: 120 + 140 * charge, trail: 40 + 30 * charge, arrow: true });
                 AudioSys.playAt(full ? 'rail' : 'whoosh', p.x, p.y, 0.25); addShake(2 + charge * 3);
                 if (full) floatText(p.x, p.y - 28, 'MŨI TÊN XUYÊN!', '#a3e635', 13);
             } else {
-                for (let i = 0; i < 3; i++) p.shotQueue.push({ t: i * 0.09, fn: () => { const mm = muzzle(p, w, ang); spawnBullet(p, mm.x, mm.y, ang + rnd(w.spread), { speed: w.speed, damage: w.damage * dmgM, range: w.range, size: 2.5, color: '#bef264', arrow: true, trail: 34 }); AudioSys.playAt('whoosh', p.x, p.y, 0.2); } });
+                for (let i = 0; i < 3; i++) p.shotQueue.push({ t: i * 0.09, fn: () => { const mm = muzzle(p, w, ang); spawnBullet(p, mm.x, mm.y, ang + rnd(w.spread), { speed: w.speed, damage: w.damage * dmgM, range: chargeRange(w, 0, p), size: 2.5, color: '#bef264', arrow: true, trail: 34 }); AudioSys.playAt('whoosh', p.x, p.y, 0.2); } });
             }
             break;
         }
@@ -418,7 +429,7 @@ function fireSuper(p, mX, mY) {
 
 function fireRail(p, mX, mY, wep, ang, mult) {
     AudioSys.playAt('rail', p.x, p.y); addShake(9); flash('#22d3ee', 0.15);
-    const L = 2600, ex = mX + Math.cos(ang) * L, ey = mY + Math.sin(ang) * L;
+    const L = chargeRange(wep, p.charge || 1, p), ex = mX + Math.cos(ang) * L, ey = mY + Math.sin(ang) * L;
     beams.push({ x1: mX, y1: mY, x2: ex, y2: ey, life: 0.35, maxLife: 0.35, color: '#22d3ee' });
     p.kx -= Math.cos(ang) * 300; p.ky -= Math.sin(ang) * 300;
     obstacles.slice().forEach(o => { if (segRect(mX, mY, ex, ey, o) >= 0) damageObstacle(o, 60, p); });

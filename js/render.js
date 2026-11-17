@@ -172,7 +172,6 @@ function draw() {
     drawDecoys(now);
     players.forEach(p => drawPlayer(p, now));
     drawBushes(now);
-    drawEnemyWarnings(now);
     drawAirZones(now); // khói, hố đen phủ lên trên
 
     // ---- Đạn ----
@@ -301,7 +300,7 @@ function drawPlayer(p, now) {
 
     // vạch ngắm kiểu Brawl Stars (Nhắm Bắn) — chỉ người điều khiển mới thấy
     const mineView = p.id === localId() || localId() === null;
-    if (p.aiming && (mineView || (p.charge > 0 && w.narrow))) drawAimZone(p, w, now);
+    if (p.aiming && mineView) drawAimZone(p, w, now); // vùng ngắm chỉ người bắn thấy
     else if (p.aimshot && mineView) drawAimGuide(p, w, now);
 
     ctx.translate(p.x, p.y); ctx.rotate(p.angle);

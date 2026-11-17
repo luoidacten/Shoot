@@ -128,7 +128,7 @@ function botThink(p, dt) {
     if (enemyVisible && e.hp > 0) {
         const facing = Math.abs(angleDiff(Math.atan2(e.y - p.y, e.x - p.x), p.angle)) < 0.3;
         let wants = false;
-        const gunRange = w.id === 'SNIPER' ? 1400 : w.id === 'BOOMERANG' ? 440 : w.range;
+        const gunRange = w.mode === 'charge' && w.narrow ? chargeRange(w, 1, p) : w.id === 'BOOMERANG' ? 440 : w.range;
         if (w.type === 'GUN' && w.mag > 0 && !w.reloading) wants = los && dE < gunRange * 0.95 && facing;
         else if (w.type === 'THROWABLE') wants = los && dE > 150 && dE < 520;
         else if (w.type === 'MELEE' || w.type === 'SHIELD') wants = dE < p.radius + e.radius + (w.range || 30) + (w.dash ? 120 : 6) && facing;
@@ -137,7 +137,7 @@ function botThink(p, dt) {
             if (w.mode === 'auto') out.a = true;
             else if (w.mode === 'charge') {
                 // giữ đến khi tụ đủ lực rồi thả
-                const want = { SNIPER: 0.85, BOW: dE > 300 ? 0.8 : 0.1, RAILGUN: 0.7, HAMMER: dE < 90 ? 0.95 : 0, SPEAR: dE > 110 ? 0.95 : 0.1, KATANA: dE > 90 ? 0.6 : 0.1, BOOMERANG: Math.min(1, Math.max(0, (dE - 260) / 220)), REVOLVER: dE < 250 ? 1 : 0, LIGHTSABER: dE > 140 ? 1 : 0.05, GRENADE: 0.1, SHIELD: 0.1 }[w.id] || 0.2;
+                const want = { SNIPER: Math.min(1, Math.max(0.05, (dE - 150) / 1720 + 0.15)), BOW: dE > 300 ? Math.min(1, (dE - 300) / 1180 + 0.4) : 0.1, RAILGUN: 0.7, HAMMER: dE < 90 ? 0.95 : 0, SPEAR: dE > 110 ? 0.95 : 0.1, KATANA: dE > 90 ? 0.6 : 0.1, BOOMERANG: Math.min(1, Math.max(0, (dE - 260) / 220)), REVOLVER: dE < 250 ? 1 : 0, LIGHTSABER: dE > 140 ? 1 : 0.05, GRENADE: 0.1, SHIELD: 0.1 }[w.id] || 0.2;
                 out.a = (p.charge || 0) < Math.max(0.05, want);
             }
             else out.a = !B.prevA;
