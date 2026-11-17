@@ -57,6 +57,7 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 
 ## Luật theo hiệp (vận mệnh)
 Ngoài các vận mệnh cũ (F1, 1 máu…), hiệp từ thứ 2 trở đi có thể bốc trúng:
+- Trời Sáng (không có sương mù)
 - Đồng Đội (chia cặp 2 người 1 đội)
 - Thêm Người Thêm Vui (+4 bot, bản đồ rộng)
 - Đấu Trường Mở Rộng

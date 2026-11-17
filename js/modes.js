@@ -39,6 +39,7 @@ killPlayer = function (dead, killerId) {
 
 /* ============================== BIẾN CỐ PHÒNG (vận mệnh mới) ============================== */
 DESTINIES.push(
+    { name: 'TRỜI SÁNG', desc: 'Nắng chói chang: hiệp này không có sương mù, ai cũng thấy hết!', apply: () => { world.bright = true; } },
     { name: 'ĐỒNG ĐỘI', desc: 'Hiệp này chia cặp 2 người 1 đội (người chơi khác đội, bot chia đều). Đội còn sống cuối cùng cùng ăn điểm!', apply: () => { world.team = true; } },
     { name: 'THÊM NGƯỜI THÊM VUI', desc: 'Thêm 4 bot vào hiệp này, bản đồ rộng hơn. Càng đông càng loạn!', more: true, apply: () => {} },
     { name: 'ĐẤU TRƯỜNG MỞ RỘNG', desc: 'Bản đồ hiệp này rộng hơn hẳn.', wide: true, apply: () => {} },
@@ -51,7 +52,7 @@ DESTINIES.push(
 );
 const _initRound = initRound;
 initRound = function () {
-    world.event = null; world.robot = null; world.timeScale = 1; world.team = false;
+    world.event = null; world.robot = null; world.timeScale = 1; world.team = false; world.bright = false;
     removeTempBots();
     const d = currentDestiny || {};
     if (d.more) { for (let k = 0; k < 4; k++) { let id = 1; while (players.some(q => q.id === id)) id++; const b = createPlayer(id, 'bot'); b.temp = true; b.label = 'BOT+' + id; b.build = randomBuild(); players.push(b); } }
@@ -180,10 +181,10 @@ snapPlayer = function (p) {
     return Object.assign(_snapPlayer(p), { spells: p.spells, items: p.items, railLv: p.railLv || 1, mech: !!p.mech, antiMelee: p.antiMelee, gasMask: p.gasMask, bag: p.bag });
 };
 const _buildSnapshot = buildSnapshot;
-buildSnapshot = function () { const s = _buildSnapshot(); s.x = { mw: MAP_W, mh: MAP_H, ev: world.event, ts: world.timeScale, rb: world.robot, team: world.team }; return s; };
+buildSnapshot = function () { const s = _buildSnapshot(); s.x = { mw: MAP_W, mh: MAP_H, ev: world.event, ts: world.timeScale, rb: world.robot, br: !!world.bright, team: world.team }; return s; };
 const _applySnapshot = applySnapshot;
 applySnapshot = function (s) {
-    if (s.x) { setMapSize(s.x.mw, s.x.mh); world.event = s.x.ev; world.timeScale = s.x.ts; world.robot = s.x.rb; world.team = !!s.x.team; }
+    if (s.x) { setMapSize(s.x.mw, s.x.mh); world.event = s.x.ev; world.timeScale = s.x.ts; world.robot = s.x.rb; world.bright = !!s.x.br; world.team = !!s.x.team; }
     _applySnapshot(s);
     const ids = new Set(s.pl.map(q => q.id));
     for (let i = players.length - 1; i >= 0; i--) if (!ids.has(players[i].id)) players.splice(i, 1);
@@ -439,3 +440,9 @@ drawHUD = function (W, H, now) {
         if (ev === 'poison') { ctx.fillStyle = 'rgba(101,163,13,0.08)'; ctx.fillRect(0, 0, W, H); }
     }
 };
+
+/* Luật TRỜI SÁNG: tắt sương mù cả hiển thị lẫn luật nhìn thấy */
+const _fowActive = fowActive;
+fowActive = function () { return !world.bright && _fowActive(); };
+const _fogGameplay = fogGameplay;
+fogGameplay = function () { return !world.bright && _fogGameplay(); };
