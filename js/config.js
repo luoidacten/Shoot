@@ -12,25 +12,7 @@ const COLORS = {
 };
 
 
-/** Vũ khí — tier dùng để quyết định ưu tiên nhặt */
-const WEAPONS = {
-    NONE:    { id:'NONE',    name:'Tay không', icon:'✊', type:'MELEE', color:'transparent', damage:8,  fireRate:20, range:28, moveScale:1.2, width:0, len:0, tier:0 },
-    KNIFE:   { id:'KNIFE',   name:'Dao',       icon:'🔪', type:'MELEE', color:'#cbd5e1', damage:35, fireRate:24, range:46, durability:6, maxDurability:6, moveScale:1.1, width:4, len:14, tier:1 },
-    PISTOL:  { id:'PISTOL',  name:'Súng lục',  icon:'🔫', type:'GUN', color:'#94a3b8', damage:16, fireRate:13, speed:19, spread:0.05, range:520, ammo:12, moveScale:1.0, width:4, len:13, tier:2 },
-    SMG:     { id:'SMG',     name:'SMG',       icon:'💨', type:'GUN', color:'#fbbf24', damage:7,  fireRate:5,  speed:21, spread:0.3, range:460, ammo:50, moveScale:0.92, width:3, len:11, automatic:true, tier:3 },
-    SHOTGUN: { id:'SHOTGUN', name:'Shotgun',   icon:'💥', type:'GUN', color:'#e11d48', damage:12, fireRate:40, speed:16, spread:0.42, range:340, ammo:8, count:7, moveScale:0.86, width:6, len:17, tier:3, knock:220 },
-    SNIPER:  { id:'SNIPER',  name:'Bắn tỉa',   icon:'🎯', type:'GUN', color:'#a855f7', damage:95, fireRate:60, speed:46, spread:0.0, range:2500, ammo:3, moveScale:0.55, width:5, len:36, pierce:true, tier:4, knock:300 },
-    ROCKET:  { id:'ROCKET',  name:'Pháo',      icon:'🚀', type:'GUN', color:'#1f2937', damage:0,  fireRate:60, speed:12, spread:0.0, range:2000, ammo:2, explosive:true, moveScale:0.7, width:10, len:22, tier:4 },
-    KATANA:  { id:'KATANA',  name:'Katana',    icon:'⚔️', type:'MELEE', color:'#38bdf8', damage:55, fireRate:38, range:92, durability:10, maxDurability:10, moveScale:1.05, width:4, len:36, dash:true, tier:3 },
-    SHIELD:  { id:'SHIELD',  name:'Khiên',     icon:'🛡️', type:'SHIELD', color:'#64748b', damage:15, fireRate:30, range:30, durability:200, maxDurability:200, moveScale:0.82, width:8, len:20, tier:2 },
-    GRENADE: { id:'GRENADE', name:'Lựu đạn',   icon:'💣', type:'THROWABLE', color:'#10b981', damage:0, fireRate:30, range:450, ammo:3, moveScale:1.0, width:8, len:8, tier:2 },
-    // Huyền thoại — chỉ có trong THÍNH VÀNG
-    MINIGUN: { id:'MINIGUN', name:'Minigun',   icon:'🌪️', type:'GUN', color:'#f97316', damage:6,  fireRate:2.5, speed:24, spread:0.22, range:520, ammo:160, moveScale:0.6, width:7, len:26, automatic:true, tier:5, legendary:true },
-    RAILGUN: { id:'RAILGUN', name:'Railgun',   icon:'⚡', type:'GUN', color:'#22d3ee', damage:85, fireRate:45, range:2600, ammo:4, moveScale:0.8, width:6, len:32, hitscan:true, tier:5, legendary:true, knock:350 }
-};
-
-const BASE_WEIGHTS = { SMG: 28, SHOTGUN: 26, PISTOL: 16, GRENADE: 14, SNIPER: 9, KATANA: 10, SHIELD: 7, ROCKET: 5 };
-const LEGEND_POOL = ['MINIGUN', 'RAILGUN', 'ROCKET', 'SNIPER'];
+// Vũ khí đã chuyển sang js/weapons.js
 
 /** ==================== VẬN MỆNH ==================== */
 const DESTINIES = [

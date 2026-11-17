@@ -134,7 +134,9 @@ function snapPlayer(p) {
         recoil: R1(p.recoil), muzzle: R1(p.muzzle * 100) / 100, hitFlash: R1(p.hitFlash * 100) / 100, stun: R1(p.stun), spawnShield: R1(p.spawnShield), ghostT: R1(p.ghostT),
         thorns: p.thorns, label: p.label, color: p.color, isBot: false, dead: p.dead, stats: p.stats, moveMult: p.moveMult, kx: R1(p.kx), ky: R1(p.ky), dashTime: R1(p.dashTime),
         st: p.st, skills: p.skills, build: p.build, minor: p.minor, combos: p.combos, superCharge: p.superCharge, superNeed: p.superNeed,
-        silent: p.silent, hunter: p.hunter, eagle: p.eagle, aimshot: p.aimshot, pyro: p.pyro, noMind: p.noMind
+        silent: p.silent, hunter: p.hunter, eagle: p.eagle, aimshot: p.aimshot, pyro: p.pyro, noMind: p.noMind,
+        aiming: p.aiming, aimAngle: R1((p.aimAngle || 0) * 100) / 100, charge: R1((p.charge || 0) * 100) / 100, cancelShot: p.cancelShot, manualEngaged: p.manualEngaged, aimDist: Math.round(p.aimDist || 0),
+        stillT: R1(p.stillT || 0), spinUp: R1(p.spinUp || 0), shotCount: p.shotCount, sniperNest: p.sniperNest, watchman: p.watchman, saboteur: p.saboteur, collector: p.collector, bushStalker: p.bushStalker, bigMag: p.bigMag
     };
 }
 function buildSnapshot() {
@@ -147,11 +149,12 @@ function buildSnapshot() {
         pl: players.map(snapPlayer),
         b: bullets.map(b => [R1(b.x), R1(b.y), R1(b.angle * 100) / 100, b.speed, b.color, b.size, b.trail || 26, b.explosive ? 1 : 0, b.blastSmall ? 1 : 0]),
         it: items.map(i => [R1(i.x), R1(i.y), R1(i.angle), i.type.id, i.type.color, i.type.len || 14, R1(i.fuse), R1(i.z || 0)]),
-        cr: crates.map(c => [R1(c.x), R1(c.y), c.size, c.type, R1(c.blinkOffset), R1(c.born)]),
-        ob: obstacles.map(o => [R1(o.x), R1(o.y), R1(o.w), R1(o.h), o.wood ? 1 : 0, o.hp || 0, o.maxHp || 0, o.hit > 0 ? 1 : 0, o.ice ? 1 : 0, o.reflect ? 1 : 0]),
-        zn: zones.map(z => [z.type, R1(z.x), R1(z.y), R1(z.r), R1(z.t), z.maxT, z.owner, z.phase || 0]),
+        cr: crates.map(c => [R1(c.x), R1(c.y), c.size, c.type, R1(c.blinkOffset), R1(c.born), c.owner || 0, c.look || '']),
+        bu: bushes.map(b => [R1(b.x), R1(b.y), R1(b.r), R1(b.seed), b.t === undefined ? -1 : R1(b.t), b.owner || 0]),
+        ob: obstacles.map(o => [R1(o.x), R1(o.y), R1(o.w), R1(o.h), o.wood ? 1 : 0, o.hp || 0, o.maxHp || 0, o.hit > 0 ? 1 : 0, o.ice ? 1 : 0, o.reflect ? 1 : 0, o.sandbag ? 1 : 0, o.ownerPass || 0]),
+        zn: zones.map(z => [z.type, R1(z.x), R1(z.y), R1(z.r), R1(z.t), z.maxT, z.owner, z.phase || 0, z.totem ? 1 : 0]),
         tu: turrets.map(t => [R1(t.x), R1(t.y), t.owner, R1(t.angle * 100) / 100, R1(t.t), t.color]),
-        mi: mines.map(m => [R1(m.x), R1(m.y), m.owner, R1(m.arm)]),
+        mi: mines.map(m => [R1(m.x), R1(m.y), m.owner, R1(m.arm), m.kind || 'spike', R1(m.angle || 0), R1(m.x2 || 0), R1(m.y2 || 0)]),
         dc: decoys.map(d => [R1(d.x), R1(d.y), d.owner, R1(d.angle * 100) / 100, d.color, d.radius, d.label]),
         me: meteors.map(m => [R1(m.x), R1(m.y), R1(m.warningTime), m.maxT]),
         ad: airdrops.map(d => [R1(d.x), R1(d.y), R1(d.t), d.maxT]),
@@ -167,7 +170,7 @@ function netHostTick(dt) {
 /** Lấy input của khách — có "chốt" để không mất các cú bấm quá nhanh */
 function netRemoteInput() {
     const r = net.remote;
-    const out = { move: r.move, a: r.a || r.la, b: r.b || r.lb, c: r.c || r.lc, s1: r.s1 || r.ls1, s2: r.s2 || r.ls2 };
+    const out = { move: r.move, a: r.a || r.la, b: r.b || r.lb, c: r.c || r.lc, s1: r.s1 || r.ls1, s2: r.s2 || r.ls2, aim: r.aim, aimActive: r.aimActive, aimMouse: r.aimMouse, aimDist: r.aimDist };
     r.la = r.lb = r.lc = r.ls1 = r.ls2 = false;
     return out;
 }
@@ -182,7 +185,7 @@ function onNetData(m) {
             const r = net.remote, i = m.i;
             r.move = i.move; if (i.a && !r.a) r.la = true; if (i.b && !r.b) r.lb = true; if (i.c && !r.c) r.lc = true;
             if (i.s1 && !r.s1) r.ls1 = true; if (i.s2 && !r.s2) r.ls2 = true;
-            r.a = i.a; r.b = i.b; r.c = i.c; r.s1 = i.s1; r.s2 = i.s2;
+            r.a = i.a; r.b = i.b; r.c = i.c; r.s1 = i.s1; r.s2 = i.s2; r.aim = i.aim; r.aimActive = i.aimActive; r.aimMouse = i.aimMouse; r.aimDist = i.aimDist;
         } else if (m.t === 'pick') pickAugmentByIndex(2, m.idx, true);
         return;
     }
@@ -217,7 +220,7 @@ function applySnapshot(s) {
         Object.assign(p, sp);
         // dịch chuyển xa (hồi sinh, Ảo Thuật Gia) → nhảy thẳng tới
         if (dist(keep.x, keep.y, sp.x, sp.y) < 150) { p.x = keep.x; p.y = keep.y; p.angle = keep.angle; }
-        p.tx = sp.x; p.ty = sp.y; p.ta = sp.angle;
+        p.tx = sp.x; p.ty = sp.y; p.ta = sp.aiming ? sp.aimAngle : sp.angle;
     });
     players.forEach(p => { p.cardSet = new Set(p.build || []); p.comboSet = new Set(p.combos || []); });
     const me = localPlayer();
@@ -225,11 +228,12 @@ function applySnapshot(s) {
 
     bullets.length = 0; s.b.forEach(b => bullets.push({ x: b[0], y: b[1], angle: b[2], speed: b[3], color: b[4], size: b[5], trail: b[6], explosive: !!b[7], blastSmall: !!b[8] }));
     items.length = 0; s.it.forEach(i => items.push({ x: i[0], y: i[1], angle: i[2], type: { id: i[3], color: i[4], len: i[5] }, fuse: i[6], z: i[7] }));
-    crates.length = 0; s.cr.forEach(c => crates.push({ x: c[0], y: c[1], size: c[2], type: c[3], blinkOffset: c[4], born: c[5] }));
-    obstacles.length = 0; s.ob.forEach(o => obstacles.push({ x: o[0], y: o[1], w: o[2], h: o[3], wood: !!o[4], hp: o[5], maxHp: o[6], hit: o[7] ? 0.1 : 0, ice: !!o[8], reflect: !!o[9], temp: o[8] ? 1 : undefined }));
-    zones.length = 0; s.zn.forEach(z => zones.push({ type: z[0], x: z[1], y: z[2], r: z[3], t: z[4], maxT: z[5], owner: z[6], phase: z[7], tick: 0 }));
+    crates.length = 0; s.cr.forEach(c => crates.push({ x: c[0], y: c[1], size: c[2], type: c[3], blinkOffset: c[4], born: c[5], owner: c[6], look: c[7] }));
+    obstacles.length = 0; s.ob.forEach(o => obstacles.push({ x: o[0], y: o[1], w: o[2], h: o[3], wood: !!o[4], hp: o[5], maxHp: o[6], hit: o[7] ? 0.1 : 0, ice: !!o[8], reflect: !!o[9], sandbag: !!o[10], ownerPass: o[11] || undefined, temp: (o[8] || o[10]) ? 1 : undefined }));
+    bushes.length = 0; (s.bu || []).forEach(b => bushes.push({ x: b[0], y: b[1], r: b[2], seed: b[3], t: b[4] < 0 ? undefined : b[4], owner: b[5] }));
+    zones.length = 0; s.zn.forEach(z => zones.push({ type: z[0], x: z[1], y: z[2], r: z[3], t: z[4] === null ? Infinity : z[4], maxT: z[5], owner: z[6], phase: z[7], tick: 0, totem: !!z[8] }));
     turrets.length = 0; s.tu.forEach(t => turrets.push({ x: t[0], y: t[1], owner: t[2], angle: t[3], t: t[4], color: t[5] }));
-    mines.length = 0; s.mi.forEach(m => mines.push({ x: m[0], y: m[1], owner: m[2], arm: m[3] }));
+    mines.length = 0; s.mi.forEach(m => mines.push({ x: m[0], y: m[1], owner: m[2], arm: m[3], kind: m[4], angle: m[5], x2: m[6], y2: m[7] }));
     decoys.length = 0; s.dc.forEach(d => decoys.push({ x: d[0], y: d[1], owner: d[2], angle: d[3], color: d[4], radius: d[5], label: d[6] }));
     meteors.length = 0; s.me.forEach(m => meteors.push({ x: m[0], y: m[1], warningTime: m[2], maxT: m[3] }));
     airdrops.length = 0; s.ad.forEach(d => airdrops.push({ x: d[0], y: d[1], t: d[2], maxT: d[3] }));
@@ -254,15 +258,16 @@ function guestUpdate(dt) {
     updateFx(dt);
     // gửi phím bấm: 30 lần/giây, hoặc ngay khi nút thay đổi
     const inp = readHumanInput(2);
-    const key = `${inp.a}${inp.b}${inp.c}${inp.s1}${inp.s2}`;
+    const key = `${inp.a}${inp.b}${inp.c}${inp.s1}${inp.s2}${inp.aim ? Math.round(Math.atan2(inp.aim.y, inp.aim.x) * 8) : ''}`;
     net.inT += dt;
     if (net.inT >= 1 / 30 || key !== net.lastIn) {
         net.inT = 0; net.lastIn = key;
-        netSend({ t: 'in', i: { move: { x: R1(inp.move.x * 10) / 10, y: R1(inp.move.y * 10) / 10 }, a: inp.a, b: inp.b, c: inp.c, s1: inp.s1, s2: inp.s2 } });
+        netSend({ t: 'in', i: { move: { x: R1(inp.move.x * 10) / 10, y: R1(inp.move.y * 10) / 10 }, a: inp.a, b: inp.b, c: inp.c, s1: inp.s1, s2: inp.s2, aim: inp.aim ? { x: R1(inp.aim.x * 10) / 10, y: R1(inp.aim.y * 10) / 10 } : null, aimActive: !!inp.aimActive, aimMouse: !!inp.aimMouse, aimDist: inp.aimDist ? Math.round(inp.aimDist) : 0 } });
     }
     if (!['COUNTDOWN', 'PLAYING', 'KO', 'ROUND_OVER'].includes(gameState)) return;
     let sdt = fx.slowMo > 0 ? dt * 0.3 : dt;
     const me = localPlayer();
+    if (me) { me.aiming = !!inp.a && gameState === 'PLAYING'; if (inp.aim && Math.hypot(inp.aim.x, inp.aim.y) > 0.3) { me.aimAngle = Math.atan2(inp.aim.y, inp.aim.x); me.manualEngaged = true; } }
     players.forEach(p => {
         if (p.tx === undefined) return;
         if (p === me && gameState === 'PLAYING' && p.hp > 0 && !(p.stun > 0) && !(p.dashTime > 0)) {

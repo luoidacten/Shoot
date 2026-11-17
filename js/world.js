@@ -1,4 +1,5 @@
 /** ==================== THẾ GIỚI: bản đồ, vật cản, hòm thính, vòng bo ==================== */
+const bushes = []; // bụi rậm: ẩn mình, nhưng tiếng chân và dấu chân vẫn lộ
 const players = [], bullets = [], items = [], crates = [], obstacles = [], meteors = [], slashes = [], beams = [], airdrops = [];
 
 const world = {
@@ -20,22 +21,23 @@ function resetWorld() {
     const startR = Math.hypot(MAP_W, MAP_H) / 2 + 50;
     const tx = MAP_W / 2 + (Math.random() - 0.5) * 500, ty = MAP_H / 2 + (Math.random() - 0.5) * 360;
     world.zone = { x: MAP_W / 2, y: MAP_H / 2, r: startR, sx: MAP_W / 2, sy: MAP_H / 2, startR, tx, ty, endR: 170, t: 0 };
-    [bullets, items, crates, obstacles, meteors, slashes, beams, airdrops, particles, texts, rings, zones, turrets, mines, decoys].forEach(a => a.length = 0);
+    [bullets, items, crates, obstacles, meteors, slashes, beams, airdrops, particles, texts, rings, zones, turrets, mines, decoys, bushes].forEach(a => a.length = 0);
     clearDecals();
 }
 
-const MAP_NAMES = { arena: 'ĐẤU TRƯỜNG', maze: 'MÊ CUNG', inferno: 'HỎA NGỤC' };
+const MAP_NAMES = { arena: 'ĐẤU TRƯỜNG', maze: 'MÊ CUNG', inferno: 'HỎA NGỤC', jungle: 'RỪNG RẬM' };
 function pickMapType() {
     if (currentRound === 1) return 'arena';
-    const r = Math.random();
-    return r < 0.34 ? 'arena' : r < 0.67 ? 'maze' : 'inferno';
+    const list = ['arena', 'maze', 'inferno', 'jungle'].filter(t => t !== world.lastMap);
+    return list[Math.floor(Math.random() * list.length)];
 }
 
 /** Sinh bản đồ đối xứng tâm → công bằng cho cả 2 bên */
 function generateMap(type = 'arena') {
-    world.mapType = type;
+    world.mapType = type; world.lastMap = type;
     if (type === 'maze') { world.theme = 2; return generateMaze(); }
     if (type === 'inferno') world.theme = 3;
+    if (type === 'jungle') world.theme = 2;
     const cx = MAP_W / 2, cy = MAP_H / 2;
     const spawns = [{ x: cx - 340, y: cy }, { x: cx + 340, y: cy }];
     const tooClose = (o) => spawns.some(s => s.x > o.x - 110 && s.x < o.x + o.w + 110 && s.y > o.y - 110 && s.y < o.y + o.h + 110)
@@ -48,7 +50,7 @@ function generateMap(type = 'arena') {
     const pillar = Math.random() < 0.5;
     if (pillar) obstacles.push({ x: cx - 45, y: cy - 45, w: 90, h: 90, wood: false });
     let tries = 0, placed = 0;
-    const want = type === 'inferno' ? 9 : 15;
+    const want = type === 'inferno' ? 9 : type === 'jungle' ? 8 : 15;
     while (placed < want && tries++ < 400) {
         const wood = Math.random() < 0.38;
         let w, h;
@@ -60,6 +62,8 @@ function generateMap(type = 'arena') {
         if (wood) { o.hp = o.maxHp = 90; o.hit = 0; }
         add(o); placed++;
     }
+    // bụi rậm: rừng rậm thì dày đặc, các map khác lác đác
+    addBushes(spawns, type === 'jungle' ? 9 : type === 'inferno' ? 2 : 3);
     if (type === 'inferno') {
         // Hồ dung nham: cháy 4.5 giây, nghỉ 3.5 giây, nháy cảnh báo trước khi bùng
         let n = 0, t2 = 0;
@@ -130,10 +134,14 @@ function segRect(x1, y1, x2, y2, o) {
 }
 function lineOfSight(x1, y1, x2, y2) { return !obstacles.some(o => segRect(x1, y1, x2, y2, o) >= 0); }
 
-function damageObstacle(o, dmg) {
-    if (!o.wood) return false;
+function damageObstacle(o, dmg, by) {
+    if (o.temp !== undefined && o.hp === undefined) { o.hp = o.maxHp = o.ice ? 120 : 160; }
+    if (!o.wood && o.temp === undefined) return false;
+    if (by && by.demolisher) dmg *= 3;
     o.hp -= dmg; o.hit = 0.12;
     if (o.hp <= 0) {
+        if (by && by.demolisher) { const w = getCurrentWeapon(by); if (w.magSize && !w.noReload) { w.reserve += w.magSize; floatText(by.x, by.y - 24, '+ĐẠN', '#fbbf24', 13); } }
+        if (by && combo(by, 'wrecking') && o.wood) shockwave(o.x + o.w / 2, o.y + o.h / 2, by.id, 100, 15);
         const i = obstacles.indexOf(o); if (i >= 0) obstacles.splice(i, 1);
         const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
         spark(cx, cy, '#a06c3c', 22, 320, 0.7, 4, false); smoke(cx, cy, 6);
@@ -229,4 +237,24 @@ function updateWorld(dt) {
 
     // ---- Hiệu ứng khối gỗ bị bắn ----
     obstacles.forEach(o => { if (o.hit > 0) o.hit -= dt; });
+}
+
+/** Rải bụi rậm đối xứng (mỗi bụi là cụm 2-3 vòng tròn) */
+function addBushes(spawns, pairs) {
+    let n = 0, tries = 0;
+    while (n < pairs && tries++ < 300) {
+        const r = 60 + Math.random() * 45;
+        const x = 120 + Math.random() * (MAP_W / 2 - 200), y = 120 + Math.random() * (MAP_H - 240);
+        if (spawns.some(s => dist(s.x, s.y, x, y) < r + 70)) continue;
+        if (obstacles.some(o => x + r > o.x && x - r < o.x + o.w && y + r > o.y && y - r < o.y + o.h)) continue;
+        if (bushes.some(b => dist(b.x, b.y, x, y) < b.r + r + 30)) continue;
+        if (zones.some(z => dist(z.x, z.y, x, y) < z.r + r)) continue;
+        const seed = Math.random() * 10;
+        bushes.push({ x, y, r, seed }, { x: MAP_W - x, y: MAP_H - y, r, seed: seed + 3 });
+        n++;
+    }
+}
+function inBush(x, y) {
+    for (const b of bushes) if (dist(x, y, b.x, b.y) < b.r) return b;
+    return null;
 }

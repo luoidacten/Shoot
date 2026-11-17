@@ -64,10 +64,11 @@ function botThink(p, dt) {
 
     // --- 3. Quản lý vũ khí ---
     const other = p.inventory[otherSlot(p)];
-    const usable = x => x && x.id !== 'NONE' && !(x.type === 'GUN' && x.ammo <= 0);
+    const usable = x => x && x.id !== 'NONE' && hasAmmo(x);
     B.swapCd -= dt;
     if (B.swapCd <= 0 && usable(other) && (!usable(w) || (other.tier || 0) > (w.tier || 0) + 0 && w.type !== 'GUN')) { out.c = true; B.swapCd = 0.8; }
-    if (w.type === 'GUN' && w.ammo <= 0 && dE < 420 && los) out.b = true; // ném súng rỗng vào mặt
+    if (w.magSize && !hasAmmo(w) && dE < 420 && los) { B.throwHold = 0.4; } // ném súng rỗng vào mặt
+    if (B.throwHold > 0) { B.throwHold -= dt; out.b = true; }
 
     const armed = usable(w) && w.id !== 'NONE' && (w.id !== 'KNIFE' || dE < 200);
     const needLoot = (w.tier || 0) <= 1 && (other.tier || 0) <= 1;
@@ -127,15 +128,24 @@ function botThink(p, dt) {
     if (enemyVisible && e.hp > 0) {
         const facing = Math.abs(angleDiff(Math.atan2(e.y - p.y, e.x - p.x), p.angle)) < 0.3;
         let wants = false;
-        if (w.type === 'GUN' && w.ammo > 0) wants = los && dE < w.range * 0.95 && facing;
+        const gunRange = w.id === 'SNIPER' ? 1400 : w.id === 'BOOMERANG' ? 440 : w.range;
+        if (w.type === 'GUN' && w.mag > 0 && !w.reloading) wants = los && dE < gunRange * 0.95 && facing;
         else if (w.type === 'THROWABLE') wants = los && dE > 150 && dE < 520;
         else if (w.type === 'MELEE' || w.type === 'SHIELD') wants = dE < p.radius + e.radius + (w.range || 30) + (w.dash ? 120 : 6) && facing;
         if (wants) B.aimT += dt; else B.aimT = 0;
         if (B.aimT > L.react) {
-            if (w.automatic) out.a = true;
-            else { out.a = !B.prevA; }
+            if (w.mode === 'auto') out.a = true;
+            else if (w.mode === 'charge') {
+                // giữ đến khi tụ đủ lực rồi thả
+                const want = { SNIPER: 0.85, BOW: dE > 300 ? 0.8 : 0.1, RAILGUN: 0.7, HAMMER: dE < 90 ? 0.95 : 0, SPEAR: dE > 110 ? 0.95 : 0.1, KATANA: dE > 90 ? 0.6 : 0.1, BOOMERANG: Math.min(1, Math.max(0, (dE - 260) / 220)), REVOLVER: dE < 250 ? 1 : 0, LIGHTSABER: dE > 140 ? 1 : 0.05, GRENADE: 0.1, SHIELD: 0.1 }[w.id] || 0.2;
+                out.a = (p.charge || 0) < Math.max(0.05, want);
+            }
+            else out.a = !B.prevA;
         }
     }
+    // nạp đạn chủ động khi không thấy địch
+    if (!enemyVisible && w.magSize && !w.noReload && w.reloadMode !== 'single' && w.mag < effMag(p, w) && w.reserve > 0 && !w.reloading && Math.random() < dt) { out.b = true; B.tapB = true; }
+    else if (B.tapB) { B.tapB = false; }
     B.prevA = out.a;
 
     // --- 5b. Dùng kỹ năng ---
@@ -154,6 +164,8 @@ function botThink(p, dt) {
                 case 'defend': use = incoming || (enemyVisible && dE < 160); break;
                 case 'heal': use = p.hp < p.maxHp * 0.55; break;
                 case 'reveal': use = !enemyVisible && world.time > 4; break;
+                case 'ammo': use = w.magSize && !w.noReload && (w.reserve + w.mag) < effMag(p, w) * 1.5; break;
+                case 'loot': use = (w.tier || 0) <= 1 || (s.id === 'magnetPulse' && crates.length > 5); break;
                 case 'place': use = enemyVisible && dE < 480; break;
             }
             if (use && Math.random() < 0.5 + settings.diff * 0.2) { out['s' + (i + 1)] = true; B.skillT = 0.6; }

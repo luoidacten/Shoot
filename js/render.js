@@ -77,14 +77,15 @@ function draw() {
 
     drawGroundZones(now);
     drawMines(now);
+    drawTrapsExtra(now);
 
     // ---- Vật cản (giả 3D) ----
     obstacles.forEach(o => {
         if (o.x > vx1 || o.x + o.w < vx0 || o.y > vy1 || o.y + o.h < vy0) return;
         const depth = o.wood ? 8 : 14;
         ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(o.x + 8, o.y + 12, o.w, o.h);
-        ctx.fillStyle = o.wood ? '#3b2716' : o.ice ? '#1e5f80' : '#121829'; ctx.fillRect(o.x, o.y + depth, o.w, o.h);
-        let top = o.wood ? COLORS.woodTop : o.ice ? (o.reflect ? '#e0f2fe' : '#7dd3fc') : COLORS.wallTop;
+        ctx.fillStyle = o.wood ? '#3b2716' : o.sandbag ? '#57452a' : o.ice ? '#1e5f80' : '#121829'; ctx.fillRect(o.x, o.y + depth, o.w, o.h);
+        let top = o.wood ? COLORS.woodTop : o.sandbag ? '#a68a5b' : o.ice ? (o.reflect ? '#e0f2fe' : '#7dd3fc') : COLORS.wallTop;
         if (o.hit > 0) top = '#fff';
         ctx.fillStyle = top; ctx.fillRect(o.x, o.y, o.w, o.h);
         ctx.strokeStyle = o.wood ? COLORS.woodEdge : COLORS.wallEdge; ctx.lineWidth = 2; ctx.strokeRect(o.x + 1, o.y + 1, o.w - 2, o.h - 2);
@@ -103,7 +104,8 @@ function draw() {
         const age = world.time - c.born, pop = Math.min(1, age * 4);
         const bob = Math.sin(now * 3 + c.blinkOffset) * 2;
         const s = c.size * (0.6 + 0.4 * pop);
-        let col = c.type === 'SUPPORT' ? COLORS.crate_sup : c.type === 'LEGEND' ? COLORS.gold : COLORS.crate_wep;
+        const look = c.type === 'FAKE' ? c.look : c.type;
+        let col = look === 'SUPPORT' ? COLORS.crate_sup : look === 'LEGEND' ? COLORS.gold : COLORS.crate_wep;
         // bẫy nguỵ trang thành hòm vũ khí, thỉnh thoảng nháy đỏ
         if (c.type === 'TRAP' && Math.sin(now * 2 + c.blinkOffset * 3) > 0.93) col = '#ff3344';
         ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + s * 0.55, s * 0.55, s * 0.2, 0, 0, Math.PI * 2); ctx.fill();
@@ -117,9 +119,14 @@ function draw() {
         ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(-s / 2 + 3, -s / 2 + 3, s - 6, 3);
         ctx.fillStyle = 'rgba(0,0,0,0.45)';
         if (c.type === 'SUPPORT') { ctx.fillRect(-s / 4, -2.5, s / 2, 5); ctx.fillRect(-2.5, -s / 4, 5, s / 2); }
-        else if (c.type === 'LEGEND') { ctx.font = `bold ${s * 0.6}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('★', 0, 1); }
+        else if (look === 'LEGEND') { ctx.font = `bold ${s * 0.6}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('★', 0, 1); }
         else { ctx.fillRect(-s / 3, -2.5, s / 1.5, 5); ctx.fillRect(-s / 3, -s / 4, 4, s / 2); ctx.fillRect(s / 3 - 4, -s / 4, 4, s / 2); }
         ctx.restore();
+        // chủ hòm giả / Nhà Sưu Tầm nhìn ra được
+        const me = localPlayer();
+        if ((c.type === 'FAKE' && (c.owner === localId() || (me && (me.collector || me.saboteur)))) || (c.type === 'TRAP' && me && me.collector)) {
+            ctx.strokeStyle = '#f87171'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]); ctx.strokeRect(c.x - s / 2 - 4, c.y + bob - s / 2 - 6, s + 8, s + 8); ctx.setLineDash([]);
+        }
     });
 
     // ---- Vật ném ----
@@ -140,7 +147,8 @@ function draw() {
             ctx.fillStyle = i.type.color; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill();
             ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
         } else {
-            ctx.fillStyle = i.type.color === 'transparent' ? '#fff' : i.type.color; ctx.fillRect(-(i.type.len || 14) / 2, -3, i.type.len || 14, 6);
+            if (WEAPONS[i.type.id]) drawWeaponArt(ctx, WEAPONS[i.type.id], -12, now, null);
+            else { ctx.fillStyle = i.type.color === 'transparent' ? '#fff' : i.type.color; ctx.fillRect(-(i.type.len || 14) / 2, -3, i.type.len || 14, 6); }
         }
         ctx.restore();
     });
@@ -163,11 +171,14 @@ function draw() {
     drawTurrets(now);
     drawDecoys(now);
     players.forEach(p => drawPlayer(p, now));
+    drawBushes(now);
+    drawEnemyWarnings(now);
     drawAirZones(now); // khói, hố đen phủ lên trên
 
     // ---- Đạn ----
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
     bullets.forEach(b => {
+        if (drawSpecialBullet(b, now)) return;
         const tl = b.trail || 26;
         const tx = b.x - Math.cos(b.angle) * tl, ty = b.y - Math.sin(b.angle) * tl;
         const g = ctx.createLinearGradient(tx, ty, b.x, b.y); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, b.color);
@@ -289,38 +300,14 @@ function drawPlayer(p, now) {
     ctx.beginPath(); ctx.arc(p.x, p.y, p.radius + 7, p.angle - 0.5, p.angle + 0.5); ctx.stroke();
 
     // vạch ngắm kiểu Brawl Stars (Nhắm Bắn) — chỉ người điều khiển mới thấy
-    if (p.aimshot && (p.id === localId() || localId() === null)) drawAimGuide(p, w, now);
-    // laser ngắm
-    if ((w.id === 'SNIPER' || w.id === 'RAILGUN') && w.ammo > 0) {
-        ctx.save(); ctx.globalCompositeOperation = 'lighter';
-        ctx.strokeStyle = w.id === 'RAILGUN' ? 'rgba(34,211,238,0.35)' : 'rgba(255,60,80,0.35)'; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + Math.cos(p.angle) * 2500, p.y + Math.sin(p.angle) * 2500); ctx.stroke(); ctx.restore();
-    }
+    const mineView = p.id === localId() || localId() === null;
+    if (p.aiming && (mineView || (p.charge > 0 && w.narrow))) drawAimZone(p, w, now);
+    else if (p.aimshot && mineView) drawAimGuide(p, w, now);
 
     ctx.translate(p.x, p.y); ctx.rotate(p.angle);
     const rc = (p.recoil || 0) * 5;
-    // vũ khí
-    if (w.id === 'SHIELD') {
-        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, p.radius + 9, -1.0, 1.0); ctx.stroke();
-        ctx.fillStyle = 'rgba(148,163,184,0.25)'; ctx.beginPath(); ctx.arc(0, 0, p.radius + 9, -1.0, 1.0); ctx.lineTo(0, 0); ctx.fill();
-    } else if (w.type === 'MELEE' && w.id !== 'NONE') {
-        ctx.fillStyle = '#334155'; ctx.fillRect(p.radius - 4, -3, 8, 6);
-        ctx.fillStyle = w.color; ctx.beginPath(); ctx.moveTo(p.radius + 4, -w.width / 2); ctx.lineTo(p.radius + 4 + w.len, -1); ctx.lineTo(p.radius + 4 + w.len, 1); ctx.lineTo(p.radius + 4, w.width / 2); ctx.fill();
-    } else if (w.type === 'GUN') {
-        ctx.fillStyle = '#0f172a'; ctx.fillRect(p.radius - 6 - rc, -w.width / 2 - 1, w.len + 2, w.width + 2);
-        ctx.fillStyle = w.color; ctx.fillRect(p.radius - 5 - rc, -w.width / 2, w.len, w.width);
-        if (w.id === 'ROCKET') { ctx.fillStyle = '#374151'; ctx.fillRect(p.radius - 12 - rc, -7, 26, 14); ctx.fillStyle = '#ef4444'; ctx.fillRect(p.radius + 12 - rc, -5, 4, 10); }
-        if (w.legendary) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = hexA(w.color, 0.4 + Math.sin(now * 8) * 0.2); ctx.fillRect(p.radius - 5 - rc, -w.width, w.len, w.width * 2); ctx.restore(); }
-        if (p.muzzle > 0) {
-            ctx.save(); ctx.globalCompositeOperation = 'lighter';
-            const mx = p.radius - 5 + w.len;
-            ctx.fillStyle = 'rgba(255,220,120,0.9)'; ctx.beginPath(); ctx.moveTo(mx, -6); ctx.lineTo(mx + 18 + Math.random() * 10, 0); ctx.lineTo(mx, 6); ctx.fill();
-            ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.beginPath(); ctx.arc(mx + 2, 0, 5, 0, Math.PI * 2); ctx.fill();
-            ctx.restore();
-        }
-    } else if (w.type === 'THROWABLE') {
-        ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(p.radius + 4, 7, 5, 0, Math.PI * 2); ctx.fill();
-    }
+    // vũ khí (mỗi loại một kiểu)
+    drawWeaponArt(ctx, w, p.radius, now, p);
     // tay
     if (w.type !== 'SHIELD') {
         ctx.fillStyle = shade(p.color, -0.2);
@@ -362,6 +349,7 @@ function drawPlayer(p, now) {
     const hpk = Math.max(0, p.hp) / p.maxHp;
     ctx.fillStyle = hpk > 0.5 ? '#4ade80' : hpk > 0.25 ? '#facc15' : '#ff4d5e'; ctx.fillRect(p.x - bw / 2, by, bw * hpk, 5);
     if (p.armor > 0) { ctx.fillStyle = COLORS.armor; ctx.fillRect(p.x - bw / 2, by + 6, bw * Math.min(1, p.armor / 150), 2); }
+    if (mineView || localId() === null) drawAmmoBar(p, w, p.x - bw / 2, by + (p.armor > 0 ? 9 : 7), bw);
     // nhãn
     ctx.font = `700 11px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = p.color;
     const ty = by - 6;
@@ -479,10 +467,8 @@ function drawPlayerPanel(p, x, y, w, flip, now) {
         ctx.globalAlpha = act ? 1 : 0.55;
         ctx.font = `18px ${FONT}`; ctx.textAlign = 'center'; ctx.fillText(wp.icon || '✊', sx + 20, 26);
         ctx.font = `700 10px ${FONT}`; ctx.fillStyle = '#fff';
-        let sub = '';
-        if (wp.ammo !== undefined) sub = world.infiniteAmmo ? '∞' : String(wp.ammo);
-        else if (wp.durability !== undefined) sub = wp.durability > 900 ? '∞' : Math.round(100 * wp.durability / wp.maxDurability) + '%';
-        if (wp.ammo === 0 && !world.infiniteAmmo) ctx.fillStyle = '#ff4d5e';
+        const sub = ammoText(wp);
+        if (wp.magSize && wp.mag === 0 && wp.reserve === 0 && !world.infiniteAmmo) ctx.fillStyle = '#ff4d5e';
         ctx.fillText(sub, sx + 20, 44);
         ctx.globalAlpha = 1;
     }
@@ -535,8 +521,10 @@ function drawControls(cfg, input, side, p) {
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, jR * 0.42, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
     const w = getCurrentWeapon(p), ow = p.inventory[otherSlot(p)];
-    drawBtn(cfg.btnA, input.a, side, w.icon || '⚔', w.type === 'GUN' ? (world.infiniteAmmo ? '∞' : w.ammo) : '', p.cooldown > 0 ? p.cooldown / (w.fireRate * p.fireRateMult) : 0);
-    drawBtn(cfg.btnB, input.b, side, '↗', 'NÉM', 0);
+    drawBtn(cfg.btnA, input.a, side, w.icon || '⚔', w.magSize ? ammoText(w) : '', w.reloading ? 1 - w.reloadT / w.reloadTime : p.cooldown > 0 ? p.cooldown / (w.fireRate * p.fireRateMult) : 0);
+    drawAimStick(side);
+    const canRl = w.magSize && !w.noReload && w.reloadMode !== 'single' && w.mag < effMag(p, w) && (w.reserve > 0 || world.infiniteAmmo);
+    drawBtn(cfg.btnB, input.b, side, canRl ? '⟳' : '↗', canRl ? 'NẠP · giữ NÉM' : 'NÉM', 0);
     drawBtn(cfg.btnC, input.c, side, ow.icon || '⇄', '', 0);
     (p.skills || []).forEach((s, i) => {
         const b = i === 0 ? cfg.btnS1 : cfg.btnS2, c = CARDS[s.id]; if (!b || !c) return;

@@ -93,6 +93,7 @@ const AudioSys = {
             case 'slam': this.tone('sawtooth', 110, 40, 0.6, vol * 1.2, t); this.burst(0.4, vol, 1200, t); this.tone('square', 880, 880, 0.2, vol * 0.3, t); break;
             case 'win': [392, 523, 659, 784, 1046].forEach((f, i) => this.tone('square', f, f, 0.25, vol * 0.4, t + i * 0.12)); break;
             case 'whoosh': this.burst(0.5, vol * 0.8, 600, t, 'bandpass'); break;
+            case 'reload': this.tone('square', 300, 300, 0.05, vol * 0.4, t); this.tone('square', 500, 500, 0.05, vol * 0.4, t + 0.12); this.burst(0.05, vol * 0.4, 3000, t + 0.06, 'highpass'); break;
             case 'step': this.burst(0.06, vol, 380 * rp, t); this.tone('sine', 95 * rp, 45, 0.07, vol * 0.7, t); break;
         }
         this._dest = null;

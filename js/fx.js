@@ -63,7 +63,7 @@ function damageNumber(x, y, dmg, big) {
 function addShake(amt) { fx.shake = Math.min(28, fx.shake + amt); }
 function hitStop(t) { fx.hitStop = Math.max(fx.hitStop, t); }
 function flash(color, a = 0.5) { fx.flash = a; fx.flashColor = color; }
-function vibrate(ms) { if (isTouch && navigator.vibrate) try { navigator.vibrate(ms); } catch (e) {} }
+function vibrate(ms) { if (isTouch && navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) try { navigator.vibrate(ms); } catch (e) {} }
 
 /** Banner lớn giữa màn hình */
 const banners = [];

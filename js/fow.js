@@ -15,7 +15,9 @@ function localPlayer() { const id = localId(); return id ? players.find(p => p.i
 function fowActive() { return (settings.mode === 'online' || (settings.mode === 'bot' && settings.fow)) && !!localPlayer(); }
 function visionRange(viewer) {
     const v = viewer || localPlayer();
-    return (world.darkness ? 260 : VISION) * (v && v.eagle ? 1.3 : 1);
+    let m = v && v.eagle ? 1.3 : 1;
+    if (v && v.watchman && v.stillT >= 0.5) m *= combo(v, 'overwatch') ? 1.8 : 1.4;
+    return (world.darkness ? 260 : VISION) * m;
 }
 
 /** Từ (ax,ay) có nhìn thấy điểm (x,y) không — bị tường che và giới hạn tầm nhìn */

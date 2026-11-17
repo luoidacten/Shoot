@@ -8,148 +8,6 @@ function otherSlot(p) { return 1 - p.weaponIdx; }
 function angleDiff(a, b) { let d = a - b; while (d < -Math.PI) d += Math.PI * 2; while (d > Math.PI) d -= Math.PI * 2; return d; }
 function enemyOf(p) { return players.find(e => e.id !== p.id); }
 
-function useWeapon(p, wep, enemy) {
-    p.cooldown = wep.fireRate * p.fireRateMult * (p.st && p.st.rage > 0 ? 0.75 : 1);
-    p.ghostT = 0;
-    const empowered = p.st && p.st.empower > 0 && wep.id !== 'NONE';
-    const isSuper = p.aimshot && p.superCharge >= p.superNeed;
-
-    if (wep.type === 'GUN') {
-        if (wep.ammo <= 0) {
-            floatText(p.x, p.y - 20, 'Hết đạn!', '#cbd5e1', 13); AudioSys.play('ui');
-            const o = p.inventory[otherSlot(p)];
-            if (o && o.id !== 'NONE' && !(o.type === 'GUN' && o.ammo <= 0)) { p.weaponIdx = otherSlot(p); floatText(p.x, p.y, o.name, '#fff', 13); }
-            return;
-        }
-        onAttack(p);
-        if (empowered) p.st.empower--;
-        if (!world.infiniteAmmo) wep.ammo--;
-        p.stats.shots++;
-        p.recoil = 1;
-        const mX = p.x + Math.cos(p.angle) * (p.radius + wep.len * 0.7), mY = p.y + Math.sin(p.angle) * (p.radius + wep.len * 0.7);
-        p.muzzle = 0.06;
-        directionalSpark(mX, mY, p.angle, '#ffe08a', 4, 380, 0.5);
-
-        if (wep.hitscan) { fireRail(p, mX, mY, wep, enemy); return; }
-        if (wep.id === 'ROCKET') {
-            AudioSys.playAt('shoot_heavy', p.x, p.y); addShake(6);
-            bullets.push({ x: mX, y: mY, px: mX, py: mY, angle: p.angle + (Math.random() - 0.5) * p.spreadMult * 0.08, speed: wep.speed, damage: 0, life: 3, owner: p.id, color: '#ff7a1a', explosive: true, size: 6, bounces: 0 });
-            p.kx -= Math.cos(p.angle) * 260; p.ky -= Math.sin(p.angle) * 260;
-            return;
-        }
-        if (wep.id === 'SNIPER') { AudioSys.playAt('shoot_heavy', p.x, p.y); addShake(5); }
-        else if (wep.id === 'SHOTGUN') { AudioSys.playAt('shotgun', p.x, p.y); addShake(5); p.kx -= Math.cos(p.angle) * 120; p.ky -= Math.sin(p.angle) * 120; }
-        else if (wep.automatic) { AudioSys.playAt('smg', p.x, p.y, 0.2); addShake(1); }
-        else { AudioSys.playAt('shoot', p.x, p.y); addShake(2); }
-        if (wep.id === 'MINIGUN') { p.kx -= Math.cos(p.angle) * 20; p.ky -= Math.sin(p.angle) * 20; }
-
-        const count = wep.count || 1;
-        const every = combo(p, 'aim_explosive') ? 7 : 5;
-        for (let i = 0; i < count; i++) {
-            p.shotCount = (p.shotCount || 0) + 1;
-            const blast = (p.blastRounds && p.shotCount % every === 0) || (empowered && combo(p, 'reload_explosive') && i === 0);
-            const spread = (Math.random() - 0.5) * wep.spread * p.spreadMult + (Math.random() - 0.5) * (p.aiSpread || 0);
-            const sp = wep.speed * (count > 1 ? 0.85 + Math.random() * 0.3 : 1);
-            bullets.push({
-                x: mX, y: mY, px: mX, py: mY, angle: p.angle + spread, speed: sp, damage: wep.damage * (empowered ? 1.5 : 1), life: wep.range / (sp * 60) + 0.15, owner: p.id,
-                color: wep.id === 'SNIPER' ? '#e9d5ff' : blast ? '#ff7a1a' : empowered ? '#fde047' : p.id === 1 ? '#ffb3a8' : '#bfe3ff',
-                pierce: !!wep.pierce, bounces: p.bounces || 0, size: wep.id === 'SNIPER' ? 4 : blast ? 5 : 2.6, knock: wep.knock || 60,
-                explosive: blast, blastSmall: blast, trail: wep.id === 'SNIPER' ? 90 : 26, burn: p.pyro
-            });
-        }
-        if (isSuper) fireSuper(p, mX, mY);
-    } else if (wep.type === 'THROWABLE') {
-        throwGrenade(p, wep, enemy);
-    } else if (wep.type === 'MELEE' || wep.type === 'SHIELD') {
-        AudioSys.playAt('swing', p.x, p.y);
-        onAttack(p);
-        if (empowered) p.st.empower--;
-        const isShield = wep.type === 'SHIELD';
-        if (wep.dash) { p.dashTime = 0.17; p.dashAngle = p.angle; smoke(p.x, p.y, 3, 'rgba(56,189,248,0.3)', 10); }
-        else if (!isShield) { p.kx += Math.cos(p.angle) * 180; p.ky += Math.sin(p.angle) * 180; }
-        const reach = (isShield ? 34 : wep.range) * (combo(p, 'sword_brawler') ? 1.25 : 1) * (isSuper ? 1.6 : 1);
-        if (isSuper) { p.superCharge = 0; ring(p.x, p.y, 10, reach + p.radius, '#fde047', 0.3, 6); floatText(p.x, p.y - 36, 'SIÊU ĐÒN!', '#fde047', 18); }
-        // chém trúng phân thân
-        for (let i = decoys.length - 1; i >= 0; i--) { const d = decoys[i]; if (d.owner !== p.id && dist(p.x, p.y, d.x, d.y) < p.radius + d.radius + reach) d.hp = 0; }
-        slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: p.angle, range: reach + p.radius, color: wep.id === 'KATANA' ? '#7dd3fc' : isShield ? '#94a3b8' : '#f1f5f9', width: wep.id === 'KATANA' ? 10 : 6, life: 0.16, maxLife: 0.16, swing: p.swingDir = -(p.swingDir || 1) });
-
-        // Katana: chém trúng đạn → phản đạn lại!
-        if (wep.id === 'KATANA') {
-            bullets.forEach(b => {
-                if (b.owner !== p.id && dist(p.x, p.y, b.x, b.y) < 100 && !b.explosive) {
-                    b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = 1.2; b.color = '#7dd3fc';
-                    spark(b.x, b.y, '#7dd3fc', 5, 200); floatText(b.x, b.y, 'PHẢN!', '#7dd3fc', 14);
-                }
-            });
-        }
-        // khối gỗ phía trước
-        const fx_ = p.x + Math.cos(p.angle) * (p.radius + reach * 0.6), fy_ = p.y + Math.sin(p.angle) * (p.radius + reach * 0.6);
-        const o = pointInObstacle(fx_, fy_, 10); if (o) damageObstacle(o, wep.damage);
-
-        if (enemy && enemy.hp > 0 && dist(p.x, p.y, enemy.x, enemy.y) < p.radius + enemy.radius + reach) {
-            const d = angleDiff(Math.atan2(enemy.y - p.y, enemy.x - p.x), p.angle);
-            if (Math.abs(d) < Math.PI / 1.8) {
-                const ang = Math.atan2(enemy.y - p.y, enemy.x - p.x);
-                p.stats.hits++;
-                const md = wep.damage * (p.meleeMult || 1) * (empowered ? 1.5 : 1) * (isSuper ? 2.5 : 1);
-                dealDamage(enemy, md, p.id, { angle: ang, knock: isShield ? 520 : isSuper ? 600 : wep.id === 'KATANA' ? 260 : 160, melee: true, burn: p.pyro, super: isSuper });
-                if (wep.id !== 'NONE' && !isShield) reduceDurability(p, wep, 1);
-                hitStop(wep.id === 'KATANA' ? 0.09 : 0.05); addShake(5);
-            }
-        }
-        p.stats.shots++;
-    }
-}
-
-/** Siêu đòn (Nhắm Bắn): viên đạn lớn xuyên thấu */
-function fireSuper(p, mX, mY) {
-    p.superCharge = 0;
-    const boom = combo(p, 'aim_explosive');
-    bullets.push({ x: mX, y: mY, px: mX, py: mY, angle: p.angle, speed: 24, damage: 55, life: 1.1, owner: p.id, color: '#fde047', size: 9, knock: 420, bounces: 0, pierce: true, super: true, trail: 80, explosive: boom, blastSmall: boom });
-    AudioSys.playAt('rail', p.x, p.y, 0.3); addShake(7); flash('#fde047', 0.08);
-    floatText(p.x, p.y - 36, 'SIÊU ĐÒN!', '#fde047', 18);
-}
-
-function fireRail(p, mX, mY, wep, enemy) {
-    AudioSys.playAt('rail', p.x, p.y); addShake(9); flash('#22d3ee', 0.15);
-    const L = 2600, ex = mX + Math.cos(p.angle) * L, ey = mY + Math.sin(p.angle) * L;
-    beams.push({ x1: mX, y1: mY, x2: ex, y2: ey, life: 0.35, maxLife: 0.35, color: '#22d3ee' });
-    p.kx -= Math.cos(p.angle) * 300; p.ky -= Math.sin(p.angle) * 300;
-    obstacles.slice().forEach(o => { if (segRect(mX, mY, ex, ey, o) >= 0) damageObstacle(o, 60); });
-    if (enemy && enemy.hp > 0) {
-        // khoảng cách từ địch tới tia
-        const dx = ex - mX, dy = ey - mY, t = Math.max(0, Math.min(1, ((enemy.x - mX) * dx + (enemy.y - mY) * dy) / (dx * dx + dy * dy)));
-        if (dist(enemy.x, enemy.y, mX + dx * t, mY + dy * t) < enemy.radius + 8) {
-            p.stats.hits++;
-            dealDamage(enemy, wep.damage, p.id, { angle: p.angle, knock: wep.knock });
-            hitStop(0.08);
-        }
-    }
-    for (let i = 0; i < 30; i++) { const t = Math.random(); spark(mX + (ex - mX) * t * 0.5, mY + (ey - mY) * t * 0.5, '#67e8f9', 1, 80, 0.4, 2); }
-}
-
-function throwGrenade(p, wep, enemy) {
-    if (!world.infiniteAmmo) wep.ammo--;
-    let ang = p.angle, d = 320;
-    if (enemy && enemy.hp > 0) { const de = dist(p.x, p.y, enemy.x, enemy.y); if (de < 650) { ang = Math.atan2(enemy.y - p.y, enemy.x - p.x); d = de; } }
-    d = Math.min(520, Math.max(90, d));
-    items.push({ x: p.x, y: p.y, type: { ...WEAPONS.GRENADE }, angle: 0, spin: 12, vx: Math.cos(ang) * d * 3.1, vy: Math.sin(ang) * d * 3.1, thrown: true, ownerId: p.id, fuse: 1.5, z: 0, vz: 260 });
-    AudioSys.playAt('whoosh', p.x, p.y, 0.3);
-    if (wep.ammo <= 0) p.inventory[p.weaponIdx] = { ...WEAPONS.NONE };
-}
-
-function throwWeapon(p, wep, enemy) {
-    if (wep.id === 'NONE') return;
-    if (wep.type === 'THROWABLE') { if (p.cooldown <= 0) { throwGrenade(p, wep, enemy); p.cooldown = wep.fireRate; } return; }
-    p.inventory[p.weaponIdx] = { ...WEAPONS.NONE };
-    let ang = p.angle;
-    if (enemy && enemy.hp > 0 && dist(p.x, p.y, enemy.x, enemy.y) < 650) ang = Math.atan2(enemy.y - p.y, enemy.x - p.x);
-    const dmg = wep.type === 'GUN' ? 14 + (wep.tier || 1) * 7 : Math.max(20, wep.damage * 0.8);
-    items.push({ x: p.x, y: p.y, type: wep, angle: Math.random() * 6, spin: 18, vx: Math.cos(ang) * 900, vy: Math.sin(ang) * 900, thrown: true, ownerId: p.id, fuse: 0, dmg });
-    AudioSys.playAt('whoosh', p.x, p.y, 0.35);
-    floatText(p.x, p.y - 18, 'NÉM!', '#f5b100', 13);
-}
-
 function reduceDurability(p, wep, amount) {
     if (wep.durability === undefined) return;
     wep.durability -= amount;
@@ -177,6 +35,12 @@ function dealDamage(target, baseDmg, attackerId, opts = {}) {
         if (attacker.hunter && target.hp < target.maxHp * 0.5) mult *= 1.1;
         if (attacker.st && attacker.st.ambush > 0 && !opts.zone) { mult *= 1.3; attacker.st.ambush = 0; floatText(attacker.x, attacker.y - 30, 'ÁM SÁT!', '#c084fc', 14); }
         if (st.mark > 0) mult *= combo(attacker, 'flare_hunter') ? 1.25 : 1.15;
+        if (entrenched(attacker)) mult *= 1.25;
+    }
+    if (!opts.zone && !opts.raw) {
+        if (entrenched(target)) mult *= combo(target, 'fortress') ? 0.65 : 0.8;
+        if (st.anchor > 0) mult *= 0.6;
+        if (target.reloadShield && getCurrentWeapon(target).reloading) mult *= 0.7;
     }
     let dmg = baseDmg * mult * (opts.raw ? 1 : target.vulnMult);
 
@@ -239,7 +103,7 @@ function dealDamage(target, baseDmg, attackerId, opts = {}) {
     }
     if (target.thorns && attacker && attacker !== target && !opts.noThorns && attacker.hp > 0) {
         floatText(attacker.x, attacker.y - 22, 'Phản!', '#facc15', 13);
-        const k = combo(target, 'thorns_armor') && target.armor > 0 ? 0.6 : 0.3;
+        const k = (combo(target, 'thorns_armor') && target.armor > 0) || (combo(target, 'ironStatue') && st.anchor > 0) ? 0.6 : 0.3;
         dealDamage(attacker, dmg * k, target.id, { noThorns: true, raw: true, noCharge: true });
     }
     if (target.hp <= 0) killPlayer(target, attacker && attacker !== target ? attacker.id : enemyOf(target).id);
@@ -247,6 +111,9 @@ function dealDamage(target, baseDmg, attackerId, opts = {}) {
 
 function explode(x, y, ownerId, dmgMax = 120, radius = 160) {
     explosionFx(x, y, radius);
+    const exOwner = players.find(q => q.id === ownerId);
+    if (exOwner && exOwner.lingering) { const t = combo(exOwner, 'lingerFire') ? 4 : 2; zones.push({ type: 'fire', x, y, r: radius * 0.6, t, maxT: t, owner: ownerId, tick: 0 }); }
+    if (exOwner && combo(exOwner, 'napalm')) zones.forEach(z => { if (z.type === 'glue' && z.owner === ownerId && dist(x, y, z.x, z.y) < z.r + radius) { z.type = 'fire'; z.t = Math.max(z.t, 3); } });
     AudioSys.playAt('explosion', x, y, 0.4, 2200);
 
     obstacles.slice().forEach(o => {
@@ -276,7 +143,12 @@ function openCrate(p, index) {
     const crate = crates[index];
     const cur = getCurrentWeapon(p);
 
+    if (crate.type === 'FAKE') {
+        if (crate.owner === p.id) return;
+        triggerFakeCrate(crate, index, p); return;
+    }
     if (crate.type === 'TRAP') {
+        if (p.collector) return; // Nhà Sưu Tầm nhận ra bẫy
         crates.splice(index, 1);
         floatText(p.x, p.y - 30, 'BẪY!! 💀', '#ff4d5e', 22);
         explode(crate.x, crate.y, -1, 55, 120);
@@ -286,15 +158,15 @@ function openCrate(p, index) {
         crates.splice(index, 1); p.stats.crates++;
         AudioSys.play('pickup');
         const roll = Math.random();
-        if (roll < 0.4 || (roll >= 0.7 && cur.type !== 'GUN' && cur.type !== 'THROWABLE')) {
+        if (roll < 0.4 || (roll >= 0.7 && !cur.magSize)) {
             const amt = (roll < 0.4 ? 45 : 30) * (p.scavenger ? 2 : 1);
             p.hp = Math.min(p.hp + amt, p.maxHp); spark(p.x, p.y, '#4ade80', 10, 120); floatText(p.x, p.y - 24, `+${amt} HP`, '#4ade80', 16);
         } else if (roll < 0.7) {
             const cap = Math.max(150, p.maxArmor);
             p.armor = Math.min(p.armor + 50, cap); spark(p.x, p.y, COLORS.armor, 10, 120); floatText(p.x, p.y - 24, '+50 GIÁP', COLORS.armor, 16);
         } else {
-            const max = WEAPONS[cur.id].ammo;
-            cur.ammo = Math.min(cur.ammo + Math.ceil(max * 0.6), max); floatText(p.x, p.y - 24, '+ĐẠN', '#fbbf24', 16);
+            if (cur.magSize) { cur.reserve += cur.noReload ? 0 : cur.magSize * (p.scavenger ? 2 : 1); if (cur.noReload) cur.mag = effMag(p, cur); }
+            floatText(p.x, p.y - 24, '+ĐẠN', '#fbbf24', 16);
         }
         return;
     }
@@ -306,13 +178,13 @@ function openCrate(p, index) {
         let r = Math.random() * total; key = 'SMG';
         for (const k in BASE_WEIGHTS) { if (r < BASE_WEIGHTS[k]) { key = k; break; } r -= BASE_WEIGHTS[k]; }
     }
-    const nw = { ...WEAPONS[key] };
+    const nw = makeWeapon(key, p);
 
     // Trùng loại → nạp đầy
     const same = p.inventory.findIndex(w => w.id === nw.id);
     if (same >= 0) {
         const w = p.inventory[same];
-        if (w.ammo !== undefined) w.ammo = Math.min(w.ammo + nw.ammo, WEAPONS[nw.id].ammo);
+        if (w.magSize) { if (w.noReload) w.mag = effMag(p, w); else w.reserve += w.magSize * 2; }
         if (w.durability !== undefined) w.durability = w.maxDurability;
         crates.splice(index, 1); p.stats.crates++;
         AudioSys.play('pickup'); floatText(p.x, p.y - 24, 'NẠP ' + nw.name, '#fde68a', 15);
@@ -344,8 +216,10 @@ function updateBullets(dt) {
     for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
         b.px = b.x; b.py = b.y;
+        if (b.boomerang && updateBoomerang(b, dt)) { bullets.splice(i, 1); continue; }
         b.x += Math.cos(b.angle) * b.speed * 60 * dt; b.y += Math.sin(b.angle) * b.speed * 60 * dt;
         b.life -= dt;
+        if (b.flame) b.size += dt * 22;
         if (b.explosive && !b.blastSmall && Math.random() < 0.7) particles.push({ x: b.px, y: b.py, vx: (Math.random() - 0.5) * 40, vy: (Math.random() - 0.5) * 40, life: 0.5, maxLife: 0.5, color: 'rgba(120,120,130,0.4)', size: 6, grow: 18, drag: 0.95 });
         let dead = false;
 
@@ -357,11 +231,13 @@ function updateBullets(dt) {
         // vật cản
         if (!dead) {
             for (const o of obstacles) {
+                if (o.ownerPass === b.owner) continue; // bắn xuyên bao cát của mình
                 const t = segRect(b.px, b.py, b.x, b.y, o);
                 if (t < 0) continue;
+                if (b.boomerang) { b.back = true; b.x = b.px; b.y = b.py; spark(b.x, b.y, '#f59e0b', 3, 120); break; }
                 const hx = b.px + (b.x - b.px) * t, hy = b.py + (b.y - b.py) * t;
                 if (b.pierce) { if (!b.pierced) { b.pierced = new Set(); } if (!b.pierced.has(o)) { b.pierced.add(o); damageObstacle(o, 40); spark(hx, hy, '#e9d5ff', 6, 200); } continue; }
-                if (o.wood) damageObstacle(o, b.damage || 30);
+                if (o.wood || o.temp !== undefined) damageObstacle(o, b.damage || 30, players.find(q => q.id === b.owner));
                 if ((b.bounces > 0 || o.reflect) && !b.explosive) {
                     if (o.reflect) { b.owner = obstacleOwnerFlip(b); b.color = '#bae6fd'; } else b.bounces--;
                     const fromLeftRight = b.px < o.x || b.px > o.x + o.w;
@@ -391,6 +267,11 @@ function updateBullets(dt) {
                 const t = Math.max(0, Math.min(1, ((p.x - b.px) * dx + (p.y - b.py) * dy) / L));
                 if (dist(p.x, p.y, b.px + dx * t, b.py + dy * t) < p.radius + b.size + 2) {
                     const w = getCurrentWeapon(p);
+                    if (b.boomerang) {
+                        const key = b.back ? 'hitBack' : 'hitOut';
+                        if (!b[key]) { b[key] = true; const ow = players.find(q => q.id === b.owner); if (ow) ow.stats.hits++; dealDamage(p, b.damage, b.owner, { angle: b.angle, knock: 200 }); }
+                        break;
+                    }
                     if (p.st && p.st.reflect > 0 && !b.hook) {
                         // Phản Xạ: bẻ ngược viên đạn
                         b.owner = p.id; b.angle += Math.PI; b.life = 1.2; b.color = '#fde047'; b.x = b.px; b.y = b.py;
@@ -401,7 +282,8 @@ function updateBullets(dt) {
                         spark(b.x, b.y, '#e2e8f0', 6, 220, 0.3, 2); AudioSys.playAt('block', p.x, p.y, 0.3); reduceDurability(p, w, b.damage > 50 ? 40 : 10);
                     } else if (!b.explosive || b.super) {
                         const owner = players.find(q => q.id === b.owner); if (owner) owner.stats.hits++;
-                        dealDamage(p, b.damage, b.owner, { angle: b.angle, knock: b.knock, burn: b.burn, slow: b.freeze ? 2.5 : 0, storm: b.storm, super: b.super });
+                        dealDamage(p, b.damage, b.owner, { angle: b.angle, knock: b.knock, burn: b.burn, slow: b.freeze ? 2.5 : (b.slowHit || 0), storm: b.storm, super: b.super });
+                        if (b.root && p.st) { p.st.root = Math.max(p.st.root || 0, b.root); floatText(p.x, p.y - 34, 'BỊ TRÓI!', '#e5e7eb', 14); ring(p.x, p.y, 5, 30, '#e5e7eb', 0.4); }
                         if (b.hook) hookHit(owner, p);
                         if (b.freeze) ring(p.x, p.y, 5, 40, '#93c5fd', 0.3);
                         if (b.damage >= 50) hitStop(0.07);
@@ -439,7 +321,7 @@ function updateItems(dt) {
         const it = items[i];
         if (it.fuse > 0) {
             it.fuse -= dt;
-            if (it.fuse <= 0 && it.type.id === 'GRENADE') { explode(it.x, it.y, it.ownerId, 110, 160); items.splice(i, 1); continue; }
+            if (it.fuse <= 0 && it.type.id === 'GRENADE') { explode(it.x, it.y, it.ownerId, it.blast ? it.blast[0] : 110, it.blast ? it.blast[1] : 160); items.splice(i, 1); continue; }
             if (it.fuse <= 0 && it.skill) { landSkillItem(it); items.splice(i, 1); continue; }
         }
         if (it.z !== undefined) { it.vz -= 900 * dt; it.z = Math.max(0, it.z + it.vz * dt); if (it.z === 0) it.vz = Math.abs(it.vz) * 0.4 > 40 ? Math.abs(it.vz) * 0.4 : 0; }

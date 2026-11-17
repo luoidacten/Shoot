@@ -18,9 +18,14 @@ function resetPlayerForRound(p) {
     p.vampire = p.thorns = p.martyr = p.magnet = p.berserk = p.ghost = p.regen = p.blastRounds = false;
     p.aimshot = p.noMind = p.scavenger = p.eagle = p.silent = p.lastStand = p.hunter = p.quickSwap = p.pyro = p.zoneImmune = false;
     p.roundVamp = 0; p.regenDelay = 3;
+    p.fastReload = p.bigMag = p.lastBullet = p.reloadShield = p.quickdraw = p.entrench = p.sniperNest = p.watchman = p.trapper = p.saboteur = p.lingering = false;
+    p.bushStalker = p.lavaWalker = p.armory = p.collector = p.demolisher = p.zoneRunner = false; p.barricadeAt = null;
     p.bounces = 0; p.aiSpread = 0;
     p.inventory = [{ ...WEAPONS.KNIFE }, { ...WEAPONS.NONE }]; p.weaponIdx = 0;
     applyBuild(p);
+    if (p.armory && p.inventory[1].id === 'NONE') { const pool = ['SMG', 'SHOTGUN', 'AR', 'REVOLVER', 'DUAL', 'BOW', 'FLAME']; p.inventory[1] = makeWeapon(pool[Math.floor(Math.random() * pool.length)], p); }
+    p.inventory = p.inventory.map(w => w.magSize && w.mag === WEAPONS[w.id].mag ? makeWeapon(w.id, p) : w);
+    p.charge = 0; p.aiming = false; p.shotQueue = []; p.stillT = 0; p.zoneTime = 0; p.autoThrowT = 0; p.spinUp = 0; p.manualEngaged = false; p.manualAim = null;
     p.hp = p.maxHp; p.ghostHp = p.maxHp; p.armor = p.maxArmor; p.tricksterUsed = false;
     p.x = p.id === 1 ? MAP_W / 2 - 340 : MAP_W / 2 + 340; p.y = MAP_H / 2;
     p.angle = p.id === 1 ? 0 : Math.PI;
@@ -111,6 +116,7 @@ function updatePlayer(p, dt) {
     const allowAct = gameState === 'PLAYING' || gameState === 'KO';
     let input = p.isBot ? botThink(p, dt) : (net.role === 'host' && p.id === 2) ? netRemoteInput() : readHumanInput(p.id);
     if (!allowAct || p.stun > 0) input = { move: { x: 0, y: 0 }, a: false, b: false, c: false, s1: false, s2: false };
+    if (p.st.silence > 0) { input.s1 = false; input.s2 = false; }
     if (Math.hypot(input.move.x, input.move.y) > 0.2) p.moveDir = Math.atan2(input.move.y, input.move.x);
     const w = getCurrentWeapon(p);
     const enemy = enemyOf(p);
@@ -127,6 +133,12 @@ function updatePlayer(p, dt) {
         const nw = getCurrentWeapon(p);
         floatText(p.x, p.y - 26, `${nw.icon} ${nw.name}`, '#fff', 13);
         AudioSys.play('ui'); if (!p.quickSwap) p.cooldown = Math.max(p.cooldown, 6);
+        p.charge = 0; p.spinUp = 0;
+        if (nw.magSize && !nw.noReload) {
+            if (combo(p, 'quickReload')) { const need = effMag(p, nw) - nw.mag, take = Math.min(need, nw.reserve); nw.mag += take; nw.reserve -= take; nw.reloading = false; }
+            else if (p.quickdraw) { const add = Math.min(Math.ceil(effMag(p, nw) / 2), nw.reserve, effMag(p, nw) - nw.mag); nw.mag += add; nw.reserve -= add; }
+        }
+        if (p.quickdraw) { p.st.quickdraw = 1.5; p.st.quickdrawShots = combo(p, 'fanHammer') ? 2 : 1; }
     }
     p.wasC = input.c;
     // Kỹ năng
@@ -137,13 +149,23 @@ function updatePlayer(p, dt) {
     p.wasS1 = !!input.s1; p.wasS2 = !!input.s2;
 
     // Di chuyển (có quán tính; băng thì trơn)
-    let speed = 175 * (w.moveScale || 1) * p.moveMult * (p.st.haste > 0 ? 1.5 : 1) * (p.st.slow > 0 ? 0.5 : 1);
+    let speed = 175 * (w.moveScale || 1) * p.moveMult * (p.st.haste > 0 ? 1.5 : 1) * (p.st.slow > 0 ? (p.st.glued ? 0.4 : 0.5) : 1);
+    if (p.charge > 0) speed *= w.id === 'SNIPER' ? 1 - 0.65 * p.charge : w.id === 'BOW' ? 1 - 0.4 * p.charge : w.id === 'RAILGUN' ? 0.5 : w.id === 'HAMMER' ? 0.7 : 0.9;
+    if (w.spin && p.aiming) speed *= 0.6;
+    if (p.saberRush) speed = 175 * p.moveMult * 1.9; // Kiếm Ánh Sáng: lao tới
+    if (p.st.root > 0 || p.st.anchor > 0) speed = 0;
+    const bush = inBush(p.x, p.y);
+    if (bush && p.bushStalker) speed *= 1.2;
+    if (p.bushStalker) { if (bush) p.wasInBush = true; else if (p.wasInBush) { p.wasInBush = false; p.st.ambushBush = 2; } }
+    if (combo(p, 'nomad') && dist(p.x, p.y, world.zone.x, world.zone.y) > world.zone.r) speed *= 1.25;
+    if (p.lavaWalker && zones.some(z => z.type === 'lava' && lavaActive(z) && dist(p.x, p.y, z.x, z.y) < z.r)) { speed *= 1.3; if (combo(p, 'magma')) p.hp = Math.min(p.maxHp, p.hp + 6 * dt); }
     if (p.st.haste > 0 && Math.random() < 0.3) particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 0.3, maxLife: 0.3, color: hexA(p.color, 0.35), size: p.radius * 0.8 });
     const tvx = input.move.x * speed, tvy = input.move.y * speed;
     const accel = world.ice ? 2.2 : 16;
     p.vx += (tvx - p.vx) * Math.min(1, accel * dt); p.vy += (tvy - p.vy) * Math.min(1, accel * dt);
     if (p.dashTime > 0) { p.dashTime -= dt; p.vx = Math.cos(p.dashAngle) * 720; p.vy = Math.sin(p.dashAngle) * 720; spark(p.x, p.y, '#7dd3fc', 2, 40, 0.3, 3); }
     // lực đẩy lùi
+    if (p.st.anchor > 0) { p.kx = 0; p.ky = 0; }
     p.x += (p.vx + p.kx) * dt; p.y += (p.vy + p.ky) * dt;
     const kd = Math.pow(world.ice ? 0.2 : 0.002, dt); p.kx *= kd; p.ky *= kd;
     resolveCircle(p, p.radius);
@@ -152,12 +174,15 @@ function updatePlayer(p, dt) {
     let target = p.angle;
     const range = w.type === 'GUN' || w.type === 'THROWABLE' ? w.range : 170;
     const tgt = p.dashTime <= 0 ? aimTargetFor(p, range * 1.3) : null; // địch hoặc phân thân
-    if (tgt) target = Math.atan2(tgt.y - p.y, tgt.x - p.x);
+    if (p.aiming && p.aimAngle !== undefined) target = p.aimAngle;
+    else if (input.aim && input.aimMouse && Math.hypot(input.aim.x, input.aim.y) > 0.3) target = Math.atan2(input.aim.y, input.aim.x); // chuột: luôn nhìn theo con trỏ
+    else if (tgt) target = Math.atan2(tgt.y - p.y, tgt.x - p.x);
     else if (Math.hypot(input.move.x, input.move.y) > 0.2) target = Math.atan2(input.move.y, input.move.x);
-    if (p.dashTime <= 0) p.angle += angleDiff(target, p.angle) * Math.min(1, 14 * dt);
+    if (p.dashTime <= 0) p.angle += angleDiff(target, p.angle) * Math.min(1, (p.aiming ? 24 : 14) * dt);
 
     // Bóng ma
     const moving = Math.hypot(input.move.x, input.move.y) > 0.1;
+    p.stillT = moving ? 0 : (p.stillT || 0) + dt; // Cố Thủ / Tổ Bắn Tỉa / Lính Gác
     if (p.ghost) { if (!moving && !input.a) p.ghostT += dt; else p.ghostT = Math.max(0, p.ghostT - dt * 3); }
     // Tái tạo
     if (p.regen && world.time - p.lastHurt > p.regenDelay && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + 5 * dt);
@@ -174,28 +199,27 @@ function updatePlayer(p, dt) {
     // Nhặt hòm
     for (let i = crates.length - 1; i >= 0; i--) if (dist(p.x, p.y, crates[i].x, crates[i].y) < p.radius + crates[i].size / 2) openCrate(p, i);
 
-    // Tấn công
-    if (p.cooldown > 0) p.cooldown -= dt * 60;
-    const pressA = input.a && !p.wasA; p.wasA = input.a;
-    const pressB = input.b && !p.wasB; p.wasB = input.b;
-    if (allowAct) {
-        const trigger = w.automatic ? input.a : pressA;
-        if (trigger && p.cooldown <= 0) useWeapon(p, w, enemy);
-        if (pressB && w.id !== 'NONE') throwWeapon(p, w, enemy);
-    }
+    // Tấn công (kiểu Brawl Stars) + nút Ném/Nạp
+    if (!p.shotQueue) p.shotQueue = [];
+    handleAttack(p, getCurrentWeapon(p), input, dt, allowAct, enemy);
+    handleThrowButton(p, getCurrentWeapon(p), input, dt, allowAct, enemy);
 
     // Ngoài vòng bo
     const z = world.zone;
     if (dist(p.x, p.y, z.x, z.y) > z.r && !p.zoneImmune) {
+        // càng đứng ngoài bo lâu càng bị đốt đau: +9 sát thương/giây mỗi giây (tối đa 70/giây)
+        p.zoneTime = (p.zoneTime || 0) + dt;
         p.zoneTick = (p.zoneTick || 0) + dt;
         if (p.zoneTick > 0.25) {
             p.zoneTick = 0;
-            const dps = world.zonePhase === 2 ? 22 : 10;
+            const base = world.zonePhase === 2 ? 16 : 8;
+            let dps = p.zoneRunner ? base * 0.4 : Math.min(70, base + 9 * p.zoneTime);
             dealDamage(p, dps * 0.25, -1, { zone: true, raw: true });
-            spark(p.x, p.y, '#c084fc', 4, 120, 0.4, 2);
-            floatText(p.x, p.y - 20, '-' + Math.round(dps * 0.25), '#c084fc', 12);
+            spark(p.x, p.y, '#c084fc', 3 + Math.min(10, p.zoneTime * 2), 120, 0.4, 2);
+            floatText(p.x, p.y - 20, '-' + Math.round(dps * 0.25), dps > 35 ? '#ff4d5e' : '#c084fc', 12 + Math.min(10, p.zoneTime * 1.5));
+            if (p.zoneTime > 2 && p.zoneTime - dt <= 2.25 && !p.isBot) floatText(p.x, p.y - 44, 'BO ĐỐT NGÀY CÀNG ĐAU!', '#ff4d5e', 14);
         }
-    }
+    } else p.zoneTime = Math.max(0, (p.zoneTime || 0) - dt * 2);
 }
 
 function updateCamera(dt) {

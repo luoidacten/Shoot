@@ -21,6 +21,7 @@ const P2_CONTROLS = { joystick: { x: 0.13, y: 0.78, r: 0.085 }, btnA: { x: 0.91,
 const touchInputs = { p1: { move: { x: 0, y: 0 }, a: false, b: false, c: false, s1: false, s2: false }, p2: { move: { x: 0, y: 0 }, a: false, b: false, c: false, s1: false, s2: false } };
 const stickOrigin = { p1: null, p2: null }; // joystick nổi: tâm đặt tại điểm chạm
 const touches = new Map();
+const aimStick = { p1: null, p2: null }; // vị trí kéo nút đánh để vẽ
 
 function dist(x1, y1, x2, y2) { return Math.hypot(x2 - x1, y2 - y1); }
 function checkZone(x, y, cfg, scale = 1.25) { return dist(x, y, cfg.x * SCREEN_W, cfg.y * SCREEN_H) < Math.min(SCREEN_W, SCREEN_H * 1.8) * cfg.r * scale; }
@@ -35,7 +36,7 @@ function handleTouch(e) {
             const side = settings.mode === 'pvp' && y < SCREEN_H / 2 ? 'p1' : 'p2'; // đấu máy / online: cả màn hình là của mình
             const C = side === 'p1' ? P1_CONTROLS : P2_CONTROLS;
             const inp = touchInputs[side];
-            if (checkZone(x, y, C.btnA, 1.35)) { inp.a = true; touches.set(t.identifier, { side, k: 'a' }); }
+            if (checkZone(x, y, C.btnA, 1.35)) { inp.a = true; inp.aim = { x: 0, y: 0 }; inp.aimActive = true; touches.set(t.identifier, { side, k: 'a', sx: x, sy: y }); }
             else if (checkZone(x, y, C.btnB, 1.4)) { inp.b = true; touches.set(t.identifier, { side, k: 'b' }); }
             else if (checkZone(x, y, C.btnC, 1.4)) { inp.c = true; touches.set(t.identifier, { side, k: 'c' }); }
             else if (checkZone(x, y, C.btnS1, 1.35)) { inp.s1 = true; touches.set(t.identifier, { side, k: 's1' }); }
@@ -47,6 +48,12 @@ function handleTouch(e) {
             }
         } else if (e.type === 'touchmove') {
             const td = touches.get(t.identifier);
+            if (td && td.k === 'a') {
+                // kéo nút đánh: vector ngắm (kiểu Brawl Stars)
+                const dx = x - td.sx, dy = y - td.sy, d = Math.hypot(dx, dy), maxD = ctrlR(P1_CONTROLS.btnA) * 1.6;
+                touchInputs[td.side].aim = d < 12 ? { x: 0, y: 0 } : { x: dx / d * Math.min(1, d / maxD), y: dy / d * Math.min(1, d / maxD) };
+                aimStick[td.side] = { sx: td.sx, sy: td.sy, x, y };
+            }
             if (td && td.k === 'stick') {
                 const dx = x - td.sx, dy = y - td.sy, maxD = ctrlR(P1_CONTROLS.joystick) * 0.85;
                 const d = Math.min(Math.hypot(dx, dy), maxD), a = Math.atan2(dy, dx);
@@ -58,6 +65,7 @@ function handleTouch(e) {
             if (td) {
                 if (td.k === 'stick') { touchInputs[td.side].move = { x: 0, y: 0 }; stickOrigin[td.side] = null; }
                 else touchInputs[td.side][td.k] = false;
+                if (td.k === 'a') { touchInputs[td.side].aim = { x: 0, y: 0 }; touchInputs[td.side].aimActive = false; aimStick[td.side] = null; }
                 touches.delete(t.identifier);
             }
         }
@@ -97,7 +105,9 @@ function gamepadInput(index) {
     let x = gp.axes[0] || 0, y = gp.axes[1] || 0;
     if (Math.hypot(x, y) < 0.2) { x = 0; y = 0; }
     const btn = i => gp.buttons[i] && gp.buttons[i].pressed;
-    return { move: { x, y }, a: btn(0) || btn(7), b: btn(1) || btn(6), c: btn(2), s1: btn(3) || btn(4), s2: btn(5) };
+    let ax = gp.axes[2] || 0, ay = gp.axes[3] || 0;
+    const aim = Math.hypot(ax, ay) > 0.3 ? { x: ax, y: ay } : null;
+    return { move: { x, y }, a: btn(0) || btn(7), b: btn(1) || btn(6), c: btn(2), s1: btn(3) || btn(4), s2: btn(5), aim };
 }
 
 function mergeInput(...list) {
@@ -106,17 +116,43 @@ function mergeInput(...list) {
         if (!i) return;
         if (Math.hypot(i.move.x, i.move.y) > Math.hypot(out.move.x, out.move.y)) out.move = { ...i.move };
         out.a = out.a || i.a; out.b = out.b || i.b; out.c = out.c || i.c; out.s1 = out.s1 || !!i.s1; out.s2 = out.s2 || !!i.s2;
+        if (i.aim && (!out.aim || Math.hypot(i.aim.x, i.aim.y) > Math.hypot(out.aim.x, out.aim.y))) out.aim = { ...i.aim };
+        if (i.aimActive) out.aimActive = true;
+        if (i.aimMouse) out.aimMouse = true;
     });
     return out;
+}
+
+/** ---------- Chuột (PC): di chuột để ngắm, chuột trái = đánh, chuột phải = nạp/ném, lăn chuột = đổi vũ khí ---------- */
+const mouse = { x: 0, y: 0, left: false, right: false, active: false, wheel: false };
+canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
+canvas.addEventListener('mousedown', e => {
+    mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true;
+    if (e.button === 0) mouse.left = true; else if (e.button === 2) mouse.right = true; else if (e.button === 1) mouse.wheel = true;
+    if (isTouch && e.pointerType !== 'touch' && !e.sourceCapabilities?.firesTouchEvents) { isTouch = false; document.body.classList.remove('touch'); }
+});
+window.addEventListener('mouseup', e => { if (e.button === 0) mouse.left = false; else if (e.button === 2) mouse.right = false; else if (e.button === 1) mouse.wheel = false; });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('wheel', e => { if (mouse.active) { mouse.wheelPulse = true; e.preventDefault(); } }, { passive: false });
+/** Người chơi dùng chuột: online/đấu máy = chính mình; 2 người = P1 (tay trái WASD, tay phải chuột) */
+function mouseOwnerId() { return settings.mode === 'pvp' ? 1 : localId(); }
+function mouseInput(id) {
+    if (!mouse.active || isTouch || mouseOwnerId() !== id) return null;
+    const p = players.find(q => q.id === id); if (!p || p.x === undefined) return null;
+    const z = camera.zoom * (1 + fx.zoomPunch * 0.08);
+    const wx = (mouse.x - SCREEN_W / 2) / z + camera.x, wy = (mouse.y - SCREEN_H / 2) / z + camera.y;
+    const dx = wx - p.x, dy = wy - p.y, d = Math.hypot(dx, dy) || 1;
+    const c = !!mouse.wheelPulse; mouse.wheelPulse = false;
+    return { move: { x: 0, y: 0 }, a: mouse.left, b: mouse.right, c: c || mouse.wheel, s1: false, s2: false, aim: { x: dx / d, y: dy / d }, aimMouse: true, aimDist: d };
 }
 
 /** Lấy input của người chơi (id 1 / 2). Trong chế độ đấu máy, người chơi (P2) dùng được cả 2 bộ phím. */
 function readHumanInput(id) {
     if (settings.mode === 'online' || (settings.mode === 'bot' && id === 2)) {
-        return mergeInput(touchInputs.p2, keyboardInput(KEYMAP.p1), keyboardInput(KEYMAP.p2), gamepadInput(0));
+        return mergeInput(touchInputs.p2, keyboardInput(KEYMAP.p1), keyboardInput(KEYMAP.p2), gamepadInput(0), mouseInput(id));
     }
-    return id === 1 ? mergeInput(touchInputs.p1, keyboardInput(KEYMAP.p1), gamepadInput(0))
-                    : mergeInput(touchInputs.p2, keyboardInput(KEYMAP.p2), gamepadInput(1));
+    return id === 1 ? mergeInput(touchInputs.p1, keyboardInput(KEYMAP.p1), gamepadInput(0), mouseInput(1))
+                    : mergeInput(touchInputs.p2, keyboardInput(KEYMAP.p2), gamepadInput(1), mouseInput(2));
 }
 
 /** Phím tắt ngoài trận (chọn lõi, tạm dừng) */
