@@ -348,9 +348,12 @@ function touchLayout() {
     const at = (deg, dd, r) => ({ x: ax + Math.cos(deg * Math.PI / 180) * dd, y: ay + Math.sin(deg * Math.PI / 180) * dd, r });
     const L = { A: { x: ax, y: ay, r: rA }, S1: at(180, d, rs), S2: at(222, d, rs), S3: at(264, d, rs), B: at(302, rA * 1.6, rA * 0.42), C: at(150, rA * 1.62, rA * 0.4),
         stick: { x: Math.max(110, W * 0.15), y: H - Math.max(110, H * 0.3), r: Math.max(56, m * 0.16) } };
-    const rr = rA * 0.4, y = H - rr - 8;
-    L.row = []; let x = L.S1.x - L.S1.r - rr - 14;
-    ['sp1', 'sp2', 'sp3', 'it1', 'it2'].forEach(k => { L.row.push({ k, x, y, r: rr }); x -= rr * 2.35; });
+    // 3 phép bổ trợ: hàng dưới, giữa màn hình lệch phải một chút
+    const rr = rA * 0.42, y = H - rr - 8, gap = rr * 2.4, cx = W * 0.58;
+    L.row = ['sp1', 'sp2', 'sp3'].map((k, i) => ({ k, x: cx + (i - 1) * gap, y, r: rr }));
+    // vật phẩm: phía trên cụm nút kỹ năng, lệch trái; vật phẩm 2 nằm trên vật phẩm 1, cách một khoảng
+    const ir = rA * 0.52, ix = L.S3.x - rA * 0.45, iy = L.S3.y - L.S3.r - ir - 12;
+    L.row.push({ k: 'it1', x: ix, y: iy, r: ir }, { k: 'it2', x: ix, y: iy - ir * 2 - 14, r: ir });
     return L;
 }
 const _handleTouch = handleTouch;

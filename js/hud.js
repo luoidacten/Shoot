@@ -97,14 +97,15 @@ function drawKillFeed(W, now) {
     for (let i = killFeed.length - 1; i >= 0; i--) if (t - killFeed[i].born > 5000) killFeed.splice(i, 1);
     ctx.save(); ctx.font = `700 11px ${FONT}`; ctx.textBaseline = 'middle';
     killFeed.forEach((k, i) => {
-        const y = 62 + i * 22, a = Math.min(1, (5000 - (t - k.born)) / 600);
+        // bảng hạ gục: bên trái, dưới thanh máu (bên phải dành cho vật phẩm)
+        const y = 80 + i * 22, a = Math.min(1, (5000 - (t - k.born)) / 600);
         const s = `${k.a}  ⚔  ${k.b}`, tw = ctx.measureText(s).width + 20;
-        ctx.globalAlpha = a; rrect(ctx, W - tw - 10, y - 9, tw, 18, 6); ctx.fillStyle = 'rgba(6,10,24,0.7)'; ctx.fill();
-        ctx.textAlign = 'right';
-        ctx.fillStyle = k.bc; ctx.fillText(k.b, W - 20, y);
-        const wb = ctx.measureText(k.b).width;
-        ctx.fillStyle = '#fca5a5'; ctx.fillText('⚔', W - 26 - wb, y);
-        ctx.fillStyle = k.ac; ctx.fillText(k.a, W - 44 - wb, y);
+        ctx.globalAlpha = a; rrect(ctx, 10, y - 9, tw, 18, 6); ctx.fillStyle = 'rgba(6,10,24,0.7)'; ctx.fill();
+        ctx.textAlign = 'left';
+        ctx.fillStyle = k.ac; ctx.fillText(k.a, 20, y);
+        const wa = ctx.measureText(k.a + '  ').width;
+        ctx.fillStyle = '#fca5a5'; ctx.fillText('⚔', 20 + wa, y);
+        ctx.fillStyle = k.bc; ctx.fillText(k.b, 20 + wa + ctx.measureText('⚔  ').width, y);
     });
     ctx.restore();
 }
