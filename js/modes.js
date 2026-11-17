@@ -446,3 +446,61 @@ const _fowActive = fowActive;
 fowActive = function () { return !world.bright && _fowActive(); };
 const _fogGameplay = fogGameplay;
 fogGameplay = function () { return !world.bright && _fogGameplay(); };
+
+/* ============================== CHỐNG BOT DÍNH NHAU / GIẬT ============================== */
+/** Va chạm giữa người chơi: đẩy tách nhau ra (không ai đứng chồng lên ai) */
+function separatePlayers() {
+    const al = players.filter(p => p.hp > 0 && !(p.air > 0) && p.x !== undefined);
+    for (let i = 0; i < al.length; i++) for (let j = i + 1; j < al.length; j++) {
+        const a = al[i], b = al[j], R = a.radius + b.radius, dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+        if (d >= R) continue;
+        const nx = d > 0.01 ? dx / d : Math.cos(a.id), ny = d > 0.01 ? dy / d : Math.sin(a.id), push = (R - d) / 2;
+        a.x -= nx * push; a.y -= ny * push; b.x += nx * push; b.y += ny * push;
+        resolveCircle(a, a.radius); resolveCircle(b, b.radius);
+    }
+}
+const _upe2 = updatePartyExtras;
+updatePartyExtras = function (dt) { _upe2(dt); separatePlayers(); };
+
+/** Bot giữ mục tiêu ổn định: chỉ đổi khi có kẻ gần hơn hẳn */
+function botTarget(p) {
+    const B = p.brain, vis = enemiesOf(p).filter(e => targetable(p, e)).sort((a, b) => dist(p.x, p.y, a.x, a.y) - dist(p.x, p.y, b.x, b.y));
+    const cur = players.find(q => q.id === B.targetId && q.hp > 0 && !sameTeam(p, q));
+    if (vis.length) {
+        if (cur && vis.includes(cur) && dist(p.x, p.y, cur.x, cur.y) < dist(p.x, p.y, vis[0].x, vis[0].y) * 1.4 + 60) return cur;
+        B.targetId = vis[0].id; return vis[0];
+    }
+    if (cur) return cur;
+    const all = enemiesOf(p).sort((a, b) => dist(p.x, p.y, a.x, a.y) - dist(p.x, p.y, b.x, b.y));
+    if (all[0]) B.targetId = all[0].id;
+    return all[0] || null;
+}
+/** Bot nhắm đúng kẻ đang đuổi (không xoay qua lại giữa nhiều địch) */
+const _aimTargetFor = aimTargetFor;
+aimTargetFor = function (p, range) {
+    if (p.isBot && p.brain && p.brain.targetId) {
+        const t = players.find(q => q.id === p.brain.targetId && q.hp > 0);
+        if (t && targetable(p, t) && dist(p.x, p.y, t.x, t.y) < range) return t;
+    }
+    return _aimTargetFor(p, range);
+};
+/** Làm mượt hướng chạy của bot + giãn cách với người khác */
+const _botThink = botThink;
+botThink = function (p, dt) {
+    const out = _botThink(p, dt), B = p.brain;
+    const tgt = players.find(q => q.id === B.targetId);
+    const melee = ['MELEE', 'SHIELD'].includes(getCurrentWeapon(p).type);
+    let sx = 0, sy = 0;
+    players.forEach(q => {
+        if (q === p || q.hp <= 0 || (melee && q === tgt)) return;
+        const d = dist(p.x, p.y, q.x, q.y), R = p.radius + q.radius + 40;
+        if (d < R && d > 0.01) { const k = 1 - d / R; sx += (p.x - q.x) / d * k; sy += (p.y - q.y) / d * k; }
+    });
+    let mx = out.move.x + sx * 1.6, my = out.move.y + sy * 1.6;
+    B.mv = B.mv || { x: 0, y: 0 };
+    const k = Math.min(1, dt * (B.dodgeT > 0 ? 14 : 6));
+    B.mv.x += (mx - B.mv.x) * k; B.mv.y += (my - B.mv.y) * k;
+    const m = Math.hypot(B.mv.x, B.mv.y);
+    out.move = m > 1 ? { x: B.mv.x / m, y: B.mv.y / m } : (m < 0.08 ? { x: 0, y: 0 } : { x: B.mv.x, y: B.mv.y });
+    return out;
+};
