@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#05060f">
+    <title>Đấu Trường Kỳ Ngộ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- Nút tạm dừng -->
+<button id="pause-btn" class="pause-btn hidden" aria-label="Tạm dừng">II</button>
+
+<!-- MÀN HÌNH CHÍNH -->
+<div id="menu-screen" class="screen">
+    <div class="menu-bg"></div>
+    <div class="menu-card">
+        <div class="logo">
+            <span class="logo-small">ĐẤU TRƯỜNG</span>
+            <span class="logo-big">KỲ NGỘ</span>
+            <span class="logo-tag">BO7 · 21 KỸ NĂNG · 21 NỘI TẠI · 36 PHỐI HỢP</span>
+        </div>
+
+        <div class="opt-group">
+            <div class="opt-label">CHẾ ĐỘ</div>
+            <div class="seg" data-opt="mode">
+                <button data-val="pvp" class="active">👥 2 NGƯỜI</button>
+                <button data-val="bot">🤖 ĐẤU MÁY</button>
+                <button data-val="online">🌐 ONLINE</button>
+            </div>
+        </div>
+        <div class="opt-group" id="diff-group">
+            <div class="opt-label">ĐỘ KHÓ BOT</div>
+            <div class="seg" data-opt="diff">
+                <button data-val="0">DỄ</button>
+                <button data-val="1" class="active">VỪA</button>
+                <button data-val="2">ÁC MỘNG</button>
+            </div>
+        </div>
+        <div class="opt-group" id="fow-group">
+            <div class="opt-label">SƯƠNG MÙ CHIẾN TRẬN</div>
+            <div class="seg" data-opt="fow">
+                <button data-val="1" class="active">BẬT</button>
+                <button data-val="0">TẮT</button>
+            </div>
+        </div>
+
+        <button class="play-btn" id="start-btn">VÀO TRẬN</button>
+
+        <div class="help">
+            <div class="help-col"><b class="c1">P1 · ĐỎ</b> WASD · <kbd>F</kbd> đánh · <kbd>G</kbd> ném · <kbd>H</kbd> đổi · <kbd>R</kbd>/<kbd>T</kbd> kỹ năng</div>
+            <div class="help-col"><b class="c2">P2 · XANH</b> ←↑↓→ · <kbd>K</kbd>/<kbd>,</kbd> đánh · <kbd>L</kbd>/<kbd>.</kbd> ném · <kbd>;</kbd> đổi · <kbd>I</kbd>/<kbd>O</kbd> kỹ năng</div>
+            <div class="help-col muted">Điện thoại: đặt máy nằm ngang giữa 2 người · Hỗ trợ tay cầm</div>
+        </div>
+    </div>
+</div>
+
+<!-- SẢNH ONLINE -->
+<div id="online-screen" class="screen hidden">
+    <div class="menu-card small">
+        <div class="logo"><span class="logo-big" style="font-size:2.4rem">ONLINE</span><span class="logo-tag">SƯƠNG MÙ · TIẾNG CHÂN · DẤU CHÂN</span></div>
+        <button class="menu-btn" id="host-btn">🏠 TẠO PHÒNG</button>
+        <div id="room-code-box" class="room-code hidden">
+            <div class="opt-label">MÃ PHÒNG</div>
+            <div id="room-code" class="code">-----</div>
+            <button class="menu-btn" id="copy-link-btn">🔗 SAO CHÉP LINK MỜI</button>
+        </div>
+        <div class="join-row">
+            <input id="join-input" maxlength="5" placeholder="NHẬP MÃ" autocomplete="off" spellcheck="false">
+            <button class="menu-btn" id="join-btn">VÀO PHÒNG</button>
+        </div>
+        <div id="net-status" class="net-status"></div>
+        <div class="help-col muted" style="font-size:0.72rem;margin-top:6px">Chỉ thấy những gì nhân vật nhìn thấy · Nghe tiếng chân &amp; tiếng súng để đoán vị trí địch</div>
+        <button class="menu-btn danger" id="online-back-btn">← QUAY LẠI</button>
+    </div>
+</div>
+
+<!-- VẬN MỆNH -->
+<div id="destiny-screen" class="screen hidden">
+    <div class="destiny-block flip-touch">
+        <div class="destiny-label">VẬN MỆNH HIỆP <span class="d-round">1</span></div>
+        <div class="destiny-name d-name">???</div>
+        <div class="destiny-desc d-desc"></div>
+    </div>
+    <div class="destiny-orb"></div>
+    <div class="destiny-block">
+        <div class="destiny-label">VẬN MỆNH HIỆP <span class="d-round">1</span></div>
+        <div class="destiny-name d-name">???</div>
+        <div class="destiny-desc d-desc"></div>
+    </div>
+</div>
+
+<!-- CHỌN LÕI -->
+<div id="augment-screen" class="screen hidden">
+    <div class="aug-side p1-side flip-touch">
+        <div class="aug-title c1">P1</div>
+        <div class="aug-bonus hidden" id="p1-bonus">🔥 BÙ ĐẮP: Thêm 1 lá để lội ngược dòng!</div>
+        <div class="aug-cards" id="p1-cards"></div>
+        <div class="aug-owned" id="p1-owned"></div>
+        <div id="p1-wait" class="waiting-text hidden">ĐÃ CHỐT! Chờ đối thủ…</div>
+    </div>
+    <div class="aug-divider"><span id="aug-score">0 — 0</span></div>
+    <div class="aug-side p2-side">
+        <div class="aug-title c2">P2</div>
+        <div class="aug-bonus hidden" id="p2-bonus">🔥 BÙ ĐẮP: Thêm 1 lá để lội ngược dòng!</div>
+        <div class="aug-cards" id="p2-cards"></div>
+        <div class="aug-owned" id="p2-owned"></div>
+        <div id="p2-wait" class="waiting-text hidden">ĐÃ CHỐT! Chờ đối thủ…</div>
+    </div>
+</div>
+
+<!-- TẠM DỪNG -->
+<div id="pause-screen" class="screen hidden">
+    <div class="menu-card small">
+        <div class="logo"><span class="logo-big" style="font-size:2.4rem">TẠM DỪNG</span></div>
+        <button class="menu-btn" id="resume-btn">▶ TIẾP TỤC</button>
+        <button class="menu-btn" id="sfx-btn">🔊 ÂM THANH: BẬT</button>
+        <button class="menu-btn" id="music-btn">🎵 NHẠC: BẬT</button>
+        <button class="menu-btn danger" id="quit-btn">⏏ VỀ MENU</button>
+    </div>
+</div>
+
+<!-- KẾT THÚC -->
+<div id="gameover-screen" class="screen hidden">
+    <div class="menu-card">
+        <div class="go-crown">👑</div>
+        <div class="go-title" id="go-title">P1 VÔ ĐỊCH</div>
+        <div class="go-score" id="go-score">3 — 1</div>
+        <table class="go-stats" id="go-stats"></table>
+        <div class="go-btns">
+            <button class="play-btn" id="rematch-btn">TÁI ĐẤU</button>
+            <button class="menu-btn" id="menu-btn">MENU</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/input.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/world.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/fow.js"></script>
+<script src="js/abilities.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/net.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
