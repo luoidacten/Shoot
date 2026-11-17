@@ -204,7 +204,7 @@ function drawEnemyArrows(zoom) {
     const sense = me.eagle || me.watchman || me.hunter;
     const W = SCREEN_W, H = SCREEN_H, now = performance.now() / 1000;
     enemiesOf(me).forEach(e => {
-        const revealed = e.st && e.st.reveal > 0;
+        const revealed = (e.st && e.st.reveal > 0) || isSpotted(e, me.id);
         const d = dist(me.x, me.y, e.x, e.y);
         const sensed = sense && d < visionRange(me) * 1.7 && !(e.st && e.st.invis > 0);
         if (!revealed && !sensed) return;
@@ -406,6 +406,21 @@ function drawNewWeaponArt(c, w, r, x0, ch, box, now, p) {
             c.beginPath(); c.arc(x0 + 20, 0, 4, 0, Math.PI * 2); c.fill();
             break;
         }
+        case 'AXE': {
+            c.rotate(-ch * 1.1);
+            c.fillStyle = '#78350f'; c.fillRect(r - 6, -2, 30, 4);
+            const g = c.createLinearGradient(r + 18, -12, r + 34, 6); g.addColorStop(0, '#f1f5f9'); g.addColorStop(1, '#64748b');
+            c.fillStyle = g; c.beginPath(); c.moveTo(r + 18, -3); c.quadraticCurveTo(r + 34, -16, r + 36, -4); c.quadraticCurveTo(r + 34, 8, r + 18, 4); c.closePath(); c.fill();
+            c.strokeStyle = 'rgba(0,0,0,0.5)'; c.lineWidth = 1.5; c.stroke(); break;
+        }
+        case 'ROUNDSHIELD': {
+            const g = c.createRadialGradient(r + 6, -3, 2, r + 8, 0, 14); g.addColorStop(0, '#bae6fd'); g.addColorStop(1, '#0369a1');
+            c.fillStyle = g; c.beginPath(); c.arc(r + 8, 0, 13, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = '#fbbf24'; c.lineWidth = 2; c.stroke(); c.fillStyle = '#fbbf24'; c.beginPath(); c.arc(r + 8, 0, 3, 0, Math.PI * 2); c.fill(); break;
+        }
+        case 'SPISTOL': box(x0, -3, 14, 6, '#475569'); box(x0 + 13, -2.5, 12, 5, '#1e293b'); box(x0 - 2, 1, 5, 7, '#334155'); break;
+        case 'SAR': box(x0 - 2, -3.5, 20, 7, '#334155'); box(x0 + 17, -3, 14, 6, '#0f172a'); box(x0 + 4, 2, 4, 7, '#1e293b'); break;
+        case 'EMPGREN': c.fillStyle = '#0ea5e9'; c.beginPath(); c.arc(r + 5, 7, 5.5, 0, Math.PI * 2); c.fill(); c.strokeStyle = '#e0f2fe'; c.lineWidth = 1.5; c.beginPath(); c.arc(r + 5, 7, 3, 0, Math.PI * 2); c.stroke(); break;
         case 'TESLA': {
             box(x0 - 4, -5, 16, 10, '#1e3a8a', 3);
             c.fillStyle = '#93c5fd'; for (let i = 0; i < 3; i++) c.fillRect(x0 + 1 + i * 4, -6, 2, 12);

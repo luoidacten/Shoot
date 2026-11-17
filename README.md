@@ -31,6 +31,42 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
   - **Đặc biệt:** Súng Lưới (trúng thì choáng, trượt thì bung lưới làm chậm), Boomerang, Lựu đạn.
   - **Huyền thoại:** Minigun, Railgun.
 
+## Phép bổ trợ & vật phẩm
+- Đầu trận mỗi người được 2 phép bổ trợ ngẫu nhiên (thẻ Túi Phép: 3): Tốc Biến, Hồi Máu, Thanh Tẩy (dùng được cả khi bị choáng), Gia Tốc, Trừng Phạt, Ngất Ngư.
+- 1 ô vật phẩm tiêu hao (thẻ Túi Vật Dụng: 2 ô). Mỗi hiệp có sẵn 1 vật phẩm, hòm hỗ trợ có thể rơi thêm.
+- Có 12 loại vật phẩm: 6 cuộn phép dùng 1 lần, Bình Máu Lớn, Thuốc Khiên, Lựu Khói, Drone Định Vị, Bù Nhìn Mini, Thuốc Cuồng Nộ.
+- Thẻ mới:
+  - Cường Thể, Giáp Chống Cận Chiến, Mặt Nạ Phòng Độc, Bom Độc, Drone Do Thám, Bù Nhìn.
+  - **Elsu**: ngắm thì đứng yên nhưng nhìn xa; kỹ năng cắm Ưng Trạm cho tầm nhìn.
+  - **Kỹ Thuật Cao**: kỹ năng đổi theo vũ khí đang cầm.
+  - Phù Thủy Bổ Trợ, Túi Phép, Túi Đồ (3 ô vũ khí), Túi Vật Dụng, Lựa Chọn Thay Thế (3 kỹ năng).
+
+## Vũ khí đặc biệt mới
+- **Rìu**: chém 2 phát, phát 3 bổ cực đau và choáng. Giữ để ném rìu rồi rìu tự quay về.
+- **Khiên Tròn**: yếu hơn Khiên; giữ để ném, khiên nảy qua 3 mục tiêu.
+- **Khiên**: giữ để hút địch phía trước về phía mình.
+- **Lục / AR Giảm Thanh**: không có tiếng, gần như không thấy đường đạn. AR giảm thanh sấy 7 viên, càng xa càng yếu.
+- **Lựu Đạn Điện Từ**: tạo vùng khoá kỹ năng địch; hiệu ứng còn 2 giây sau khi rời vùng.
+- **Cung**: bắn không có tiếng, cầm cung nhìn xa hơn chút. Mũi tụ lực có đường đạn rất mờ.
+- **Bắn tỉa**: khi ngắm nhìn rất xa thẳng phía trước, nhưng xung quanh bị thu hẹp tầm nhìn (có thẻ Elsu thì không bị).
+- **Railgun** 3 mức:
+  - Mức 1: như cũ.
+  - Mức 2 (giữ thêm 1 giây): đứng yên, có giáp, nhìn xa hơn, mạnh hơn.
+  - Mức 3 (giữ thêm 1 giây nữa): chiếu laser rộng liên tục 1 giây, dùng hết đạn.
+- Bụi rậm có thể bị lửa đốt cháy.
+
+## Luật theo hiệp (vận mệnh)
+Ngoài các vận mệnh cũ (F1, 1 máu…), hiệp từ thứ 2 trở đi có thể bốc trúng:
+- Đồng Đội (chia cặp 2 người 1 đội)
+- Thêm Người Thêm Vui (+4 bot, bản đồ rộng)
+- Đấu Trường Mở Rộng
+- Zombie Tràn
+- Phòng Ping 999+ (thao tác trễ)
+- Thời Gian Bất Ổn
+- Khí Độc
+- Giả Lập Robot
+- Phòng Gương
+
 ## Bản đồ
 - **Đấu Trường**: cân bằng, có trụ và thùng gỗ phá được.
 - **Mê Cung**: tường dày đặc, đánh giáp lá cà.

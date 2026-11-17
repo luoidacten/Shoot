@@ -1,6 +1,6 @@
 /** ==================== CẤU HÌNH CHUNG ==================== */
-const MAP_W = 2400;
-const MAP_H = 1800;
+let MAP_W = 2400;
+let MAP_H = 1800;
 
 const COLORS = {
     p1: '#ff4d5e', p2: '#3ba8ff',

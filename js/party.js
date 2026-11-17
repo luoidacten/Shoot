@@ -6,7 +6,7 @@ const PBULLET = ['#ffb3a8', '#bfe3ff', '#bbf7d0', '#fde68a'];
 const PNAMES = ['ĐỎ', 'XANH', 'LỤC', 'VÀNG'];
 const MAX_PICKS = 5;
 let pickCount = 0;
-const pColor = id => PCOLORS[(id - 1) % 4] || '#ffffff';
+const pColor = id => PCOLORS[(id - 1) % PCOLORS.length] || '#ffffff';
 
 /* ============================== NGƯỜI CHƠI & MỤC TIÊU ============================== */
 function enemiesOf(p) { return players.filter(e => e.id !== p.id && e.hp > 0 && e.x !== undefined); }
@@ -99,7 +99,7 @@ function killPlayer(dead, killerId) {
     if (killer) killer.stats.kills = (killer.stats.kills || 0) + 1;
     killFeedAdd(killer ? killer.label : '☠', killer ? killer.color : '#94a3b8', dead.label, dead.color);
     const alive = players.filter(p => p.hp > 0);
-    if (gameState === 'PLAYING' && alive.length <= 1) {
+    if (gameState === 'PLAYING' && aliveSides() <= 1) {
         gameState = 'KO'; koTimer = dead.martyr ? 2.6 : 1.8;
         fx.slowMo = 1.4; fx.zoomPunch = 1; flash('#ffffff', 0.35);
         camera.focus = { x: dead.x, y: dead.y };
@@ -543,7 +543,7 @@ function castSkill(p, slot, aimVec) {
 /** Nút kỹ năng: kỹ năng không cần ngắm → bấm là dùng; cần ngắm → giữ/kéo để chọn, thả ra mới dùng */
 function handleSkillButtons(p, input, allowAct) {
     p.skillAimView = null;
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 3; i++) {
         const k = 's' + (i + 1), held = !!input[k] && allowAct, was = !!p['wasS' + (i + 1)];
         const s = p.skills && p.skills[i], card = s && CARDS[s.id];
         let vec = input[k + 'aim'] || null;

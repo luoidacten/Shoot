@@ -77,6 +77,7 @@ function updatePlayer(p, dt) {
     if (p.hp <= 0) return;
     const allowAct = gameState === 'PLAYING' || gameState === 'KO';
     let input = p.isBot ? botThink(p, dt) : p.remote ? netRemoteInput(p.id) : readHumanInput(p.id);
+    handleSpellButtons(p, input, gameState === 'PLAYING' || gameState === 'KO');
     if (!allowAct || p.stun > 0) input = { move: { x: 0, y: 0 }, a: false, b: false, c: false, s1: false, s2: false };
     if (p.st.silence > 0) { input.s1 = false; input.s2 = false; }
     if (Math.hypot(input.move.x, input.move.y) > 0.2) p.moveDir = Math.atan2(input.move.y, input.move.x);

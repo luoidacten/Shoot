@@ -240,11 +240,11 @@ function fireWeapon(p, w, ang, charge, enemy) {
         case 'BOW': {
             if (charge >= 0.35) {
                 const full = charge >= 0.98;
-                spawnBullet(p, m0.x, m0.y, ang + rnd(spreadAt(w, charge)), { speed: 26 + 22 * charge, damage: (22 + 40 * charge) * dmgM, range: chargeRange(w, charge, p), size: 3 + charge, color: full ? '#f7fee7' : '#d9f99d', pierce: full, knock: 120 + 140 * charge, trail: 40 + 30 * charge, arrow: true });
-                AudioSys.playAt(full ? 'rail' : 'whoosh', p.x, p.y, 0.25); addShake(2 + charge * 3);
+                spawnBullet(p, m0.x, m0.y, ang + rnd(spreadAt(w, charge)), { speed: 26 + 22 * charge, damage: (22 + 40 * charge) * dmgM, range: chargeRange(w, charge, p), size: 3 + charge, color: '#3f4a3a', pierce: full, knock: 120 + 140 * charge, trail: 6, arrow: true });
+                addShake(1); // cung bắn không phát tiếng
                 if (full) floatText(p.x, p.y - 28, 'MŨI TÊN XUYÊN!', '#a3e635', 13);
             } else {
-                for (let i = 0; i < 3; i++) p.shotQueue.push({ t: i * 0.09, fn: () => { const mm = muzzle(p, w, ang); spawnBullet(p, mm.x, mm.y, ang + rnd(w.spread), { speed: w.speed, damage: w.damage * dmgM, range: chargeRange(w, 0, p), size: 2.5, color: '#bef264', arrow: true, trail: 34 }); AudioSys.playAt('whoosh', p.x, p.y, 0.2); } });
+                for (let i = 0; i < 3; i++) p.shotQueue.push({ t: i * 0.09, fn: () => { const mm = muzzle(p, w, ang); spawnBullet(p, mm.x, mm.y, ang + rnd(w.spread), { speed: w.speed, damage: w.damage * dmgM, range: chargeRange(w, 0, p), size: 2.5, color: '#bef264', arrow: true, trail: 34 }); } });
             }
             break;
         }

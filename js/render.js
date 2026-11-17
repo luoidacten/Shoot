@@ -264,8 +264,9 @@ function drawPlayer(p, now) {
     const st = p.st || {};
     let alpha = 1;
     if (p.id !== localId()) {
-        if (!canSee(p.x, p.y, p.radius)) return; // khuất trong sương mù
-        if (me && me.hp > 0 && !targetable(me, p)) return; // tàng hình / trong khói
+        const ally = me && sameTeam(me, p), seenBy = (st.reveal > 0) || isSpotted(p, localId()) || ally;
+        if (!canSee(p.x, p.y, p.radius) && !seenBy) return; // khuất trong sương mù
+        if (me && me.hp > 0 && !targetable(me, p) && !ally) return; // tàng hình / trong khói
         if (!me && ((st.invis > 0 && !(st.reveal > 0)) || (inSmoke(p.x, p.y) && !(st.reveal > 0)))) alpha = 0.12 + Math.sin(now * 10) * 0.05; // chơi chung 1 máy: chỉ còn bóng mờ
     } else if (st.invis > 0 || inSmoke(p.x, p.y)) alpha = 0.45;
     const w = getCurrentWeapon(p);

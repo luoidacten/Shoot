@@ -139,7 +139,7 @@ function drawWeaponArt(c, w, r, now, p) {
             for (let i = 0; i < 4; i++) { c.fillStyle = `rgba(34,211,238,${0.3 + (ch > i / 4 ? 0.6 : 0)})`; c.fillRect(x0 + i * 7, -2, 5, 4); }
             break;
         }
-        case 'RAPIER': case 'GREATSWORD': case 'ENERGY': case 'TESLA': drawNewWeaponArt(c, w, r, x0, ch, box, now, p); break;
+        case 'RAPIER': case 'GREATSWORD': case 'ENERGY': case 'TESLA': case 'AXE': case 'ROUNDSHIELD': case 'SPISTOL': case 'SAR': case 'EMPGREN': drawNewWeaponArt(c, w, r, x0, ch, box, now, p); break;
         default: box(x0, -(w.width || 4) / 2, w.len || 12, w.width || 4, w.color || '#999');
     }
     c.restore();

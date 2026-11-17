@@ -40,7 +40,7 @@ function dealDamage(target, baseDmg, attackerId, opts = {}) {
         if (entrenched(target)) mult *= combo(target, 'fortress') ? 0.65 : 0.8;
         if (st.anchor > 0) mult *= 0.6;
         if (target.reloadShield && getCurrentWeapon(target).reloading) mult *= 0.7;
-        if (opts.melee && attacker) { const sw = getCurrentWeapon(target); if (sw.id === 'SHIELD' && Math.abs(angleDiff(Math.atan2(attacker.y - target.y, attacker.x - target.x), target.angle)) < Math.PI / 2.4) { mult *= 0.3; reduceDurability(target, sw, 8); spark(target.x, target.y, '#e2e8f0', 6, 200, 0.3, 2); } }
+        if (opts.melee && attacker) { const sw = getCurrentWeapon(target); if (sw.type === 'SHIELD' && Math.abs(angleDiff(Math.atan2(attacker.y - target.y, attacker.x - target.x), target.angle)) < Math.PI / 2.4) { mult *= 0.3; reduceDurability(target, sw, 8); spark(target.x, target.y, '#e2e8f0', 6, 200, 0.3, 2); } }
     }
     let dmg = baseDmg * mult * (opts.raw ? 1 : target.vulnMult);
 
@@ -130,7 +130,7 @@ function explode(x, y, ownerId, dmgMax = 120, radius = 160) {
         if (d < radius + p.radius) {
             let dmg = dmgMax * Math.max(0.15, 1 - d / (radius + p.radius));
             const w = getCurrentWeapon(p);
-            if (w.id === 'SHIELD' && Math.abs(angleDiff(Math.atan2(y - p.y, x - p.x), p.angle)) < Math.PI / 2.5) { dmg *= 0.3; reduceDurability(p, w, 30); }
+            if (w.type === 'SHIELD' && Math.abs(angleDiff(Math.atan2(y - p.y, x - p.x), p.angle)) < Math.PI / 2.5) { dmg *= 0.3; reduceDurability(p, w, 30); }
             const self = ownerId === p.id;
             if (self) dmg *= 0.5;
             dealDamage(p, dmg, self ? -1 : ownerId, { angle: Math.atan2(p.y - y, p.x - x), knock: 520 });
@@ -261,7 +261,7 @@ function updateBullets(dt) {
         // người chơi
         if (!dead) {
             for (const p of players) {
-                if (p.id === b.owner || p.hp <= 0) continue;
+                if (p.id === b.owner || p.hp <= 0 || sameTeamId(p.id, b.owner)) continue;
                 // khoảng cách điểm tới đoạn đường đạn
                 const dx = b.x - b.px, dy = b.y - b.py, L = dx * dx + dy * dy || 1;
                 const t = Math.max(0, Math.min(1, ((p.x - b.px) * dx + (p.y - b.py) * dy) / L));
@@ -278,11 +278,11 @@ function updateBullets(dt) {
                         spark(b.x, b.y, '#fde047', 5, 200, 0.25, 2); AudioSys.playAt('block', p.x, p.y, 0.25);
                         break;
                     }
-                    if (energyBlock(p, w, b)) { b.hitP = true; } else if (w.id === 'SHIELD' && !b.explosive && !b.hook && Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) < Math.PI / 2.4) {
+                    if (energyBlock(p, w, b)) { b.hitP = true; } else if (w.type === 'SHIELD' && !b.explosive && !b.hook && Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) < Math.PI / 2.4) {
                         spark(b.x, b.y, '#e2e8f0', 6, 220, 0.3, 2); AudioSys.playAt('block', p.x, p.y, 0.3); reduceDurability(p, w, b.damage > 50 ? 40 : 10);
                     } else if (!b.explosive || b.super) {
                         const owner = players.find(q => q.id === b.owner); if (owner) owner.stats.hits++;
-                        dealDamage(p, b.damage, b.owner, { angle: b.angle, knock: b.knock, burn: b.burn, slow: b.freeze ? 2.5 : (b.slowHit || 0), storm: b.storm, super: b.super });
+                        dealDamage(p, b.damage * (b.falloff ? Math.max(0.35, 1 - dist(b.sx, b.sy, p.x, p.y) / b.falloff) : 1), b.owner, { angle: b.angle, knock: b.knock, burn: b.burn, slow: b.freeze ? 2.5 : (b.slowHit || 0), storm: b.storm, super: b.super });
                         if (b.root && p.st) { p.st.root = Math.max(p.st.root || 0, b.root); floatText(p.x, p.y - 34, 'BỊ TRÓI!', '#e5e7eb', 14); ring(p.x, p.y, 5, 30, '#e5e7eb', 0.4); }
                         if (b.hook) hookHit(owner, p);
                         if (b.freeze) ring(p.x, p.y, 5, 40, '#93c5fd', 0.3);
@@ -317,6 +317,7 @@ function updateBullets(dt) {
 function updateItems(dt) {
     for (let i = items.length - 1; i >= 0; i--) {
         const it = items[i];
+        if (it.custom) { if (updateCustomItem(it, dt)) items.splice(i, 1); continue; }
         if (it.fuse > 0) {
             it.fuse -= dt;
             if (it.fuse <= 0 && it.type.id === 'GRENADE') { explode(it.x, it.y, it.ownerId, it.blast ? it.blast[0] : 110, it.blast ? it.blast[1] : 160); items.splice(i, 1); continue; }

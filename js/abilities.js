@@ -307,6 +307,7 @@ function inSmoke(x, y) { return zones.find(z => z.type === 'smoke' && dist(x, y,
 function targetable(viewer, t) {
     if (!t || t.hp <= 0) return false;
     if (t.st && t.st.reveal > 0) return true;
+    if (viewer && viewer.id !== undefined && isSpotted(t, viewer.id)) return true;
     const d = dist(viewer.x, viewer.y, t.x, t.y);
     if (t.st && t.st.invis > 0 && d > 60) return false;
     if (t.ghostT > 1 && d > 140) return false;
@@ -483,7 +484,7 @@ function cardsForPick(p, kind, n) {
         return out;
     }
     const owned = new Set(p.build);
-    const skillsFull = p.build.filter(id => CARDS[id].kind === 'S').length >= 2;
+    const skillsFull = p.build.filter(id => CARDS[id].kind === 'S').length >= (p.build.includes('altChoice') ? 3 : 2);
     let pool = Object.keys(CARDS).filter(id => !owned.has(id) && !(skillsFull && CARDS[id].kind === 'S'));
     const makesCombo = id => (COMBOS_OF[id] || []).some(c => owned.has(c.a === id ? c.b : c.a));
     const weight = id => (makesCombo(id) ? 4 : 1) * (CARDS[id].kind === 'S' && p.build.length === 0 ? 1.5 : 1);
