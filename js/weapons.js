@@ -33,12 +33,29 @@ const WEAPONS = {
     NET:      { id:'NET', name:'Súng Lưới', icon:'🕸️', type:'GUN', mode:'tap', aim:'line', color:'#e5e7eb', damage:8, fireRate:30, speed:13, spread:0, range:480, magSize:2, mag:2, reserve:2, reloadTime:1.6, moveScale:1.0, width:7, len:16, tier:2, desc:'Trói chân địch 1.3 giây' },
     BOOMERANG:{ id:'BOOMERANG', name:'Boomerang', icon:'🪃', type:'GUN', mode:'charge', chargeTime:0.6, aim:'boomer', color:'#d97706', damage:26, fireRate:20, speed:16, spread:0, range:260, magSize:1, mag:1, reserve:0, noReload:true, durability:14, maxDurability:14, moveScale:1.05, width:6, len:14, tier:3, desc:'Bay đi rồi quay về, trúng cả 2 lượt' },
     GRENADE:  { id:'GRENADE', name:'Lựu đạn', icon:'💣', type:'THROWABLE', mode:'charge', chargeTime:1.0, aim:'lob', color:'#10b981', damage:0, fireRate:24, range:450, magSize:3, mag:3, reserve:0, noReload:true, moveScale:1.0, width:8, len:8, tier:2 },
+    // ---------- MỚI ----------
+    RAPIER:   { id:'RAPIER', name:'Kiếm Liễu', icon:'🤺', type:'MELEE', mode:'charge', chargeTime:0.35, aim:'lineMelee', strike:'stab', color:'#e0f2fe', damage:24, fireRate:14, range:84, durability:30, maxDurability:30, moveScale:1.12, width:2, len:40, tier:3, desc:'Chỉ đâm; giữ để lướt đâm xuyên' },
+    GREATSWORD:{ id:'GREATSWORD', name:'Đại Đao', icon:'🪓', type:'MELEE', mode:'charge', chargeTime:1.0, aim:'arc', strike:'slash', color:'#f43f5e', damage:58, fireRate:46, range:96, durability:14, maxDurability:14, moveScale:0.86, width:9, len:48, tier:4, desc:'Chém rộng cực mạnh nhưng chậm; giữ để phóng lên trời, chọn vùng đạp xuống gây choáng' },
+    ENERGY:   { id:'ENERGY', name:'Súng Năng Lượng', icon:'🔋', type:'GUN', mode:'tap', aim:'line', color:'#a78bfa', damage:16, fireRate:16, speed:22, spread:0.05, range:520, magSize:8, mag:8, reserve:16, reloadTime:1.4, moveScale:0.95, width:6, len:18, tier:3, eShield:80, eShieldMax:80, desc:'Không bắn sẽ dựng khiên năng lượng trước mặt (bị phá được)' },
+    TESLA:    { id:'TESLA', name:'Súng Điện', icon:'⚡', type:'GUN', mode:'auto', aim:'arc', color:'#60a5fa', damage:2.6, fireRate:6, speed:0, spread:0, range:300, magSize:60, mag:60, reserve:60, reloadTime:1.8, moveScale:0.92, width:7, len:18, tier:3, desc:'Phóng điện liên tục phía trước; trúng đủ lâu sẽ bị giật choáng' },
     // ---------- HUYỀN THOẠI (thính vàng) ----------
     MINIGUN:  { id:'MINIGUN', name:'Minigun', icon:'🌪️', type:'GUN', mode:'auto', aim:'line', color:'#f97316', damage:6, fireRate:2.4, speed:24, spread:0.2, range:520, magSize:150, mag:150, reserve:0, noReload:true, moveScale:0.62, width:7, len:26, tier:5, legendary:true, spin:true, desc:'Càng giữ càng bắn nhanh' },
     RAILGUN:  { id:'RAILGUN', name:'Railgun', icon:'⚡', type:'GUN', mode:'charge', chargeTime:0.9, narrow:[0.4, 0], aim:'line', color:'#22d3ee', damage:85, fireRate:30, range:2600, magSize:1, mag:1, reserve:3, reloadTime:1.5, moveScale:0.8, width:6, len:32, hitscan:true, tier:5, legendary:true, knock:350, spread:0, desc:'Phải tụ đủ 60% mới bắn' }
 };
 const BASE_WEIGHTS = { LIGHTSABER: 4, SMG: 15, SHOTGUN: 14, PISTOL: 10, AR: 14, REVOLVER: 9, DUAL: 9, GRENADE: 9, SNIPER: 7, BOW: 9, KATANA: 7, SPEAR: 7, HAMMER: 6, DAGGERS: 7, CHAINSAW: 5, SHIELD: 5, ROCKET: 4, LAUNCHER: 5, FLAME: 6, NET: 5, BOOMERANG: 6 };
 const LEGEND_POOL = ['MINIGUN', 'RAILGUN', 'ROCKET', 'SNIPER'];
+Object.assign(BASE_WEIGHTS, { RAPIER: 7, GREATSWORD: 6, ENERGY: 7, TESLA: 6 });
+// Đâm / chém / combo
+Object.assign(WEAPONS.KNIFE, { strike: 'combo', desc: 'Chém, chém, ĐÂM (đòn 3 x1.8)' });
+Object.assign(WEAPONS.DAGGERS, { strike: 'stab' }); Object.assign(WEAPONS.SPEAR, { strike: 'stab' }); Object.assign(WEAPONS.SHIELD, { strike: 'stab' });
+['KATANA', 'HAMMER', 'CHAINSAW', 'NONE'].forEach(k => WEAPONS[k].strike = 'slash');
+// Buff mạnh: Kiếm Ánh Sáng, Khiên, Súng Lưới
+Object.assign(WEAPONS.LIGHTSABER, { strike: 'combo', damage: 42, durability: 60, maxDurability: 60, desc: 'Chém, chém, ĐÂM; chẻ đạn; giữ để lao tới' });
+Object.assign(WEAPONS.SHIELD, { damage: 28, durability: 320, maxDurability: 320, desc: 'Chặn đạn & giảm 70% đòn cận chiến phía trước; húc gây choáng' });
+Object.assign(WEAPONS.NET, { magSize: 3, mag: 3, reserve: 3, speed: 15, desc: 'Trúng: trói + choáng. Trượt: bung lưới làm chậm mạnh 4 giây' });
+Object.assign(WEAPONS.HAMMER, { desc: 'Giữ để nhảy lên đập xuống: vùng nhỏ, đẩy lùi mạnh, choáng lâu' });
+// Giảm mạnh tầm bắn & tầm đánh (tầm xa vẫn hơn cận chiến nhiều)
+for (const k in WEAPONS) { const w = WEAPONS[k]; if (k === 'NONE') continue; w.range = Math.round(w.range * (w.type === 'GUN' || w.type === 'THROWABLE' ? 0.6 : 0.85)); }
 
 /* ---------------- Băng đạn ---------------- */
 function effMag(p, w) {
@@ -69,10 +86,10 @@ function spreadAt(w, c) {
  *  Sniper: không ngắm chỉ bay rất ngắn (ngắn hơn shotgun), ngắm càng lâu càng xa. */
 function chargeRange(w, c, p) {
     switch (w.id) {
-        case 'SNIPER': return (180 + 1720 * c) * (p && p.sniperNest && p.stillT >= 0.5 ? 1.2 : 1);
-        case 'BOW': return c < 0.35 ? 320 : 320 + 1180 * c;
-        case 'RAILGUN': return 300 + 1700 * c;
-        case 'AR': return 640;
+        case 'SNIPER': return (110 + 990 * c) * (p && p.sniperNest && p.stillT >= 0.5 ? 1.2 : 1);
+        case 'BOW': return c < 0.35 ? 200 : 200 + 700 * c;
+        case 'RAILGUN': return 200 + 1000 * c;
+        case 'AR': return 400;
         default: return w.range || 500;
     }
 }
@@ -123,67 +140,6 @@ function tickReload(p, w, dt) {
 }
 
 /* ---------------- Ngắm + bắn ---------------- */
-/** Xử lý nút đánh theo kiểu Brawl Stars. Gọi mỗi khung hình. */
-function handleAttack(p, w, input, dt, allowAct, enemy) {
-    const held = !!input.a && allowAct;
-    const aimMag = input.aim ? Math.hypot(input.aim.x, input.aim.y) : 0;
-    // ngắm tay (kéo nút đánh / cần phải tay cầm)
-    if (held) {
-        if (aimMag > 0.3) { p.manualAim = Math.atan2(input.aim.y, input.aim.x); p.manualEngaged = true; p.cancelShot = false; p.aimDist = input.aimDist || 0; }
-        else if (p.manualEngaged && input.aimActive && aimMag < 0.15) p.cancelShot = true; // kéo về giữa = huỷ
-    }
-    const tgt = aimTargetFor(p, (w.range || 170) * (w.type === 'MELEE' || w.type === 'SHIELD' ? 1.6 : 1.3));
-    p.aimAngle = p.manualEngaged && p.manualAim != null ? p.manualAim : tgt ? Math.atan2(tgt.y - p.y, tgt.x - p.x) : p.angle;
-    p.aiming = held;
-    p.cooldown > 0 && (p.cooldown -= dt * 60);
-
-    tickReload(p, w, dt);
-    if (p.shotQueue && p.shotQueue.length) {
-        for (let i = p.shotQueue.length - 1; i >= 0; i--) { const q = p.shotQueue[i]; q.t -= dt; if (q.t <= 0) { p.shotQueue.splice(i, 1); q.fn(); } }
-    }
-    if (p.autoThrowT > 0) { p.autoThrowT -= dt; if (p.autoThrowT <= 0 && getCurrentWeapon(p) === w && !hasAmmo(w)) { floatText(p.x, p.y - 30, 'HẾT ĐẠN — NÉM!', '#f5b100', 14); throwWeapon(p, w, enemy); return; } }
-
-    const ready = p.cooldown <= 0 && !w.reloading && (!w.magSize || w.mag > 0);
-    const released = !held && p.wasHeldA;
-    p.wasHeldA = held;
-
-    if (w.mode === 'auto') {
-        if (w.spin) p.spinUp = held ? Math.min(1.2, (p.spinUp || 0) + dt) : 0;
-        if (held && ready) fireWeapon(p, w, p.aimAngle, 0, enemy);
-        else if (held && w.magSize && w.mag <= 0 && !p.emptyMsg) { emptyFeedback(p, w); }
-    } else if (w.mode === 'charge') {
-        p.saberRush = false;
-        if (w.saber && held && (p.charge || 0) >= 1 && w.durability > 0) {
-            p.saberRush = true;
-            p.saberT = (p.saberT || 0) + dt;
-            if (p.saberT > 0.2) { p.saberT = 0; reduceDurability(p, w, 1); }
-            cutBullets(p, p.aimAngle, p.radius + 50, 1.5);
-            if (Math.random() < 0.5) particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 0.25, maxLife: 0.25, color: hexA(saberColor(p), 0.5), size: p.radius, glow: true });
-        }
-        if (held && ready) {
-            let rate = 1 / (w.chargeTime || 1);
-            if (p.sniperNest && p.stillT >= 0.5) rate *= 2;
-            if (combo(p, 'turretMode') && p.st.anchor > 0) rate = 99;
-            p.charge = Math.min(1, (p.charge || 0) + dt * rate);
-        }
-        if (released) {
-            if (!p.cancelShot && (p.charge > 0 || ready)) {
-                if (ready) fireWeapon(p, w, p.aimAngle, p.charge || 0, enemy);
-                else emptyFeedback(p, w);
-            }
-            p.charge = 0;
-        }
-    } else { // tap: thả là bắn
-        if (released && !p.cancelShot) {
-            if (ready) fireWeapon(p, w, p.aimAngle, 0, enemy);
-            else if (p.cooldown > 0 && p.cooldown < 12) p.tapBuffer = 0.25; // bấm hơi sớm → bắn ngay khi hồi xong
-            else emptyFeedback(p, w);
-        }
-        if (p.tapBuffer > 0) { p.tapBuffer -= dt; if (ready) { p.tapBuffer = 0; fireWeapon(p, w, p.aimAngle, 0, enemy); } }
-    }
-    if (!held) { p.manualEngaged = false; p.manualAim = null; p.cancelShot = false; if (w.mode !== 'charge') p.charge = 0; }
-    if (!held && w.mode === 'charge' && !released) p.charge = 0;
-}
 function emptyFeedback(p, w) {
     if (!w.magSize) return;
     if (w.reloading) return;
@@ -209,7 +165,7 @@ function spawnBullet(p, x, y, ang, o) {
     const sp = o.speed || 20;
     const b = {
         x, y, px: x, py: y, angle: ang, speed: sp, damage: o.damage, life: Math.max(10, (o.range || 500) - dist(p.x, p.y, x, y)) / (sp * 60), owner: p.id, // dừng đúng mép vùng ngắm (tính từ tâm người bắn)
-        color: o.color || (p.id === 1 ? '#ffb3a8' : '#bfe3ff'), size: o.size || 2.6, knock: o.knock || 60,
+        color: o.color || PBULLET[(p.id - 1) % 4], size: o.size || 2.6, knock: o.knock || 60,
         bounces: o.bounces !== undefined ? o.bounces : (p.bounces || 0), pierce: !!o.pierce, explosive: !!o.explosive, blastSmall: !!o.blastSmall,
         trail: o.trail || 26, burn: o.burn !== undefined ? o.burn : p.pyro, slowHit: o.slow || 0, root: o.root || 0,
         flame: !!o.flame, net: !!o.net, arrow: !!o.arrow
@@ -228,7 +184,7 @@ function gunBullet(p, w, ang, o) {
 function fireWeapon(p, w, ang, charge, enemy) {
     const rofMult = p.fireRateMult * (p.st.rage > 0 ? 0.75 : 1) * (p.st.anchor > 0 ? 0.77 : 1);
     p.cooldown = (w.spin ? Math.max(w.fireRate, 8 - (p.spinUp || 0) * 5) : w.fireRate) * rofMult;
-    p.ghostT = 0; p.angle = ang;
+    p.ghostT = 0; p.angle = ang; p.lastFireT = world.time;
     if (inBush(p.x, p.y)) p.st.exposed = 1.2; // tấn công trong bụi sẽ lộ ra một lúc
     onAttack(p);
     const mult = attackMult(p, w);
@@ -255,7 +211,7 @@ function fireWeapon(p, w, ang, charge, enemy) {
     const spreadM = p.spreadMult, ai = p.aiSpread || 0;
     const rnd = s => (Math.random() - 0.5) * (s * spreadM + ai);
     const m0 = muzzle(p, w, ang);
-    if (!w.flame) directionalSpark(m0.x, m0.y, ang, '#ffe08a', 3, 340, 0.5);
+    if (!w.flame && w.id !== 'TESLA') directionalSpark(m0.x, m0.y, ang, '#ffe08a', 3, 340, 0.5);
 
     switch (w.id) {
         case 'AR': {
@@ -263,7 +219,7 @@ function fireWeapon(p, w, ang, charge, enemy) {
             // 5 viên: 2 viên đầu thẳng tâm, 3 viên sau tỏa và bay xa hơn
             for (let i = 0; i < 5; i++) {
                 const straight = i < 2;
-                p.shotQueue.push({ t: i * 0.045, fn: () => { if (p.hp <= 0) return; gunBullet(p, w, ang + (straight ? rnd(0.02) : rnd(w.spread)), { speed: straight ? 24 : 21, damage: w.damage * dmgM, range: straight ? 560 : 640, ...extra }); AudioSys.playAt('smg', p.x, p.y, 0.15); } });
+                p.shotQueue.push({ t: i * 0.045, fn: () => { if (p.hp <= 0) return; gunBullet(p, w, ang + (straight ? rnd(0.02) : rnd(w.spread)), { speed: straight ? 24 : 21, damage: w.damage * dmgM, range: straight ? 350 : 400, ...extra }); AudioSys.playAt('smg', p.x, p.y, 0.15); } });
             }
             addShake(2); break;
         }
@@ -271,7 +227,7 @@ function fireWeapon(p, w, ang, charge, enemy) {
             if (charge >= 1 && w.mag > 0) {
                 // xả ổ: bắn hết số đạn còn lại thật nhanh
                 const n = w.mag + 1; w.mag = 0;
-                for (let i = 0; i < n; i++) p.shotQueue.push({ t: i * 0.07, fn: () => { gunBullet(p, w, ang + rnd(0.35), { speed: 21, damage: w.damage * 0.8 * dmgM, range: 480 }); AudioSys.playAt('shoot', p.x, p.y, 0.3); addShake(2); } });
+                for (let i = 0; i < n; i++) p.shotQueue.push({ t: i * 0.07, fn: () => { gunBullet(p, w, ang + rnd(0.35), { speed: 21, damage: w.damage * 0.8 * dmgM, range: 290 }); AudioSys.playAt('shoot', p.x, p.y, 0.3); addShake(2); } });
                 floatText(p.x, p.y - 30, 'XẢ Ổ!', '#fbbf24', 14);
             } else { gunBullet(p, w, ang + rnd(w.spread), { speed: w.speed, damage: w.damage * dmgM, range: w.range, knock: 120, ...extra }); AudioSys.playAt('shoot_heavy', p.x, p.y, 0.25); addShake(3); }
             break;
@@ -319,6 +275,7 @@ function fireWeapon(p, w, ang, charge, enemy) {
         case 'RAILGUN':
             if (charge < 0.6) { w.mag++; floatText(p.x, p.y - 26, 'Chưa đủ lực!', '#67e8f9', 12); p.cooldown = 10; return; }
             fireRail(p, m0.x, m0.y, w, ang + rnd(spreadAt(w, charge)), dmgM); break;
+        case 'TESLA': fireTesla(p, w, ang, dmgM, m0); break;
         case 'SHOTGUN':
             AudioSys.playAt('shotgun', p.x, p.y); addShake(5); p.kx -= Math.cos(ang) * 120; p.ky -= Math.sin(ang) * 120;
             for (let i = 0; i < w.count; i++) gunBullet(p, w, ang + rnd(w.spread), { speed: w.speed * (0.85 + Math.random() * 0.3), damage: w.damage * dmgM, range: w.range, knock: w.knock, ...(i === 0 ? extra : {}) });
@@ -334,89 +291,6 @@ function fireWeapon(p, w, ang, charge, enemy) {
     if (w.magSize && w.mag <= 0 && w.reserve <= 0 && !world.infiniteAmmo && w.id !== 'BOOMERANG') p.autoThrowT = 0.45;
 }
 
-/** Cận chiến */
-function fireMelee(p, w, ang, charge, mult, isSuper, enemy) {
-    AudioSys.playAt('swing', p.x, p.y);
-    p.stats.shots++;
-    let reach = (w.type === 'SHIELD' ? 34 : w.range) * (combo(p, 'sword_brawler') ? 1.25 : 1) * (isSuper ? 1.6 : 1);
-    let dmg = w.damage * (p.meleeMult || 1) * mult * (isSuper ? 2.5 : 1);
-    let knock = 160, arc = Math.PI / 1.8, line = false, aoe = 0, stun = 0, slow = 0;
-    switch (w.id) {
-        case 'KNIFE': {
-            p.knifeCombo = world.time - (p.knifeT || -9) < 1 ? (p.knifeCombo || 0) + 1 : 1; p.knifeT = world.time;
-            if (p.knifeCombo >= 3) { dmg *= 1.8; p.knifeCombo = 0; floatText(p.x, p.y - 30, 'COMBO!', '#f1f5f9', 13); }
-            p.kx += Math.cos(ang) * 180; p.ky += Math.sin(ang) * 180; break;
-        }
-        case 'DAGGERS': p.kx += Math.cos(ang) * 120; p.ky += Math.sin(ang) * 120; knock = 60; break;
-        case 'KATANA':
-            p.dashTime = 0.15 + charge * 0.2; p.dashAngle = ang; dmg *= 1 + charge * 0.6; knock = 260;
-            smoke(p.x, p.y, 3, 'rgba(56,189,248,0.3)', 10);
-            bullets.forEach(b => {
-                if (b.owner !== p.id && dist(p.x, p.y, b.x, b.y) < 100 && !b.explosive) {
-                    b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = 1.2; b.color = '#7dd3fc';
-                    spark(b.x, b.y, '#7dd3fc', 5, 200); floatText(b.x, b.y, 'PHẢN!', '#7dd3fc', 14);
-                }
-            });
-            break;
-        case 'SPEAR':
-            line = true; arc = 0.25; knock = 300;
-            if (charge >= 0.9) { p.dashTime = 0.22; p.dashAngle = ang; dmg *= 1.8; reach = 150; floatText(p.x, p.y - 30, 'LAO GIÁO!', '#fbbf24', 13); }
-            break;
-        case 'HAMMER':
-            knock = 380;
-            if (charge >= 0.9) { aoe = 140; dmg = (w.damage + 50) * (p.meleeMult || 1) * mult; stun = 0.7; }
-            break;
-        case 'CHAINSAW': knock = 20; slow = 0.4; arc = 0.9; break;
-        case 'SHIELD': knock = 520; break;
-        case 'NONE': knock = 140; break;
-        case 'LIGHTSABER': {
-            knock = 240; arc = Math.PI / 1.6;
-            const n = cutBullets(p, ang, p.radius + reach, arc);
-            if (n) floatText(p.x, p.y - 30, `CHẺ ${n} ĐẠN!`, '#4ade80', 13);
-            if (charge >= 1) { dmg *= 1.4; p.kx += Math.cos(ang) * 260; p.ky += Math.sin(ang) * 260; }
-            AudioSys.playAt('rail', p.x, p.y, 0.15);
-            break;
-        }
-    }
-    slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: ang, range: reach + p.radius, color: w.id === 'LIGHTSABER' ? saberColor(p) : w.id === 'KATANA' ? '#7dd3fc' : w.id === 'CHAINSAW' ? '#fb923c' : w.id === 'SPEAR' ? '#fde68a' : '#f1f5f9', width: w.id === 'HAMMER' ? 14 : w.id === 'KATANA' ? 10 : 6, life: 0.16, maxLife: 0.16, swing: p.swingDir = -(p.swingDir || 1), line });
-    if (isSuper) { p.superCharge = 0; ring(p.x, p.y, 10, reach + p.radius, '#fde047', 0.3, 6); floatText(p.x, p.y - 36, 'SIÊU ĐÒN!', '#fde047', 18); }
-    if (w.id === 'CHAINSAW') reduceDurability(p, w, 1);
-
-    const hx = p.x + Math.cos(ang) * (p.radius + reach * 0.6), hy = p.y + Math.sin(ang) * (p.radius + reach * 0.6);
-    // phân thân, gỗ
-    for (const d of decoys) if (d.owner !== p.id && dist(hx, hy, d.x, d.y) < d.radius + reach * 0.7) d.hp = 0;
-    const o = pointInObstacle(hx, hy, 10); if (o) damageObstacle(o, dmg * (combo(p, 'wrecking') ? 5 : 1), p);
-
-    if (aoe) {
-        const cx = p.x + Math.cos(ang) * (p.radius + 40), cy = p.y + Math.sin(ang) * (p.radius + 40);
-        ring(cx, cy, 10, aoe, '#a8a29e', 0.4, 8); spark(cx, cy, '#d6d3d1', 20, 300, 0.5, 4); addScorch(cx, cy, 60); addShake(12);
-        AudioSys.playAt('slam', cx, cy, 0.5); floatText(p.x, p.y - 30, 'NỆN ĐẤT!', '#d6d3d1', 15);
-        if (enemy && enemy.hp > 0 && dist(cx, cy, enemy.x, enemy.y) < aoe + enemy.radius) {
-            p.stats.hits++;
-            dealDamage(enemy, dmg, p.id, { angle: Math.atan2(enemy.y - cy, enemy.x - cx), knock, melee: true, burn: p.pyro });
-            enemy.stun = Math.max(enemy.stun, stun);
-        }
-        reduceDurability(p, w, 1);
-        return;
-    }
-    if (!enemy || enemy.hp <= 0) return;
-    let hit;
-    if (line) {
-        // giáo: đâm theo đường thẳng hẹp
-        const ex = p.x + Math.cos(ang) * (p.radius + reach), ey = p.y + Math.sin(ang) * (p.radius + reach);
-        const dx = ex - p.x, dy = ey - p.y, t = Math.max(0, Math.min(1, ((enemy.x - p.x) * dx + (enemy.y - p.y) * dy) / (dx * dx + dy * dy)));
-        hit = dist(enemy.x, enemy.y, p.x + dx * t, p.y + dy * t) < enemy.radius + 10;
-    } else {
-        hit = dist(p.x, p.y, enemy.x, enemy.y) < p.radius + enemy.radius + reach && Math.abs(angleDiff(Math.atan2(enemy.y - p.y, enemy.x - p.x), ang)) < arc;
-    }
-    if (!hit) return;
-    const hitAng = Math.atan2(enemy.y - p.y, enemy.x - p.x);
-    if (w.id === 'DAGGERS' && Math.abs(angleDiff(enemy.angle, hitAng)) < 1.0) { dmg *= 2; floatText(enemy.x, enemy.y - 34, 'ĐÂM LÉN!', '#f1f5f9', 15); }
-    p.stats.hits++;
-    dealDamage(enemy, dmg, p.id, { angle: hitAng, knock, melee: true, burn: p.pyro, super: isSuper, slow });
-    if (w.id !== 'NONE' && w.type !== 'SHIELD' && w.id !== 'CHAINSAW') reduceDurability(p, w, 1);
-    if (w.id !== 'CHAINSAW') { hitStop(w.id === 'KATANA' || w.id === 'HAMMER' ? 0.09 : 0.05); addShake(5); }
-}
 
 /** Siêu đòn (Nhắm Bắn): viên đạn lớn xuyên thấu */
 function fireSuper(p, mX, mY) {
@@ -427,27 +301,10 @@ function fireSuper(p, mX, mY) {
     floatText(p.x, p.y - 36, 'SIÊU ĐÒN!', '#fde047', 18);
 }
 
-function fireRail(p, mX, mY, wep, ang, mult) {
-    AudioSys.playAt('rail', p.x, p.y); addShake(9); flash('#22d3ee', 0.15);
-    const L = chargeRange(wep, p.charge || 1, p), ex = mX + Math.cos(ang) * L, ey = mY + Math.sin(ang) * L;
-    beams.push({ x1: mX, y1: mY, x2: ex, y2: ey, life: 0.35, maxLife: 0.35, color: '#22d3ee' });
-    p.kx -= Math.cos(ang) * 300; p.ky -= Math.sin(ang) * 300;
-    obstacles.slice().forEach(o => { if (segRect(mX, mY, ex, ey, o) >= 0) damageObstacle(o, 60, p); });
-    const enemy = enemyOf(p);
-    if (enemy && enemy.hp > 0) {
-        const dx = ex - mX, dy = ey - mY, t = Math.max(0, Math.min(1, ((enemy.x - mX) * dx + (enemy.y - mY) * dy) / (dx * dx + dy * dy)));
-        if (dist(enemy.x, enemy.y, mX + dx * t, mY + dy * t) < enemy.radius + 8) {
-            p.stats.hits++;
-            dealDamage(enemy, wep.damage * mult, p.id, { angle: ang, knock: wep.knock });
-            hitStop(0.08);
-        }
-    }
-    for (let i = 0; i < 20; i++) { const t = Math.random(); spark(mX + (ex - mX) * t * 0.5, mY + (ey - mY) * t * 0.5, '#67e8f9', 1, 80, 0.4, 2); }
-}
 
 function throwGrenade(p, w, ang, d) {
     if (!world.infiniteAmmo) w.mag--;
-    d = Math.min(520, Math.max(90, d));
+    d = Math.min(330, Math.max(70, d));
     items.push({ x: p.x, y: p.y, type: { ...WEAPONS.GRENADE }, angle: 0, spin: 12, vx: Math.cos(ang) * d * 3.1, vy: Math.sin(ang) * d * 3.1, thrown: true, ownerId: p.id, fuse: 1.5, z: 0, vz: 260 });
     AudioSys.playAt('whoosh', p.x, p.y, 0.3);
     if (w.mag <= 0) p.inventory[p.weaponIdx] = { ...WEAPONS.NONE };
@@ -515,4 +372,3 @@ function cutBullets(p, ang, reach, arc) {
     if (n) AudioSys.playAt('block', p.x, p.y, 0.3);
     return n;
 }
-function saberColor(p) { return p && p.id === 1 ? '#f87171' : '#4ade80'; }

@@ -1,0 +1,10 @@
+{
+  "name": "Đấu Trường Kỳ Ngộ",
+  "short_name": "Kỳ Ngộ",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#05060f",
+  "theme_color": "#05060f",
+  "icons": []
+}

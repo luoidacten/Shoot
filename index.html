@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#05060f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
     <title>Đấu Trường Kỳ Ngộ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,15 +28,23 @@
         <div class="logo">
             <span class="logo-small">ĐẤU TRƯỜNG</span>
             <span class="logo-big">KỲ NGỘ</span>
-            <span class="logo-tag">BO7 · 24 VŨ KHÍ · 34 KỸ NĂNG · 38 NỘI TẠI · 74 PHỐI HỢP</span>
+            <span class="logo-tag">4 NGƯỜI · 28 VŨ KHÍ · 37 KỸ NĂNG · 40 NỘI TẠI · 92 PHỐI HỢP</span>
         </div>
 
         <div class="opt-group">
             <div class="opt-label">CHẾ ĐỘ</div>
             <div class="seg" data-opt="mode">
-                <button data-val="pvp" class="active">👥 2 NGƯỜI</button>
-                <button data-val="bot">🤖 ĐẤU MÁY</button>
+                <button data-val="bot" class="active">🤖 ĐẤU BOT</button>
+                <button data-val="pvp" class="pc-only">👥 2 NGƯỜI 1 MÁY</button>
                 <button data-val="online">🌐 ONLINE</button>
+            </div>
+        </div>
+        <div class="opt-group" id="count-group">
+            <div class="opt-label">SỐ NGƯỜI TRONG TRẬN (thiếu thì thêm bot)</div>
+            <div class="seg" data-opt="count">
+                <button data-val="2">2</button>
+                <button data-val="3">3</button>
+                <button data-val="4" class="active">4</button>
             </div>
         </div>
         <div class="opt-group" id="diff-group">
@@ -57,7 +69,7 @@
             <div class="help-col"><b class="c1">P1 · ĐỎ</b> WASD · <kbd>F</kbd> đánh (giữ: ngắm/tụ lực) · <kbd>G</kbd> nạp/giữ ném · <kbd>H</kbd> đổi · <kbd>R</kbd>/<kbd>T</kbd> kỹ năng</div>
             <div class="help-col"><b class="c2">P2 · XANH</b> ←↑↓→ · <kbd>K</kbd>/<kbd>,</kbd> đánh · <kbd>L</kbd>/<kbd>.</kbd> ném · <kbd>;</kbd> đổi · <kbd>I</kbd>/<kbd>O</kbd> kỹ năng</div>
             <div class="help-col"><b>🖱 CHUỘT</b> di để ngắm · chuột trái bắn (giữ để tụ lực) · chuột phải nạp/ném · lăn chuột đổi súng</div>
-            <div class="help-col muted">Điện thoại: kéo nút đánh để ngắm, kéo về giữa để huỷ · Hỗ trợ tay cầm</div>
+            <div class="help-col muted">Điện thoại: chạm nhẹ nút đánh = tự nhắm hỗ trợ · kéo nút đánh / nút kỹ năng để ngắm tay, kéo về giữa để huỷ · Tự bật toàn màn hình</div>
         </div>
     </div>
 </div>
@@ -65,13 +77,15 @@
 <!-- SẢNH ONLINE -->
 <div id="online-screen" class="screen hidden">
     <div class="menu-card small">
-        <div class="logo"><span class="logo-big" style="font-size:2.4rem">ONLINE</span><span class="logo-tag">SƯƠNG MÙ · TIẾNG CHÂN · DẤU CHÂN</span></div>
+        <div class="logo"><span class="logo-big" style="font-size:2.4rem">ONLINE</span><span class="logo-tag">TỐI ĐA 4 NGƯỜI · CHỖ TRỐNG LÀ BOT</span></div>
         <button class="menu-btn" id="host-btn">🏠 TẠO PHÒNG</button>
         <div id="room-code-box" class="room-code hidden">
             <div class="opt-label">MÃ PHÒNG</div>
             <div id="room-code" class="code">-----</div>
             <button class="menu-btn" id="copy-link-btn">🔗 SAO CHÉP LINK MỜI</button>
         </div>
+        <div id="lobby-list" class="lobby-list hidden"></div>
+        <button class="play-btn hidden" id="lobby-start">▶ BẮT ĐẦU</button>
         <div class="join-row">
             <input id="join-input" maxlength="5" placeholder="NHẬP MÃ" autocomplete="off" spellcheck="false">
             <button class="menu-btn" id="join-btn">VÀO PHÒNG</button>
@@ -156,6 +170,8 @@
 <script src="js/ui.js"></script>
 <script src="js/net.js"></script>
 <script src="js/game.js"></script>
+<script src="js/party.js"></script>
+<script src="js/hud.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

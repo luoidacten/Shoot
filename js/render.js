@@ -76,6 +76,7 @@ function draw() {
     });
 
     drawGroundZones(now);
+    drawNetZones(now);
     drawMines(now);
     drawTrapsExtra(now);
 
@@ -155,16 +156,8 @@ function draw() {
 
     // ---- Nhát chém ----
     slashes.forEach(s => {
-        const k = s.life / s.maxLife, sw = s.swing || 1;
         const so = players.find(q => q.id === s.ownerId); if (!so || so.hp <= 0 || !canSee(so.x, so.y, so.radius + s.range)) return;
-        ctx.save(); ctx.translate(so.x, so.y); ctx.rotate(s.angle);
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = k; ctx.strokeStyle = s.color; ctx.lineWidth = s.width * k + 2; ctx.lineCap = 'round';
-        const a0 = -1.1 * sw, a1 = a0 + 2.2 * sw * (1 - k * 0.5);
-        ctx.beginPath(); ctx.arc(0, 0, s.range, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke();
-        ctx.globalAlpha = k * 0.3; ctx.lineWidth = s.width * 3;
-        ctx.beginPath(); ctx.arc(0, 0, s.range - 8, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke();
-        ctx.restore();
+        drawSlashFx(s, so);
     });
 
     // ---- Người chơi ----
@@ -178,14 +171,10 @@ function draw() {
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
     bullets.forEach(b => {
         if (drawSpecialBullet(b, now)) return;
-        const tl = b.trail || 26;
-        const tx = b.x - Math.cos(b.angle) * tl, ty = b.y - Math.sin(b.angle) * tl;
-        const g = ctx.createLinearGradient(tx, ty, b.x, b.y); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, b.color);
-        ctx.strokeStyle = g; ctx.lineWidth = b.size * 1.6; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(b.x, b.y); ctx.stroke();
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(b.x, b.y, b.size * 0.8, 0, Math.PI * 2); ctx.fill();
-        if (b.explosive && !b.blastSmall) { ctx.fillStyle = 'rgba(255,140,40,0.5)'; ctx.beginPath(); ctx.arc(b.x, b.y, 12, 0, Math.PI * 2); ctx.fill(); }
+        drawBulletFx(b);
     });
     beams.forEach(bm => {
+        if (bm.zig) { drawZigBeam(bm); return; }
         const k = bm.life / bm.maxLife;
         ctx.strokeStyle = hexA(bm.color, k * 0.5); ctx.lineWidth = 18 * k; ctx.beginPath(); ctx.moveTo(bm.x1, bm.y1); ctx.lineTo(bm.x2, bm.y2); ctx.stroke();
         ctx.strokeStyle = `rgba(255,255,255,${k})`; ctx.lineWidth = 4 * k + 1; ctx.beginPath(); ctx.moveTo(bm.x1, bm.y1); ctx.lineTo(bm.x2, bm.y2); ctx.stroke();
@@ -230,14 +219,12 @@ function draw() {
     // ---- Sương mù ----
     if (fowActive()) { drawFogOfWar(zoom); drawPings(zoom); }
     else if (world.darkness) drawFog(zoom);
+    drawEnemyArrows(zoom);
 
     // ---- Lớp màn hình ----
     drawScreenFx(W, H, now);
     if (gameState === 'PLAYING' || gameState === 'COUNTDOWN' || gameState === 'KO' || gameState === 'ROUND_OVER') {
-        if (isTouch) {
-            if (settings.mode === 'pvp') { drawControls(P1_CONTROLS, touchInputs.p1, 'p1', players[0]); drawControls(P2_CONTROLS, touchInputs.p2, 'p2', players[1]); }
-            else drawControls(P2_CONTROLS, touchInputs.p2, 'p2', localPlayer() || players[1]);
-        }
+        if (isTouch && localPlayer()) drawTouchControls(localPlayer());
         drawHUD(W, H, now);
     }
     drawBanners(W, H);
@@ -284,6 +271,8 @@ function drawPlayer(p, now) {
     const w = getCurrentWeapon(p);
     if (p.ghostT > 1) alpha = Math.min(alpha, 0.13 + Math.sin(now * 10) * 0.04);
     drawStatusUnder(p, now, alpha);
+    drawAirShadow(p);
+    ctx.save(); ctx.translate(0, -(p.airH || 0)); // đang bay: vẽ cao lên
 
     ctx.save(); ctx.globalAlpha = alpha;
     // bóng + quầng sáng đội
@@ -302,11 +291,13 @@ function drawPlayer(p, now) {
     const mineView = p.id === localId() || localId() === null;
     if (p.aiming && mineView) drawAimZone(p, w, now); // vùng ngắm chỉ người bắn thấy
     else if (p.aimshot && mineView) drawAimGuide(p, w, now);
+    if (mineView) drawExtraAim(p, w, now);
 
     ctx.translate(p.x, p.y); ctx.rotate(p.angle);
     const rc = (p.recoil || 0) * 5;
     // vũ khí (mỗi loại một kiểu)
     drawWeaponArt(ctx, w, p.radius, now, p);
+    if (p.muzzle > 0 && w.type === 'GUN' && w.id !== 'TESLA') drawMuzzleFlash(ctx, w, p);
     // tay
     if (w.type !== 'SHIELD') {
         ctx.fillStyle = shade(p.color, -0.2);
@@ -335,6 +326,7 @@ function drawPlayer(p, now) {
         ctx.strokeStyle = `rgba(255,255,255,${0.3 + Math.sin(now * 20) * 0.2})`; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.radius + 10, 0, Math.PI * 2); ctx.stroke();
     }
+    drawPlayerExtras(p, w, now);
     drawStatusOver(p, now);
     // choáng
     if (p.stun > 0) {
@@ -354,6 +346,7 @@ function drawPlayer(p, now) {
     const ty = by - 6;
     if (isTouch && settings.mode === 'pvp' && p.id === 1) { ctx.save(); ctx.translate(p.x, p.y + p.radius + 16); ctx.rotate(Math.PI); ctx.fillText(p.label, 0, 0); ctx.restore(); }
     else ctx.fillText(p.label, p.x, ty);
+    ctx.restore();
     ctx.restore();
 }
 
@@ -414,139 +407,9 @@ function drawScreenFx(W, H, now) {
     }
 }
 
-/** HUD từng người chơi */
-function drawPlayerPanel(p, x, y, w, flip, now) {
-    const h = 62;
-    ctx.save();
-    ctx.translate(x + w / 2, y + h / 2); if (flip) ctx.rotate(Math.PI); ctx.translate(-w / 2, -h / 2);
-    rrect(ctx, 0, 0, w, h, 14); ctx.fillStyle = 'rgba(8,11,24,0.78)'; ctx.fill();
-    ctx.strokeStyle = hexA(p.color, 0.55); ctx.lineWidth = 1.5; ctx.stroke();
-    // avatar
-    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(28, 31, 19, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = `700 13px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(p.isBot ? 'BOT' : 'P' + p.id, 28, 32);
-    // điểm thắng
-    for (let i = 0; i < settings.maxWins; i++) {
-        ctx.fillStyle = i < p.score ? COLORS.gold : 'rgba(255,255,255,0.15)';
-        ctx.beginPath(); ctx.arc(14 + i * (28 / Math.max(1, settings.maxWins - 1)), 56, 3, 0, Math.PI * 2); ctx.fill();
-    }
-    // máu
-    const bx = 56, bw = w - 56 - 98;
-    ctx.fillStyle = 'rgba(255,255,255,0.08)'; rrect(ctx, bx, 12, bw, 14, 5); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.55)'; rrect(ctx, bx, 12, Math.max(0, bw * p.ghostHp / p.maxHp), 14, 5); ctx.fill();
-    const hpk = Math.max(0, p.hp) / p.maxHp;
-    const hg = ctx.createLinearGradient(bx, 0, bx + bw, 0);
-    if (hpk > 0.3) { hg.addColorStop(0, '#22c55e'); hg.addColorStop(1, '#86efac'); } else { hg.addColorStop(0, '#dc2626'); hg.addColorStop(1, '#f87171'); }
-    ctx.fillStyle = hg; if (hpk > 0) { rrect(ctx, bx, 12, Math.max(6, bw * hpk), 14, 5); ctx.fill(); }
-    ctx.fillStyle = '#fff'; ctx.font = `700 11px ${FONT}`; ctx.textAlign = 'left';
-    ctx.fillText(`${Math.ceil(Math.max(0, p.hp))}`, bx + 6, 20);
-    // giáp
-    ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(bx, 30, bw, 4);
-    if (p.armor > 0) { ctx.fillStyle = COLORS.armor; ctx.fillRect(bx, 30, bw * Math.min(1, p.armor / Math.max(150, p.maxArmor)), 4); }
-    // kỹ năng (ô có hồi chiêu) + nội tại
-    let sx0 = bx;
-    (p.skills || []).forEach(s => {
-        const c = CARDS[s.id]; if (!c) return;
-        rrect(ctx, sx0, 38, 20, 20, 5); ctx.fillStyle = s.cd > 0 ? 'rgba(255,255,255,0.06)' : 'rgba(34,211,238,0.25)'; ctx.fill();
-        ctx.strokeStyle = s.cd > 0 ? 'rgba(255,255,255,0.15)' : '#22d3ee'; ctx.lineWidth = 1; ctx.stroke();
-        ctx.font = `12px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.globalAlpha = s.cd > 0 ? 0.45 : 1; ctx.fillText(c.icon, sx0 + 10, 49); ctx.globalAlpha = 1;
-        if (s.cd > 0) { ctx.font = `700 9px ${FONT}`; ctx.fillStyle = '#fde68a'; ctx.fillText(Math.ceil(s.cd), sx0 + 10, 49); }
-        sx0 += 23;
-    });
-    ctx.font = `11px ${FONT}`; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
-    const pas = (p.build || []).filter(id => CARDS[id] && CARDS[id].kind === 'P').map(id => CARDS[id].icon).join('');
-    ctx.fillText(pas + ((p.combos || []).length ? ' ⚡' + p.combos.length : ''), sx0 + 3, 49);
-    if (p.aimshot) { ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(bx, 35, bw, 2); ctx.fillStyle = '#fde047'; ctx.fillRect(bx, 35, bw * Math.min(1, (p.superCharge || 0) / (p.superNeed || 5)), 2); }
-    // ô vũ khí
-    for (let i = 0; i < 2; i++) {
-        const wp = p.inventory[i], sx = w - 92 + i * 44, act = i === p.weaponIdx;
-        rrect(ctx, sx, 10, 40, 42, 8);
-        ctx.fillStyle = act ? hexA(p.color, 0.28) : 'rgba(255,255,255,0.05)'; ctx.fill();
-        ctx.strokeStyle = act ? (wp.legendary ? COLORS.gold : '#fff') : 'rgba(255,255,255,0.12)'; ctx.lineWidth = act ? 2 : 1; ctx.stroke();
-        ctx.globalAlpha = act ? 1 : 0.55;
-        ctx.font = `18px ${FONT}`; ctx.textAlign = 'center'; ctx.fillText(wp.icon || '✊', sx + 20, 26);
-        ctx.font = `700 10px ${FONT}`; ctx.fillStyle = '#fff';
-        const sub = ammoText(wp);
-        if (wp.magSize && wp.mag === 0 && wp.reserve === 0 && !world.infiniteAmmo) ctx.fillStyle = '#ff4d5e';
-        ctx.fillText(sub, sx + 20, 44);
-        ctx.globalAlpha = 1;
-    }
-    ctx.restore();
-}
 
-function drawHUD(W, H, now) {
-    const p1 = players[0], p2 = players[1];
-    const pw = Math.min(330, Math.max(250, W * 0.34));
-    if (isTouch) {
-        const me = settings.mode === 'pvp' ? p2 : (localPlayer() || p2), them = me === p1 ? p2 : p1;
-        drawPlayerPanel(me, W / 2 - pw / 2, H - 70, pw, false, now);
-        drawPlayerPanel(them, W / 2 - pw / 2, 8, pw, settings.mode === 'pvp', now);
-    } else {
-        drawPlayerPanel(p1, 14, H - 76, pw, false, now);
-        drawPlayerPanel(p2, W - pw - 14, H - 76, pw, false, now);
-    }
-    // thông tin hiệp / vòng bo
-    const z = world.zone;
-    let label, col = '#cbd5e1';
-    if (world.time < world.zoneDelay) label = `BO THU SAU ${Math.ceil(world.zoneDelay - world.time)}s`;
-    else if (world.zonePhase === 1) { label = 'VÒNG BO ĐANG THU'; col = '#c084fc'; }
-    else { label = 'TỬ CHIẾN'; col = '#ff4d5e'; }
-    const outside = players.some(p => p.hp > 0 && dist(p.x, p.y, z.x, z.y) > z.r);
-    ctx.save();
-    if (isTouch) { ctx.translate(W - 22, H / 2); ctx.rotate(-Math.PI / 2); } else ctx.translate(W / 2, 30);
-    const tw = isTouch ? 240 : 300;
-    rrect(ctx, -tw / 2, -18, tw, 36, 18); ctx.fillStyle = 'rgba(8,11,24,0.8)'; ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1; ctx.stroke();
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = `700 15px ${FONT}`;
-    ctx.fillStyle = COLORS.p1; ctx.fillText(p1.score, -tw / 2 + 20, 1);
-    ctx.fillStyle = COLORS.p2; ctx.fillText(p2.score, tw / 2 - 20, 1);
-    ctx.font = `700 10px ${FONT}`; ctx.fillStyle = COLORS.gold; ctx.fillText(`HIỆP ${currentRound} · ${MAP_NAMES[world.mapType] || ''} · ${currentDestiny ? currentDestiny.name : ''}`, 0, -6);
-    ctx.fillStyle = outside && Math.sin(now * 10) > 0 ? '#ff4d5e' : col; ctx.fillText(label, 0, 8);
-    ctx.restore();
-}
 
-function drawControls(cfg, input, side, p) {
-    const jR = ctrlR(cfg.joystick);
-    const o = stickOrigin[side];
-    const jX = o ? o.x : cfg.joystick.x * SCREEN_W, jY = o ? o.y : cfg.joystick.y * SCREEN_H;
-    ctx.save();
-    ctx.globalAlpha = o ? 0.9 : 0.45;
-    ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.beginPath(); ctx.arc(jX, jY, jR, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 2; ctx.stroke();
-    const px = jX + input.move.x * jR * 0.6, py = jY + input.move.y * jR * 0.6;
-    const g = ctx.createRadialGradient(px - 5, py - 5, 2, px, py, jR * 0.42);
-    g.addColorStop(0, 'rgba(255,255,255,0.7)'); g.addColorStop(1, hexA(p.color, 0.5));
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, jR * 0.42, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-    const w = getCurrentWeapon(p), ow = p.inventory[otherSlot(p)];
-    drawBtn(cfg.btnA, input.a, side, w.icon || '⚔', w.magSize ? ammoText(w) : '', w.reloading ? 1 - w.reloadT / w.reloadTime : p.cooldown > 0 ? p.cooldown / (w.fireRate * p.fireRateMult) : 0);
-    drawAimStick(side);
-    const canRl = w.magSize && !w.noReload && w.reloadMode !== 'single' && w.mag < effMag(p, w) && (w.reserve > 0 || world.infiniteAmmo);
-    drawBtn(cfg.btnB, input.b, side, canRl ? '⟳' : '↗', canRl ? 'NẠP · giữ NÉM' : 'NÉM', 0);
-    drawBtn(cfg.btnC, input.c, side, ow.icon || '⇄', '', 0);
-    (p.skills || []).forEach((s, i) => {
-        const b = i === 0 ? cfg.btnS1 : cfg.btnS2, c = CARDS[s.id]; if (!b || !c) return;
-        drawBtn(b, input['s' + (i + 1)], side, c.icon, s.cd > 0 ? Math.ceil(s.cd) : '', s.cd > 0 ? s.cd / Math.max(0.1, skillCooldown(p, s.id)) : 0);
-    });
-}
 
-function drawBtn(btn, pressed, side, icon, sub, cd) {
-    const x = btn.x * SCREEN_W, y = btn.y * SCREEN_H, r = ctrlR(btn);
-    ctx.save(); ctx.translate(x, y);
-    if (side === 'p1') ctx.rotate(Math.PI);
-    ctx.globalAlpha = pressed ? 1 : 0.75;
-    const g = ctx.createRadialGradient(0, -r * 0.3, r * 0.1, 0, 0, r);
-    g.addColorStop(0, pressed ? '#fff' : shade(btn.color, 0.3)); g.addColorStop(1, hexA(btn.color, pressed ? 0.9 : 0.55));
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r * (pressed ? 0.92 : 1), 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2; ctx.stroke();
-    if (cd > 0) { ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, cd)); ctx.fill(); }
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = `${Math.round(r * 0.75)}px ${FONT}`; ctx.fillText(icon, 0, sub !== '' ? -r * 0.1 : 2);
-    if (sub !== '') { ctx.font = `700 ${Math.round(r * 0.3)}px ${FONT}`; ctx.fillText(sub, 0, r * 0.5); }
-    ctx.restore();
-}
 
 function drawBanners(W, H) {
     banners.forEach(b => {
@@ -632,7 +495,7 @@ function drawMines(now) {
         // bẫy của địch là vô hình; chơi chung 1 máy thì chỉ thấy rất mờ
         if (localId() !== null && m.owner !== localId()) return;
         ctx.globalAlpha = localId() === null ? 0.22 : 0.8;
-        ctx.strokeStyle = m.owner === 1 ? COLORS.p1 : COLORS.p2; ctx.lineWidth = 2;
+        ctx.strokeStyle = pColor(m.owner); ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(m.x, m.y, 12, 0, Math.PI * 2); ctx.stroke();
         for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + now; ctx.beginPath(); ctx.moveTo(m.x + Math.cos(a) * 6, m.y + Math.sin(a) * 6); ctx.lineTo(m.x + Math.cos(a) * 14, m.y + Math.sin(a) * 14); ctx.stroke(); }
         ctx.globalAlpha = 1;

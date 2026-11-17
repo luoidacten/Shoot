@@ -1,4 +1,4 @@
-/** ==================== ONLINE 2 MÁY (WebRTC P2P qua PeerJS) ====================
+/** ==================== ONLINE 4 MÁY (WebRTC P2P qua PeerJS) ====================
  *  Chủ phòng (P1) chạy toàn bộ mô phỏng, gửi ảnh chụp trạng thái 30 lần/giây.
  *  Khách (P2) gửi phím bấm, nhận trạng thái, tự dựng hiệu ứng + dự đoán chuyển động của chính mình.
  */
@@ -26,85 +26,11 @@ function loadPeerLib() {
 }
 function randomCode() { const c = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 5; i++) s += c[Math.floor(Math.random() * c.length)]; return s; }
 function setNetStatus(t, cls = '') { const el = $('net-status'); el.textContent = t; el.className = 'net-status ' + cls; }
-function netSend(msg) { if (net.conn && net.conn.open) { try { net.conn.send(msg); } catch (e) {} } }
 
-async function hostRoom() {
-    netLeave(true);
-    setNetStatus('Đang mở phòng…');
-    try { await loadPeerLib(); } catch (e) { setNetStatus(e.message, 'err'); return; }
-    net.code = randomCode();
-    net.peer = new Peer(ROOM_PREFIX + net.code);
-    net.peer.on('open', () => {
-        $('room-code').textContent = net.code; $('room-code-box').classList.remove('hidden');
-        setNetStatus('Đã tạo phòng. Gửi mã cho bạn bè và chờ họ vào…', 'wait');
-    });
-    net.peer.on('connection', conn => {
-        if (net.conn) { conn.on('open', () => { conn.send({ t: 'full' }); setTimeout(() => conn.close(), 300); }); return; }
-        bindConn(conn, 'host');
-    });
-    net.peer.on('error', e => {
-        if (e.type === 'unavailable-id') return hostRoom();
-        setNetStatus('Lỗi mạng: ' + e.type, 'err');
-    });
-    net.peer.on('disconnected', () => { if (net.peer && !net.peer.destroyed) net.peer.reconnect(); });
-}
 
-async function joinRoom(code) {
-    code = (code || '').trim().toUpperCase();
-    if (code.length !== 5) { setNetStatus('Mã phòng gồm 5 ký tự', 'err'); return; }
-    netLeave(true);
-    setNetStatus('Đang tìm phòng ' + code + '…');
-    try { await loadPeerLib(); } catch (e) { setNetStatus(e.message, 'err'); return; }
-    net.peer = new Peer();
-    net.peer.on('open', () => {
-        const conn = net.peer.connect(ROOM_PREFIX + code, { reliable: true, serialization: 'json' });
-        bindConn(conn, 'guest');
-        setTimeout(() => { if (!net.role && net.conn === conn) setNetStatus('Không kết nối được. Kiểm tra mã phòng hoặc mạng (một số mạng 4G chặn kết nối P2P).', 'err'); }, 12000);
-    });
-    net.peer.on('error', e => setNetStatus(e.type === 'peer-unavailable' ? 'Không tìm thấy phòng ' + code : 'Lỗi mạng: ' + e.type, 'err'));
-}
 
-function bindConn(conn, role) {
-    net.conn = conn;
-    conn.on('open', () => {
-        net.role = role; net.myId = role === 'host' ? 1 : 2;
-        settings.mode = 'online';
-        document.body.classList.add('online');
-        document.body.classList.toggle('me1', role === 'host'); document.body.classList.toggle('me2', role === 'guest');
-        AudioSys.init();
-        if (role === 'host') {
-            setNetStatus('Đối thủ đã vào! Bắt đầu…', 'ok');
-            netSend({ t: 'hello', maxWins: settings.maxWins });
-            setTimeout(() => startMatch(), 600);
-        } else {
-            setNetStatus('Đã vào phòng! Chờ chủ phòng bắt đầu…', 'ok');
-            players.length = 0;
-            AudioSys.startMusic();
-        }
-    });
-    conn.on('data', onNetData);
-    conn.on('close', () => netDisconnected());
-    conn.on('error', () => netDisconnected());
-}
 
-function netDisconnected() {
-    if (!net.role) return;
-    const wasIn = gameState !== 'MENU';
-    netLeave(true);
-    if (wasIn) { goMenu(); }
-    showScreen('online-screen');
-    setNetStatus('Mất kết nối với đối thủ.', 'err');
-}
 
-function netLeave(silent) {
-    const c = net.conn, p = net.peer;
-    net.conn = null; net.peer = null; net.role = null; net.events.length = 0;
-    try { c && c.close(); } catch (e) {}
-    try { p && p.destroy(); } catch (e) {}
-    document.body.classList.remove('online', 'me1', 'me2');
-    $('room-code-box').classList.add('hidden');
-    if (!silent) setNetStatus('');
-}
 
 /** Bọc các hàm hiệu ứng: ở chủ phòng, mỗi lần gọi sẽ được ghi lại để phát lại ở máy khách */
 const NET_FX = ['spark', 'directionalSpark', 'smoke', 'createBlood', 'ring', 'floatText', 'damageNumber', 'addDecal', 'addScorch', 'addShake', 'hitStop', 'flash', 'showBanner', 'explosionFx'];
@@ -132,11 +58,11 @@ function snapPlayer(p) {
         id: p.id, x: R1(p.x), y: R1(p.y), angle: R1(p.angle * 10) / 10, hp: R1(p.hp), maxHp: p.maxHp, ghostHp: R1(p.ghostHp), armor: R1(p.armor), maxArmor: p.maxArmor,
         radius: p.radius, inventory: p.inventory, weaponIdx: p.weaponIdx, score: p.score, cooldown: R1(p.cooldown), fireRateMult: p.fireRateMult,
         recoil: R1(p.recoil), muzzle: R1(p.muzzle * 100) / 100, hitFlash: R1(p.hitFlash * 100) / 100, stun: R1(p.stun), spawnShield: R1(p.spawnShield), ghostT: R1(p.ghostT),
-        thorns: p.thorns, label: p.label, color: p.color, isBot: false, dead: p.dead, stats: p.stats, moveMult: p.moveMult, kx: R1(p.kx), ky: R1(p.ky), dashTime: R1(p.dashTime),
+        thorns: p.thorns, label: p.label, color: p.color, isBot: p.isBot, dead: p.dead, stats: p.stats, moveMult: p.moveMult, kx: R1(p.kx), ky: R1(p.ky), dashTime: R1(p.dashTime),
         st: p.st, skills: p.skills, build: p.build, minor: p.minor, combos: p.combos, superCharge: p.superCharge, superNeed: p.superNeed,
         silent: p.silent, hunter: p.hunter, eagle: p.eagle, aimshot: p.aimshot, pyro: p.pyro, noMind: p.noMind,
         aiming: p.aiming, aimAngle: R1((p.aimAngle || 0) * 100) / 100, charge: R1((p.charge || 0) * 100) / 100, cancelShot: p.cancelShot, manualEngaged: p.manualEngaged, aimDist: Math.round(p.aimDist || 0),
-        stillT: R1(p.stillT || 0), spinUp: R1(p.spinUp || 0), shotCount: p.shotCount, sniperNest: p.sniperNest, watchman: p.watchman, saboteur: p.saboteur, collector: p.collector, bushStalker: p.bushStalker, bigMag: p.bigMag
+        stillT: R1(p.stillT || 0), spinUp: R1(p.spinUp || 0), shotCount: p.shotCount, sniperNest: p.sniperNest, watchman: p.watchman, saboteur: p.saboteur, collector: p.collector, bushStalker: p.bushStalker, bigMag: p.bigMag, air: R1(p.air || 0), airH: R1(p.airH || 0), jet: p.jetT > 0, lastFireT: R1(p.lastFireT || -9), vault: p.vault
     };
 }
 function buildSnapshot() {
@@ -158,8 +84,8 @@ function buildSnapshot() {
         dc: decoys.map(d => [R1(d.x), R1(d.y), d.owner, R1(d.angle * 100) / 100, d.color, d.radius, d.label]),
         me: meteors.map(m => [R1(m.x), R1(m.y), R1(m.warningTime), m.maxT]),
         ad: airdrops.map(d => [R1(d.x), R1(d.y), R1(d.t), d.maxT]),
-        sl: slashes.map(s => [s.ownerId, R1(s.angle * 100) / 100, s.range, s.color, s.width, R1(s.life * 100) / 100, s.maxLife, s.swing]),
-        bm: beams.map(b => [R1(b.x1), R1(b.y1), R1(b.x2), R1(b.y2), R1(b.life * 100) / 100, b.maxLife, b.color]),
+        sl: slashes.map(s => [s.ownerId, R1(s.angle * 100) / 100, s.range, s.color, s.width, R1(s.life * 100) / 100, s.maxLife, s.swing, s.line ? 1 : 0]),
+        bm: beams.map(b => [R1(b.x1), R1(b.y1), R1(b.x2), R1(b.y2), R1(b.life * 100) / 100, b.maxLife, b.color, b.zig ? 1 : 0]),
         ev: net.events.splice(0)
     };
 }
@@ -167,43 +93,9 @@ function netHostTick(dt) {
     net.sendT += dt;
     if (net.sendT >= 1 / 30) { net.sendT = 0; netSend(buildSnapshot()); }
 }
-/** Lấy input của khách — có "chốt" để không mất các cú bấm quá nhanh */
-function netRemoteInput() {
-    const r = net.remote;
-    const out = { move: r.move, a: r.a || r.la, b: r.b || r.lb, c: r.c || r.lc, s1: r.s1 || r.ls1, s2: r.s2 || r.ls2, aim: r.aim, aimActive: r.aimActive, aimMouse: r.aimMouse, aimDist: r.aimDist };
-    r.la = r.lb = r.lc = r.ls1 = r.ls2 = false;
-    return out;
-}
 
 /** ---------- MÁY KHÁCH ---------- */
 let guestDestinyRolling = false;
-function onNetData(m) {
-    if (!m || !m.t) return;
-    if (m.t === 'full') { setNetStatus('Phòng đã đủ người.', 'err'); return; }
-    if (net.role === 'host') {
-        if (m.t === 'in') {
-            const r = net.remote, i = m.i;
-            r.move = i.move; if (i.a && !r.a) r.la = true; if (i.b && !r.b) r.lb = true; if (i.c && !r.c) r.lc = true;
-            if (i.s1 && !r.s1) r.ls1 = true; if (i.s2 && !r.s2) r.ls2 = true;
-            r.a = i.a; r.b = i.b; r.c = i.c; r.s1 = i.s1; r.s2 = i.s2; r.aim = i.aim; r.aimActive = i.aimActive; r.aimMouse = i.aimMouse; r.aimDist = i.aimDist;
-        } else if (m.t === 'pick') pickAugmentByIndex(2, m.idx, true);
-        return;
-    }
-    // ---- khách ----
-    switch (m.t) {
-        case 'hello': settings.maxWins = m.maxWins; break;
-        case 'destiny':
-            currentRound = m.rd; currentDestiny = DESTINIES[m.di]; gameState = 'DESTINY';
-            if (m.rd === 1) { players.length = 0; AudioSys.startMusic(); }
-            clearDecals(); clearFootprints(); [bullets, items, particles, texts, rings, slashes, beams].forEach(a => a.length = 0);
-            guestDestinyRolling = true;
-            playDestinyRoll(currentDestiny, () => { guestDestinyRolling = false; });
-            break;
-        case 'aug': guestOpenAugments(m); break;
-        case 'over': showGameOver(); break;
-        case 's': applySnapshot(m); break;
-    }
-}
 
 function applySnapshot(s) {
     const IN = ['COUNTDOWN', 'PLAYING', 'KO', 'ROUND_OVER'];
@@ -237,8 +129,8 @@ function applySnapshot(s) {
     decoys.length = 0; s.dc.forEach(d => decoys.push({ x: d[0], y: d[1], owner: d[2], angle: d[3], color: d[4], radius: d[5], label: d[6] }));
     meteors.length = 0; s.me.forEach(m => meteors.push({ x: m[0], y: m[1], warningTime: m[2], maxT: m[3] }));
     airdrops.length = 0; s.ad.forEach(d => airdrops.push({ x: d[0], y: d[1], t: d[2], maxT: d[3] }));
-    slashes.length = 0; s.sl.forEach(l => slashes.push({ ownerId: l[0], angle: l[1], range: l[2], color: l[3], width: l[4], life: l[5], maxLife: l[6], swing: l[7] }));
-    beams.length = 0; s.bm.forEach(b => beams.push({ x1: b[0], y1: b[1], x2: b[2], y2: b[3], life: b[4], maxLife: b[5], color: b[6] }));
+    slashes.length = 0; s.sl.forEach(l => slashes.push({ ownerId: l[0], angle: l[1], range: l[2], color: l[3], width: l[4], life: l[5], maxLife: l[6], swing: l[7], line: !!l[8] }));
+    beams.length = 0; s.bm.forEach(b => beams.push({ x1: b[0], y1: b[1], x2: b[2], y2: b[3], life: b[4], maxLife: b[5], color: b[6], zig: b[7] }));
 
     // phát lại hiệu ứng / âm thanh
     s.ev.forEach(([name, args]) => {
@@ -254,23 +146,24 @@ function applySnapshot(s) {
     }
 }
 
+const rv = v => v ? { x: Math.round(v.x * 20) / 20, y: Math.round(v.y * 20) / 20 } : null;
 function guestUpdate(dt) {
     updateFx(dt);
     // gửi phím bấm: 30 lần/giây, hoặc ngay khi nút thay đổi
-    const inp = readHumanInput(2);
+    const inp = readHumanInput(net.myId);
     const key = `${inp.a}${inp.b}${inp.c}${inp.s1}${inp.s2}${inp.aim ? Math.round(Math.atan2(inp.aim.y, inp.aim.x) * 8) : ''}`;
     net.inT += dt;
     if (net.inT >= 1 / 30 || key !== net.lastIn) {
         net.inT = 0; net.lastIn = key;
-        netSend({ t: 'in', i: { move: { x: R1(inp.move.x * 10) / 10, y: R1(inp.move.y * 10) / 10 }, a: inp.a, b: inp.b, c: inp.c, s1: inp.s1, s2: inp.s2, aim: inp.aim ? { x: R1(inp.aim.x * 10) / 10, y: R1(inp.aim.y * 10) / 10 } : null, aimActive: !!inp.aimActive, aimMouse: !!inp.aimMouse, aimDist: inp.aimDist ? Math.round(inp.aimDist) : 0 } });
+        netSend({ t: 'in', i: { move: { x: R1(inp.move.x * 10) / 10, y: R1(inp.move.y * 10) / 10 }, a: inp.a, b: inp.b, c: inp.c, s1: inp.s1, s2: inp.s2, aim: inp.aim ? { x: R1(inp.aim.x * 10) / 10, y: R1(inp.aim.y * 10) / 10 } : null, aimActive: !!inp.aimActive, aimMouse: !!inp.aimMouse, aimDist: inp.aimDist ? Math.round(inp.aimDist) : 0, s1aim: rv(inp.s1aim), s2aim: rv(inp.s2aim), s1cancel: !!inp.s1cancel, s2cancel: !!inp.s2cancel } });
     }
     if (!['COUNTDOWN', 'PLAYING', 'KO', 'ROUND_OVER'].includes(gameState)) return;
     let sdt = fx.slowMo > 0 ? dt * 0.3 : dt;
     const me = localPlayer();
-    if (me) { me.aiming = !!inp.a && gameState === 'PLAYING'; if (inp.aim && Math.hypot(inp.aim.x, inp.aim.y) > 0.3) { me.aimAngle = Math.atan2(inp.aim.y, inp.aim.x); me.manualEngaged = true; } }
+    if (me) { guestSkillView(me, inp); me.aimMag = inp.aim ? Math.min(1, Math.hypot(inp.aim.x, inp.aim.y)) : 0; me.aiming = !!inp.a && gameState === 'PLAYING'; if (inp.aim && Math.hypot(inp.aim.x, inp.aim.y) > 0.3) { me.aimAngle = Math.atan2(inp.aim.y, inp.aim.x); me.manualEngaged = true; } }
     players.forEach(p => {
         if (p.tx === undefined) return;
-        if (p === me && gameState === 'PLAYING' && p.hp > 0 && !(p.stun > 0) && !(p.dashTime > 0)) {
+        if (p === me && gameState === 'PLAYING' && p.hp > 0 && !(p.stun > 0) && !(p.dashTime > 0) && !(p.air > 0)) {
             // dự đoán chuyển động của chính mình cho mượt, rồi kéo nhẹ về vị trí thật
             const w = getCurrentWeapon(p);
             const sp = 175 * (w.moveScale || 1) * (p.moveMult || 1) * (p.st && p.st.haste > 0 ? 1.5 : 1) * (p.st && p.st.slow > 0 ? 0.5 : 1);
@@ -290,25 +183,7 @@ function guestUpdate(dt) {
     if (me && me.hp > 0 && me.hp < me.maxHp * 0.3 && gameState === 'PLAYING') { heartTimer -= dt; if (heartTimer <= 0) { AudioSys.play('heart', 0.5); heartTimer = 0.85; } }
 }
 
-/** Chọn thẻ phía khách */
-function guestOpenAugments(m) {
-    gameState = 'AUGMENT'; net.augPicked = false;
-    currentRound = m.round || currentRound;
-    clearPlayersForPick();
-    showScreen('augment-screen');
-    $('aug-score').textContent = `${m.score[0]} — ${m.score[1]} · HIỆP ${currentRound}`;
-    augState.kind = m.kind; augState.choices[2] = m.ids; augState.picked[2] = null;
-    renderPickCards(2, m.ids, m.kind, m.owned, m.minor, m.bonus, i => guestPick(i));
-}
 function clearPlayersForPick() { [bullets, items, slashes, beams, zones, turrets, mines, decoys].forEach(a => a.length = 0); }
-function guestPick(idx) {
-    if (net.augPicked || !augState.choices[2][idx]) return;
-    net.augPicked = true; augState.picked[2] = augState.choices[2][idx];
-    AudioSys.play('select', 0.4);
-    $('p2-cards').querySelectorAll('.aug-card').forEach((c, i) => c.classList.add(i === idx ? 'selected' : 'disabled'));
-    $('p2-wait').classList.remove('hidden');
-    netSend({ t: 'pick', idx });
-}
 
 /** ---------- Màn hình sảnh ---------- */
 $('host-btn').addEventListener('click', () => { AudioSys.init(); AudioSys.play('ui'); hostRoom(); });

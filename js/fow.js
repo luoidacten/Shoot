@@ -5,12 +5,6 @@ const pings = [];        // gợn sóng âm thanh phát ra từ trong sương
 const stepTrack = {};
 let visPoly = null;      // đa giác tầm nhìn của khung hình hiện tại
 
-/** Người chơi "của máy này" (để tính tầm nhìn, nghe tiếng) */
-function localId() {
-    if (settings.mode === 'online') return net.myId;
-    if (settings.mode === 'bot') return 2;
-    return null;
-}
 function localPlayer() { const id = localId(); return id ? players.find(p => p.id === id && p.x !== undefined) : null; }
 function fowActive() { return (settings.mode === 'online' || (settings.mode === 'bot' && settings.fow)) && !!localPlayer(); }
 function visionRange(viewer) {

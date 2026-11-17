@@ -6,7 +6,6 @@ function getCurrentWeapon(p) {
 }
 function otherSlot(p) { return 1 - p.weaponIdx; }
 function angleDiff(a, b) { let d = a - b; while (d < -Math.PI) d += Math.PI * 2; while (d > Math.PI) d -= Math.PI * 2; return d; }
-function enemyOf(p) { return players.find(e => e.id !== p.id); }
 
 function reduceDurability(p, wep, amount) {
     if (wep.durability === undefined) return;
@@ -41,6 +40,7 @@ function dealDamage(target, baseDmg, attackerId, opts = {}) {
         if (entrenched(target)) mult *= combo(target, 'fortress') ? 0.65 : 0.8;
         if (st.anchor > 0) mult *= 0.6;
         if (target.reloadShield && getCurrentWeapon(target).reloading) mult *= 0.7;
+        if (opts.melee && attacker) { const sw = getCurrentWeapon(target); if (sw.id === 'SHIELD' && Math.abs(angleDiff(Math.atan2(attacker.y - target.y, attacker.x - target.x), target.angle)) < Math.PI / 2.4) { mult *= 0.3; reduceDurability(target, sw, 8); spark(target.x, target.y, '#e2e8f0', 6, 200, 0.3, 2); } }
     }
     let dmg = baseDmg * mult * (opts.raw ? 1 : target.vulnMult);
 
@@ -52,8 +52,7 @@ function dealDamage(target, baseDmg, attackerId, opts = {}) {
             st.shieldT = 0; ring(target.x, target.y, 10, 60, '#67e8f9', 0.3);
             if (combo(target, 'shield_thorns')) {
                 ring(target.x, target.y, 10, 110, '#facc15', 0.4, 6);
-                const e = enemyOf(target);
-                if (e && e.hp > 0 && dist(e.x, e.y, target.x, target.y) < 110 + e.radius) dealDamage(e, 40, target.id, { noThorns: true, knock: 400 });
+                enemiesOf(target).forEach(e => { if (dist(e.x, e.y, target.x, target.y) < 110 + e.radius) dealDamage(e, 40, target.id, { noThorns: true, knock: 400 }); });
             }
         }
         if (dmg <= 0.01) return;
@@ -87,12 +86,12 @@ function dealDamage(target, baseDmg, attackerId, opts = {}) {
         addShake(Math.min(10, 2 + dmg / 10));
         vibrate(dmg >= 40 ? 60 : 20);
     }
-    if (attacker && attacker !== target) { attacker.stats.dmg += dmg; }
+    if (attacker && attacker !== target) { attacker.stats.dmg += dmg; target.lastHitBy = attacker.id; }
     if (opts.burn && st.burn !== undefined && !target.pyro) { st.burn = Math.max(st.burn, 2); st.burnBy = attackerId; }
     if (opts.slow && st.slow !== undefined) { st.slow = Math.max(st.slow, opts.slow); floatText(target.x, target.y - 34, 'CHẬM!', '#93c5fd', 13); }
 
     if (attacker && attacker !== target && attacker.hp > 0 && !opts.zone) {
-        const vamp = (attacker.vampire ? 0.25 : 0) + (attacker.roundVamp || 0);
+        const vamp = (attacker.vampire ? (combo(attacker, 'regen_vamp') ? 0.18 : 0.25) : 0) + (attacker.roundVamp || 0);
         let heal = dmg * vamp;
         if (opts.storm && combo(attacker, 'storm_vampire')) heal += 8;
         if (heal > 0) { attacker.hp = Math.min(attacker.hp + heal, attacker.maxHp); spark(attacker.x, attacker.y, '#4ade80', 3, 80, 0.4, 2); }
@@ -106,10 +105,11 @@ function dealDamage(target, baseDmg, attackerId, opts = {}) {
         const k = (combo(target, 'thorns_armor') && target.armor > 0) || (combo(target, 'ironStatue') && st.anchor > 0) ? 0.6 : 0.3;
         dealDamage(attacker, dmg * k, target.id, { noThorns: true, raw: true, noCharge: true });
     }
-    if (target.hp <= 0) killPlayer(target, attacker && attacker !== target ? attacker.id : enemyOf(target).id);
+    if (target.hp <= 0) killPlayer(target, attacker && attacker !== target ? attacker.id : (target.lastHitBy || -1));
 }
 
 function explode(x, y, ownerId, dmgMax = 120, radius = 160) {
+    dmgMax *= 1.4; // bom & vũ khí nổ mạnh hơn
     explosionFx(x, y, radius);
     const exOwner = players.find(q => q.id === ownerId);
     if (exOwner && exOwner.lingering) { const t = combo(exOwner, 'lingerFire') ? 4 : 2; zones.push({ type: 'fire', x, y, r: radius * 0.6, t, maxT: t, owner: ownerId, tick: 0 }); }
@@ -239,7 +239,7 @@ function updateBullets(dt) {
                 if (b.pierce) { if (!b.pierced) { b.pierced = new Set(); } if (!b.pierced.has(o)) { b.pierced.add(o); damageObstacle(o, 40); spark(hx, hy, '#e9d5ff', 6, 200); } continue; }
                 if (o.wood || o.temp !== undefined) damageObstacle(o, b.damage || 30, players.find(q => q.id === b.owner));
                 if ((b.bounces > 0 || o.reflect) && !b.explosive) {
-                    if (o.reflect) { b.owner = obstacleOwnerFlip(b); b.color = '#bae6fd'; } else b.bounces--;
+                    if (o.reflect) { b.owner = obstacleOwnerFlip(b, o); b.color = '#bae6fd'; } else b.bounces--;
                     const fromLeftRight = b.px < o.x || b.px > o.x + o.w;
                     b.angle = fromLeftRight ? Math.PI - b.angle : -b.angle;
                     b.x = hx; b.y = hy;
@@ -278,7 +278,7 @@ function updateBullets(dt) {
                         spark(b.x, b.y, '#fde047', 5, 200, 0.25, 2); AudioSys.playAt('block', p.x, p.y, 0.25);
                         break;
                     }
-                    if (w.id === 'SHIELD' && !b.explosive && !b.hook && Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) < Math.PI / 2.4) {
+                    if (energyBlock(p, w, b)) { b.hitP = true; } else if (w.id === 'SHIELD' && !b.explosive && !b.hook && Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) < Math.PI / 2.4) {
                         spark(b.x, b.y, '#e2e8f0', 6, 220, 0.3, 2); AudioSys.playAt('block', p.x, p.y, 0.3); reduceDurability(p, w, b.damage > 50 ? 40 : 10);
                     } else if (!b.explosive || b.super) {
                         const owner = players.find(q => q.id === b.owner); if (owner) owner.stats.hits++;
@@ -286,6 +286,8 @@ function updateBullets(dt) {
                         if (b.root && p.st) { p.st.root = Math.max(p.st.root || 0, b.root); floatText(p.x, p.y - 34, 'BỊ TRÓI!', '#e5e7eb', 14); ring(p.x, p.y, 5, 30, '#e5e7eb', 0.4); }
                         if (b.hook) hookHit(owner, p);
                         if (b.freeze) ring(p.x, p.y, 5, 40, '#93c5fd', 0.3);
+                        if (b.net) { p.stun = Math.max(p.stun, 1.1); b.hitP = true; floatText(p.x, p.y - 48, 'CHOÁNG!', '#e5e7eb', 14); }
+                        if (b.freeze && p.st.glued > 0 && combo(owner, 'freeze_glue')) { p.stun = Math.max(p.stun, 0.8); floatText(p.x, p.y - 48, 'ĐÓNG BĂNG!', '#93c5fd', 15); }
                         if (b.damage >= 50) hitStop(0.07);
                     }
                     dead = true; break;
@@ -302,6 +304,7 @@ function updateBullets(dt) {
         if (dead && b.explosive) {
             if (b.blastSmall) explode(b.x, b.y, b.owner, 40, 90); else explode(b.x, b.y, b.owner, 130, 170);
         }
+        if ((dead || b.life <= 0) && b.net && !b.hitP) { zones.push({ type: 'net', x: b.x, y: b.y, r: 105, t: 4, maxT: 4, owner: b.owner, tick: 0 }); spark(b.x, b.y, '#e5e7eb', 10, 160); }
         if (dead || b.life <= 0) {
             if (!dead && b.explosive && !b.blastSmall) explode(b.x, b.y, b.owner, 130, 170);
             bullets.splice(i, 1);
@@ -309,11 +312,6 @@ function updateBullets(dt) {
     }
 }
 
-/** Tường gương (Gương Băng) phản đạn: đạn đổi chủ sang người dựng tường */
-function obstacleOwnerFlip(b) {
-    const e = players.find(q => q.id !== b.owner);
-    return e ? e.id : b.owner;
-}
 
 /** Vật ném: lựu đạn, vũ khí bị ném */
 function updateItems(dt) {

@@ -23,9 +23,9 @@ const DESTINIES = [
     { name:'SÂN BÊ TÔNG',         desc:'Không còn chỗ nấp. Mọi vật cản bị xóa sổ!', apply: () => { obstacles.length = 0; } },
     { name:'SƯƠNG MÙ DÀY ĐẶC',    desc:'Tầm nhìn thu hẹp cực độ. Kẻ thù có thể ngay sau lưng.', apply: () => { world.darkness = true; } },
     { name:'ĐUA XE F1',           desc:'Tốc độ di chuyển của tất cả x2.2! Chóng mặt chưa?', apply: () => { players.forEach(p => p.moveMult *= 2.2); } },
-    { name:'CĂN PHÒNG CHẬT HẸP',  desc:'Cả hai bị đặt sát nhau ngay giây đầu tiên. Chém!', apply: () => {
+    { name:'CĂN PHÒNG CHẬT HẸP',  desc:'Mọi người bị đặt sát nhau ngay giây đầu tiên. Chém!', apply: () => {
         obstacles.splice(0, obstacles.length, ...obstacles.filter(o => Math.abs(o.x + o.w/2 - MAP_W/2) > 260 || Math.abs(o.y + o.h/2 - MAP_H/2) > 160));
-        players[0].x = MAP_W/2 - 110; players[0].y = MAP_H/2; players[1].x = MAP_W/2 + 110; players[1].y = MAP_H/2;
+        players.forEach((p, i) => { const a = Math.PI + i * Math.PI * 2 / players.length; p.x = MAP_W/2 + Math.cos(a) * 120; p.y = MAP_H/2 + Math.sin(a) * 120; });
         world.zoneDelay = 8;
     } },
     { name:'SÂN BĂNG',            desc:'Mặt đất trơn như mỡ. Phanh gấp là không có cửa!', apply: () => { world.ice = true; } },

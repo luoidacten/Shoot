@@ -23,7 +23,7 @@ function steer(p, ang) {
 
 function botThink(p, dt) {
     const B = p.brain, L = BOT_LEVELS[settings.diff];
-    const e = enemyOf(p);
+    const e = botTarget(p);
     const w = getCurrentWeapon(p);
     const out = { move: { x: 0, y: 0 }, a: false, b: false, c: false };
     if (!e) return out;
@@ -131,13 +131,13 @@ function botThink(p, dt) {
         const gunRange = w.mode === 'charge' && w.narrow ? chargeRange(w, 1, p) : w.id === 'BOOMERANG' ? 440 : w.range;
         if (w.type === 'GUN' && w.mag > 0 && !w.reloading) wants = los && dE < gunRange * 0.95 && facing;
         else if (w.type === 'THROWABLE') wants = los && dE > 150 && dE < 520;
-        else if (w.type === 'MELEE' || w.type === 'SHIELD') wants = dE < p.radius + e.radius + (w.range || 30) + (w.dash ? 120 : 6) && facing;
+        else if (w.type === 'MELEE' || w.type === 'SHIELD') wants = dE < p.radius + e.radius + (w.range || 30) + ({ GREATSWORD: 200, HAMMER: 130, RAPIER: 80, SPEAR: 50 }[w.id] || 6) && facing;
         if (wants) B.aimT += dt; else B.aimT = 0;
         if (B.aimT > L.react) {
             if (w.mode === 'auto') out.a = true;
             else if (w.mode === 'charge') {
                 // giữ đến khi tụ đủ lực rồi thả
-                const want = { SNIPER: Math.min(1, Math.max(0.05, (dE - 150) / 1720 + 0.15)), BOW: dE > 300 ? Math.min(1, (dE - 300) / 1180 + 0.4) : 0.1, RAILGUN: 0.7, HAMMER: dE < 90 ? 0.95 : 0, SPEAR: dE > 110 ? 0.95 : 0.1, KATANA: dE > 90 ? 0.6 : 0.1, BOOMERANG: Math.min(1, Math.max(0, (dE - 260) / 220)), REVOLVER: dE < 250 ? 1 : 0, LIGHTSABER: dE > 140 ? 1 : 0.05, GRENADE: 0.1, SHIELD: 0.1 }[w.id] || 0.2;
+                const want = { SNIPER: Math.min(1, Math.max(0.05, (dE - 150) / 1720 + 0.15)), BOW: dE > 300 ? Math.min(1, (dE - 300) / 1180 + 0.4) : 0.1, RAILGUN: 0.7, HAMMER: dE > 100 && dE < 220 ? 1 : 0.1, GREATSWORD: dE > 110 && dE < 300 ? 1 : 0.1, RAPIER: dE > 90 ? 1 : 0.1, SPEAR: dE > 110 ? 0.95 : 0.1, KATANA: dE > 90 ? 0.6 : 0.1, BOOMERANG: Math.min(1, Math.max(0, (dE - 260) / 220)), REVOLVER: dE < 250 ? 1 : 0, LIGHTSABER: dE > 140 ? 1 : 0.05, GRENADE: 0.1, SHIELD: 0.1 }[w.id] || 0.2;
                 out.a = (p.charge || 0) < Math.max(0.05, want);
             }
             else out.a = !B.prevA;

@@ -3,34 +3,32 @@
 Game bắn súng đối kháng 1v1 góc nhìn từ trên xuống, chơi trên trình duyệt và tối ưu cho điện thoại.
 
 ## Chế độ chơi
-- **2 người chung 1 máy**: đặt điện thoại nằm ngang giữa hai người.
-- **Đấu máy**: bot có 3 độ khó và dùng kỹ năng như người. Có thể bật sương mù chiến trận.
-- **Online 2 máy**: tạo phòng, gửi mã 5 ký tự hoặc link mời. Hai máy nối thẳng với nhau qua WebRTC (PeerJS).
-  - Sương mù chiến trận: chỉ thấy những gì nhân vật nhìn thấy, tường che tầm mắt.
-  - Tiếng bước chân và tiếng súng nghe theo hướng trái/phải và khoảng cách.
-  - Dấu chân in trên sàn để lần theo đối thủ.
+- **Đấu bot**: bạn + bot, chọn 2–4 người trong trận. Bot có 3 độ khó và dùng kỹ năng như người.
+- **Online tối đa 4 máy**: tạo phòng, gửi mã 5 ký tự hoặc link mời; chỗ trống tự thêm bot (ví dụ 3 người + 1 bot). Hai máy nối thẳng qua WebRTC (PeerJS).
+  - Sương mù chiến trận, tiếng chân/súng theo hướng, dấu chân trên sàn.
+  - Người rời phòng giữa trận sẽ được bot thay.
+- **2 người 1 máy** (chỉ trên PC, bàn phím): 2 người + bot cho đủ số.
+- Điện thoại: tự bật toàn màn hình khi vào trận. HUD kiểu Liên Quân: máu ở góc trái, không hiện thông tin của địch.
 
-## Thể thức BO7
-Ai thắng 4 hiệp trước sẽ vô địch. Trước mỗi hiệp, mỗi người chọn 1 thẻ:
+## Thể thức
+Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hiệp. Ai thắng 4 hiệp trước sẽ vô địch.
 
-| Hiệp | Loại thẻ |
-|---|---|
-| 1, 3, 5, 7 | **Định hình**: Kỹ năng (S, có nút bấm, tối đa 2) hoặc Nội tại (P) |
-| 2, 4, 6 | **Chỉ số** (vĩnh viễn) hoặc **lợi thế** chỉ trong hiệp đó |
+- Chỉ chọn nâng cấp **5 lần** cả trận (trước hiệp 1, 3, 5, 7, 9). Người đang bị dẫn được chọn trong 4 lá thay vì 3.
+- 37 kỹ năng (S) và 40 nội tại (P), trong đó có 5 thẻ vượt địa hình: Cất Cánh (ba lô tên lửa), Móc Leo, Bước Nhảy Vọt, Vượt Rào, Xe Ủi.
+- 92 phối hợp: sở hữu đúng cặp thẻ thì cả hai mạnh lên kèm một đánh đổi. Mỗi thẻ tham gia tối đa 3 phối hợp.
+- Thẻ tầm nhìn (Mắt Đại Bàng, Lính Gác, Thợ Săn) và hiệu ứng làm lộ địch (Pháo Sáng, Dây Bẫy…) hiện mũi tên chỉ về phía địch.
 
-- 34 kỹ năng (S) và 38 nội tại (P), gồm nhóm nạp đạn, giữ vị trí, bẫy, bản đồ và tài nguyên.
-- 74 phối hợp: khi sở hữu đúng cặp thẻ, cả hai mạnh lên nhưng kèm một đánh đổi. Mỗi thẻ tham gia tối đa 3 phối hợp.
-- Người đang thua được chọn thêm 1 lá.
-
-## Vũ khí (kiểu Brawl Stars)
-- Giữ nút đánh để hiện vùng bắn, thả tay là bắn. Trên điện thoại kéo nút đánh để ngắm tay, kéo về giữa để huỷ.
-- Có băng đạn và đạn dự trữ. Hết băng thì tự nạp; chạm nút Ném để nạp chủ động, giữ nút Ném để ném. Hết sạch đạn thì tự ném vũ khí.
-- Vùng ngắm chỉ người bắn thấy và dài đúng bằng tầm bay tối đa của đạn.
-- Vũ khí tụ lực (Sniper, Cung, Railgun): không ngắm thì bắn rất gần (Sniper chỉ khoảng 200, ngắn hơn Shotgun). Ngắm càng lâu thì vùng càng dài ra và hẹp lại, bắn xa và chuẩn hơn.
-- Có 24 vũ khí:
-  - **Cận chiến:** Dao, Song Đao, Katana, Giáo, Búa Tạ, Cưa Máy, Khiên, Kiếm Ánh Sáng.
-  - **Tầm xa:** Súng lục, Ổ Quay, SMG, Song Súng, Súng Trường, Shotgun, Bắn tỉa, Cung, Pháo, Súng Phóng Lựu, Phun Lửa.
-  - **Đặc biệt:** Súng Lưới, Boomerang, Lựu đạn.
+## Ngắm & vũ khí
+- Không còn tự ngắm. Chạm nhẹ nút đánh = hỗ trợ nhắm địch gần nhất; kéo nút đánh để ngắm tay, kéo về giữa để huỷ.
+- Kỹ năng cần hướng/vị trí (Lướt, Bom Khói, Bước Nhảy…): kéo nút kỹ năng để chọn, thả ra để dùng. Chạm nhẹ thì tự nhắm.
+- Vùng ngắm chỉ người bắn thấy và dài đúng bằng tầm bay. Tầm bắn và tầm đánh đã giảm mạnh, súng vẫn xa hơn cận chiến nhiều.
+- Cận chiến chia **đâm** (thẳng, xa, hẹp) và **chém** (vòng cung rộng). Dao và Kiếm Ánh Sáng: chém, chém, đâm.
+- Bom và mọi vũ khí nổ mạnh hơn 40%.
+- 28 vũ khí:
+  - **Cận chiến:** Dao, Song Đao, Katana, Giáo, Búa Tạ, Cưa Máy, Khiên, Kiếm Ánh Sáng, **Kiếm Liễu** (lướt & đâm), **Đại Đao**.
+  - Đại Đao chém rộng, mạnh, chậm; Búa Tạ cũng vậy. Giữ để phóng lên trời, chọn vùng rồi đạp xuống gây sát thương và choáng. Búa có vùng nhỏ hơn nhưng đẩy lùi mạnh và choáng lâu hơn.
+  - **Tầm xa:** Súng lục, Ổ Quay, SMG, Song Súng, Súng Trường, Shotgun, Bắn tỉa, Cung, Pháo, Súng Phóng Lựu, Phun Lửa, **Súng Năng Lượng** (không bắn thì có khiên phía trước, bị phá được), **Súng Điện** (phóng điện liên tục, trúng đủ khoảng 1 giây thì bị giật choáng).
+  - **Đặc biệt:** Súng Lưới (trúng thì choáng, trượt thì bung lưới làm chậm), Boomerang, Lựu đạn.
   - **Huyền thoại:** Minigun, Railgun.
 
 ## Bản đồ

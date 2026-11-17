@@ -14,22 +14,12 @@ const combo = (p, id) => !!(p && p.comboSet && p.comboSet.has(id));
 function freshStatus() {
     return { invis: 0, haste: 0, rage: 0, shield: 0, shieldT: 0, slow: 0, burn: 0, burnBy: -1, mark: 0, reveal: 0, reflect: 0, invuln: 0, empower: 0, heal: 0, healRate: 0, ambush: 0, focus: 0, pendingShock: 0, root: 0, silence: 0, anchor: 0, exposed: 0, quickdraw: 0, quickdrawShots: 0, ambushBush: 0, glued: 0 };
 }
-function aimDir(p) { return p.angle; }
-function moveDir(p) { return p.moveDir !== undefined ? p.moveDir : p.angle; }
 function enemyTargetable(p, maxD) {
     const e = enemyOf(p);
     return e && e.hp > 0 && targetable(p, e) && dist(p.x, p.y, e.x, e.y) < maxD ? e : null;
 }
 function skillText(p, text, color) { floatText(p.x, p.y - 34, text, color || '#e9d5ff', 15); }
 
-/** Ném vật kỹ năng (khói, bom lửa, hố đen) tới gần địch hoặc về phía trước */
-function throwSkillItem(p, id, color, maxD) {
-    const e = enemyTargetable(p, maxD + 100);
-    const ang = e ? Math.atan2(e.y - p.y, e.x - p.x) : aimDir(p);
-    const d = Math.max(80, Math.min(maxD, e ? dist(p.x, p.y, e.x, e.y) : maxD * 0.7));
-    items.push({ x: p.x, y: p.y, type: { id, color }, skill: true, angle: 0, spin: 10, vx: Math.cos(ang) * d * 3.1, vy: Math.sin(ang) * d * 3.1, thrown: true, ownerId: p.id, fuse: 0.6, z: 0, vz: 240 });
-    AudioSys.playAt('whoosh', p.x, p.y, 0.3);
-}
 function landSkillItem(it) {
     const owner = players.find(q => q.id === it.ownerId);
     if (it.type.id === 'SMOKE') {
@@ -135,6 +125,7 @@ defS('wall', '🧊', 'Tường Băng', 12, 'place', 'Dựng tường băng chắ
     const a = aimDir(p), cx = p.x + Math.cos(a) * 60, cy = p.y + Math.sin(a) * 60;
     const horizontal = Math.abs(Math.sin(a)) > Math.abs(Math.cos(a));
     const o = placeTempWall(cx, cy, horizontal, 150, 5, combo(p, 'wall_reflect'));
+    if (o) o.owner = p.id;
     if (o && combo(p, 'wall_trap')) {
         const ends = horizontal ? [[o.x - 20, cy], [o.x + o.w + 20, cy]] : [[cx, o.y - 20], [cx, o.y + o.h + 20]];
         ends.forEach(([x, y]) => mines.push({ kind: 'spike', x, y, owner: p.id, arm: 0.6 }));
@@ -178,7 +169,7 @@ defS('storm', '🌧️', 'Mưa Đạn', 15, 'engage', 'Xả 16 viên đạn ra m
     const bouncy = combo(p, 'storm_ricochet'), n = bouncy ? 12 : 16;
     for (let i = 0; i < n; i++) {
         const a = (i / n) * Math.PI * 2;
-        bullets.push({ x: p.x, y: p.y, px: p.x, py: p.y, angle: a, speed: 18, damage: 10, life: 0.8, owner: p.id, color: '#fde68a', size: 3, knock: 60, bounces: bouncy ? 3 : 0, storm: true, trail: 22 });
+        bullets.push({ x: p.x, y: p.y, px: p.x, py: p.y, angle: a, speed: 18, damage: 10, life: 0.8, owner: p.id, color: '#fde68a', size: 3, knock: 60, bounces: bouncy ? 3 : 0, storm: true, burn: combo(p, 'storm_rage'), trail: 22 });
     }
     AudioSys.playAt('shotgun', p.x, p.y, 0.3); addShake(5);
 }, 260);
@@ -261,6 +252,12 @@ function skillCooldown(p, id) {
     if (id === 'barricade' && combo(p, 'bunker')) cd += 4;
     if (id === 'beacon' && combo(p, 'lifeTotem')) cd += 5;
     if (id === 'reforge' && combo(p, 'masterSmith')) cd += 5;
+    if (id === 'jetpack') cd += (combo(p, 'jet_martyr') ? 3 : 0) + (combo(p, 'jet_linger') ? 2 : 0) + (combo(p, 'jet_leap') ? 2 : 0);
+    if (id === 'grapple' && combo(p, 'grap_nest')) cd += 2;
+    if (id === 'leap' && combo(p, 'leap_titan')) cd += 3;
+    if (id === 'rage' && combo(p, 'rage_berserk')) cd += 3;
+    if (id === 'storm' && combo(p, 'storm_rage')) cd += 3;
+    if (id === 'ammoDrop' && combo(p, 'ammo_fast')) cd *= 0.6;
     return cd;
 }
 
@@ -294,6 +291,9 @@ function applyBuild(p) {
     p.build.forEach(id => { if (CARDS[id].kind === 'P') CARDS[id].apply(p); });
     if (combo(p, 'titan_last')) p.moveMult *= 0.9;
     if (combo(p, 'camper')) p.moveMult *= 0.95;
+    if (combo(p, 'doz_demo')) p.moveMult *= 0.95;
+    if (combo(p, 'doz_armor')) p.moveMult *= 0.95;
+    if (combo(p, 'vault_swift')) p.maxHp -= 10;
     p.minor.forEach(id => STAT_BY_ID[id].apply && STAT_BY_ID[id].apply(p));
     p.roundPerks.forEach(id => STAT_BY_ID[id].apply && STAT_BY_ID[id].apply(p));
 }
@@ -301,17 +301,6 @@ function roundStartPerks() {
     players.forEach(p => p.roundPerks.forEach(id => STAT_BY_ID[id].start && STAT_BY_ID[id].start(p, enemyOf(p))));
 }
 
-/** Kích hoạt kỹ năng ở ô slot */
-function castSkill(p, slot) {
-    const s = p.skills && p.skills[slot];
-    if (!s) return;
-    if (s.cd > 0) { if (!p.isBot) floatText(p.x, p.y - 30, `${Math.ceil(s.cd)}s`, '#94a3b8', 12); return; }
-    const card = CARDS[s.id];
-    card.cast(p, enemyOf(p));
-    s.cd = skillCooldown(p, s.id);
-    p.stats.skills = (p.stats.skills || 0) + 1;
-    skillText(p, card.icon + ' ' + card.name);
-}
 
 /** Ai được coi là "nhìn thấy / ngắm được" người khác */
 function inSmoke(x, y) { return zones.find(z => z.type === 'smoke' && dist(x, y, z.x, z.y) < z.r); }
@@ -334,14 +323,6 @@ function targetable(viewer, t) {
 }
 function fogGameplay() { return settings.mode === 'online' || (settings.mode === 'bot' && settings.fow); }
 
-/** Mục tiêu ngắm tự động: địch hoặc phân thân của địch (gần hơn thì ưu tiên) */
-function aimTargetFor(p, range) {
-    let best = null, bd = range;
-    const e = enemyOf(p);
-    if (e && targetable(p, e)) { const d = dist(p.x, p.y, e.x, e.y); if (d < bd) { bd = d; best = e; } }
-    decoys.forEach(dc => { if (dc.owner !== p.id) { const d = dist(p.x, p.y, dc.x, dc.y); if (d < bd && (!fogGameplay() || canSeeFrom(p.x, p.y, dc.x, dc.y, 0, p))) { bd = d; best = dc; } } });
-    return best;
-}
 
 /** Sau mỗi đòn tấn công */
 function onAttack(p) {
@@ -390,7 +371,7 @@ function updateAbilities(dt) {
             z.tick += dt;
             if (on && z.tick > 0.25) {
                 z.tick = 0;
-                players.forEach(p => { if (p.hp > 0 && !p.pyro && !p.lavaWalker && dist(p.x, p.y, z.x, z.y) < z.r) { dealDamage(p, 5, -1, { zone: true, raw: true }); p.st.burn = Math.max(p.st.burn, 1); p.st.burnBy = -1; } });
+                players.forEach(p => { if (p.hp > 0 && !p.pyro && !p.lavaWalker && !(p.air > 0) && dist(p.x, p.y, z.x, z.y) < z.r) { dealDamage(p, 5, -1, { zone: true, raw: true }); p.st.burn = Math.max(p.st.burn, 1); p.st.burnBy = -1; } });
             }
             continue;
         }
@@ -405,11 +386,11 @@ function updateAbilities(dt) {
         } else if (z.type === 'fire') {
             if (z.tick > 0.25) {
                 z.tick = 0;
-                players.forEach(p => { if (p.id !== z.owner && p.hp > 0 && !p.pyro && !p.lavaWalker && dist(p.x, p.y, z.x, z.y) < z.r) { dealDamage(p, 6.25, z.owner, { zone: true }); p.st.burn = Math.max(p.st.burn, 1); p.st.burnBy = z.owner; } });
+                players.forEach(p => { if (p.id !== z.owner && p.hp > 0 && !p.pyro && !p.lavaWalker && !(p.air > 0) && dist(p.x, p.y, z.x, z.y) < z.r) { dealDamage(p, 6.25, z.owner, { zone: true }); p.st.burn = Math.max(p.st.burn, 1); p.st.burnBy = z.owner; } });
             }
             if (Math.random() < 0.6) particles.push({ x: z.x + (Math.random() - 0.5) * z.r * 1.6, y: z.y + (Math.random() - 0.5) * z.r * 1.6, vx: 0, vy: -50, life: 0.5, maxLife: 0.5, color: Math.random() < 0.5 ? '#f97316' : '#facc15', size: 5, glow: true });
         } else if (z.type === 'glue') {
-            players.forEach(p => { if (p.id !== z.owner && p.hp > 0 && dist(p.x, p.y, z.x, z.y) < z.r) { p.st.slow = Math.max(p.st.slow, 0.2); p.st.glued = 0.2; } });
+            players.forEach(p => { if (p.id !== z.owner && p.hp > 0 && !(p.air > 0) && dist(p.x, p.y, z.x, z.y) < z.r) { p.st.slow = Math.max(p.st.slow, 0.2); p.st.glued = 0.2; } });
         } else if (z.type === 'heal') {
             if (owner && owner.hp > 0 && dist(owner.x, owner.y, z.x, z.y) < z.r) { owner.hp = Math.min(owner.maxHp, owner.hp + z.rate * dt); if (Math.random() < 0.2) spark(owner.x, owner.y, '#4ade80', 1, 50, 0.5, 2); }
         } else if (z.type === 'gravity') {
@@ -494,7 +475,6 @@ function hookHit(owner, target) {
 }
 
 /* ============================== CHỌN THẺ ============================== */
-function isBuildRound(round) { return round % 2 === 1; }
 
 function cardsForPick(p, kind, n) {
     if (kind === 'stat') {
@@ -663,6 +643,7 @@ defS('airdropCall', '📦', 'Gọi Tiếp Tế', 30, 'loot', 'Gọi một thùng
     const vip = combo(p, 'vip'), t = vip ? 0.8 : 2;
     airdrops.push({ x: p.x + Math.cos(p.angle) * 70, y: p.y + Math.sin(p.angle) * 70, t, maxT: t });
     if (vip) airdrops.push({ x: p.x - Math.cos(p.angle) * 70, y: p.y - Math.sin(p.angle) * 70, t, maxT: t });
+    if (combo(p, 'drop_magnet')) { const s2 = p.skills.find(q => q.id === 'magnetPulse'); if (s2) s2.cd = 0; }
     AudioSys.play('legend', 0.3);
 });
 defS('reforge', '⚒️', 'Rèn Lại', 18, 'loot', 'Biến vũ khí đang cầm thành một vũ khí mạnh hơn (đầy đạn).', p => {
@@ -747,40 +728,3 @@ function triggerFakeCrate(c, index, victim) {
     if (owner && combo(owner, 'deceiver')) decoys.push({ x: c.x, y: c.y, angle: Math.random() * 6.28, speed: 220, owner: owner.id, t: 4, hp: 40, color: owner.color, radius: owner.radius, label: owner.label });
 }
 
-/** Bẫy (mìn định hướng / dây / gai) */
-function updateTraps(dt) {
-    for (let i = mines.length - 1; i >= 0; i--) {
-        const m = mines[i]; if (m.arm > 0) { m.arm -= dt; continue; }
-        const owner = players.find(q => q.id === m.owner), e = owner && enemyOf(owner);
-        if (!e || e.hp <= 0) continue;
-        const half = e.saboteur ? 0.5 : 1;
-        if (m.kind === 'claymore') {
-            const d = dist(m.x, m.y, e.x, e.y);
-            if (d < 160 && Math.abs(angleDiff(Math.atan2(e.y - m.y, e.x - m.x), m.angle)) < 0.7 && lineOfSight(m.x, m.y, e.x, e.y)) {
-                mines.splice(i, 1);
-                const n = combo(owner, 'clay_trapper') ? 10 : 6, bush = combo(owner, 'ambushMine') && inBush(m.x, m.y) ? 1.5 : 1;
-                for (let k = 0; k < n; k++) bullets.push({ x: m.x, y: m.y, px: m.x, py: m.y, angle: m.angle + (Math.random() - 0.5) * 0.9, speed: 18, damage: trapDmg(owner, 11) * bush * half, life: 0.5, owner: m.owner, color: '#fca5a5', size: 3, knock: 140, bounces: 0, trail: 20 });
-                AudioSys.playAt('shotgun', m.x, m.y, 0.4); spark(m.x, m.y, '#fca5a5', 12, 260);
-                if (e.saboteur) floatText(e.x, e.y - 30, 'GỠ MÌN!', '#94a3b8', 13);
-            }
-        } else if (m.kind === 'wire') {
-            const dx = m.x2 - m.x, dy = m.y2 - m.y, L = dx * dx + dy * dy || 1;
-            const t = Math.max(0, Math.min(1, ((e.x - m.x) * dx + (e.y - m.y) * dy) / L));
-            if (dist(e.x, e.y, m.x + dx * t, m.y + dy * t) < e.radius) {
-                mines.splice(i, 1);
-                dealDamage(e, trapDmg(owner, 15) * half, m.owner, {});
-                e.st.reveal = Math.max(e.st.reveal, combo(owner, 'trip_hunter') ? 8 : 5); e.st.slow = Math.max(e.st.slow, 2);
-                if (combo(owner, 'trip_trapper')) e.stun = Math.max(e.stun, 0.6);
-                floatText(e.x, e.y - 34, 'VẤP DÂY!', '#f87171', 15); AudioSys.playAt('alarm', m.x, m.y, 0.2);
-            }
-        } else if (dist(e.x, e.y, m.x, m.y) < e.radius + 14) { // bẫy gai
-            mines.splice(i, 1);
-            spark(m.x, m.y, '#e5e7eb', 16, 260, 0.4, 3); ring(m.x, m.y, 5, 60, '#f87171', 0.3);
-            dealDamage(e, trapDmg(owner, 40) * half, m.owner, { knock: 0 });
-            e.st.root = Math.max(e.st.root || 0, combo(owner, 'trapper_trap') ? 1.6 : 1);
-            floatText(e.x, e.y - 30, e.saboteur ? 'GỠ BẪY!' : 'DÍNH BẪY!', '#f87171', 16);
-            if (combo(owner, 'trap_hunter')) e.st.reveal = Math.max(e.st.reveal, 4);
-            AudioSys.playAt('crit', m.x, m.y, 0.4);
-        }
-    }
-}

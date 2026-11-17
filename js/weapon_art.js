@@ -139,6 +139,7 @@ function drawWeaponArt(c, w, r, now, p) {
             for (let i = 0; i < 4; i++) { c.fillStyle = `rgba(34,211,238,${0.3 + (ch > i / 4 ? 0.6 : 0)})`; c.fillRect(x0 + i * 7, -2, 5, 4); }
             break;
         }
+        case 'RAPIER': case 'GREATSWORD': case 'ENERGY': case 'TESLA': drawNewWeaponArt(c, w, r, x0, ch, box, now, p); break;
         default: box(x0, -(w.width || 4) / 2, w.len || 12, w.width || 4, w.color || '#999');
     }
     c.restore();
@@ -195,7 +196,7 @@ function drawAimZone(p, w, now) {
     } else if (kind === 'lob') {
         const e = enemyOf(p);
         let d = p.manualEngaged ? (p.aimDist || (150 + ch * 400)) : (e && targetable(p, e) ? dist(p.x, p.y, e.x, e.y) : 300);
-        d = Math.min(w.id === 'LAUNCHER' ? w.range : 520, Math.max(90, d));
+        d = Math.min(w.id === 'LAUNCHER' ? w.range : 330, Math.max(90, d));
         ctx.setLineDash([8, 8]); ctx.lineDashOffset = -now * 30; ctx.strokeStyle = `rgba(${col},0.6)`; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(p.radius, 0); ctx.quadraticCurveTo(d / 2, -d * 0.35, d, 0); ctx.stroke(); ctx.setLineDash([]);
         const rr = w.id === 'LAUNCHER' ? 120 : 160;
