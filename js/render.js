@@ -83,6 +83,7 @@ function draw() {
     // ---- Vật cản (giả 3D) ----
     obstacles.forEach(o => {
         if (o.x > vx1 || o.x + o.w < vx0 || o.y > vy1 || o.y + o.h < vy0) return;
+        if (o.shieldOf) return; // khiên dựng: vẽ riêng hình tấm khiên, không vẽ khối tường
         const depth = o.wood ? 8 : 14;
         ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(o.x + 8, o.y + 12, o.w, o.h);
         ctx.fillStyle = o.wood ? '#3b2716' : o.sandbag ? '#57452a' : o.ice ? '#1e5f80' : '#121829'; ctx.fillRect(o.x, o.y + depth, o.w, o.h);
