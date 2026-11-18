@@ -72,6 +72,11 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - 🎯 **Bắn Chuẩn**: hòm chỉ ra súng; súng chính xác hơn 35%.
 - 🗡️ **Cận Chiến**: hòm chỉ ra vũ khí cận chiến; cận chiến +25% sát thương, chạy nhanh hơn 10%.
 - 🥷 **Lẩn Trốn**: tiếng chân nhỏ, chỉ nghe được trong 380; nửa số dấu chân; người nhỏ hơn.
+- 👑 **Con Đường Độc Tôn**: không nhận thẻ kỹ năng / nội tại. Mỗi lần nâng cấp nhận 2 gói chỉ số, cấp tăng dần theo lần nâng cấp: cấp I ×1.5 → cấp V ×3.5.
+
+## Nâng cấp chỉ số
+- 14 gói chỉ số (dùng cho Độc Tôn): Máu, Sát Thương, Tốc Chạy, Hồi Chiêu, Tốc Đánh, Giáp, **Tầm Nhìn**, **Chí Mạng**, **Chính Xác**, **Hồi Máu**, và 4 gói kép: **Toàn Diện**, **Chiến Binh**, **Thợ Săn**, **Linh Hoạt**.
+- 10 thẻ liên quan chỉ số: Lớn Dần, Đà Tiến, Pháo Thủy Tinh, Xe Tăng Thịt, Thích Nghi, Cân Bằng, Liều Mạng, Sung Sức, Giáp Dày, Chuỗi Hạ Gục; 12 phối hợp mới (Khổng Lồ Tăng Trưởng, Đại Bác Pha Lê, Sát Thần, Liều Chết…).
 
 ## Chí mạng, headshot & 20 thẻ mới
 - Súng lục mạnh hơn: 24 sát thương, đạn bay nhanh, 30% chí mạng. Chí mạng mặc định ×1.6.
