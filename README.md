@@ -112,6 +112,27 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - **Lính Nhảy Dù giảm sức mạnh:** 40 máu, súng yếu, sống 10 giây, hồi chiêu 30 giây. Biệt Kích Dù thả 4 lính.
 - **Kỹ thuật cao cấp đủ mọi vũ khí:** Trang Bị Phụ có kỹ năng riêng cho Lục Giảm Thanh, AR Giảm Thanh, Lựu đạn, Lựu Đạn Điện Từ và 8 vũ khí gọi hoả lực. Song Đao không có địch gần thì ném quạt phi đao.
 
+## 4 vũ khí mới · 2 vật phẩm mới
+- **🏏 Gậy Bóng Chày:** chạm thì đẩy lùi nhẹ; giữ càng lâu đánh địch bay càng xa. Địch bay đập vào tường nhận sát thương và choáng theo lực đánh (đầy lực là HOME RUN).
+- **🗡️ Trường Kiếm:** chém – chém – đâm. Mỗi thanh mang 1 trong 5 hành:
+  - ⚙️ Kim: +25% sát thương, đòn đâm có thể chí mạng.
+  - 🌿 Mộc: cầm kiếm hồi máu, đòn đánh hút máu, đòn đâm trói.
+  - 💧 Thủy: đòn đánh làm chậm, đòn đâm đóng băng.
+  - 🔥 Hỏa: đòn đánh gây bỏng, đòn đâm để lại vùng lửa.
+  - ⛰️ Thổ: khi cầm nhận ít sát thương hơn, đẩy lùi mạnh, đòn đâm làm choáng.
+- **💥 Nỏ Nổ:** bắn nhanh, mũi tên nổ nhỏ.
+- **🏹 Nỏ Liên Châu:** bắn liên tục thẳng tắp; giữ càng lâu bắn càng nhanh (tối đa ×3).
+- **Vật phẩm 🧨 Mìn Nổ:** đặt xuống, sau 1 giây thì sẵn sàng; địch dẫm phải thì nổ lớn.
+- **Vật phẩm 🔷 Khiên Năng Lượng:** dựng tường năng lượng 8 giây (70 máu, yếu hơn Tường Băng). Bạn bắn xuyên và đi xuyên được; ai cũng nhìn xuyên được.
+- **Kỹ năng Bậc Thầy và Kỹ Thuật Cao cho cả 4 vũ khí:**
+
+  | Vũ khí | Kỹ năng Bậc Thầy | Nội tại Bậc Thầy | Kỹ Thuật Cao |
+  |---|---|---|---|
+  | Gậy | Cú Đánh Home Run | đập tường +50% | Vụt Xoay |
+  | Trường Kiếm | 5 kỹ năng theo hành | hiệu ứng hành ×1.5 | Ngũ Hành Trảm |
+  | Nỏ Nổ | Mũi Tên Chùm | mỗi phát thứ 4 nổ lớn | Mưa Nổ |
+  | Nỏ Liên Châu | Lên Dây Tối Đa | tăng tốc ×2, càng nhanh càng đau | Bão Tên |
+
 ## Thẻ thoát chết (mỗi hiệp 1 lần mỗi thẻ)
 - 💉 **Adrenaline**: còn 1 máu, bất tử 3 giây, +40% sát thương; không hạ được ai thì chết, hạ được thì sống với 30% máu.
 - 🪢 **Thập Tử Nhất Sinh**: còn 1 máu, bất tử 1 giây.
