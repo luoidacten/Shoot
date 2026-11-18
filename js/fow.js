@@ -66,13 +66,15 @@ function updateFootprints(dt) {
         const stride = 30 + p.radius * 0.8;
         if (s.acc < stride) return;
         s.acc = 0; s.side *= -1;
-        if (p.ghostT > 1 || p.silent) return;
+        if (p.ghostT > 1 || p.silent || (p.adv === 'stealth' && s.side > 0)) return; // Lẩn Trốn: chỉ còn nửa số dấu chân
         const ox = Math.cos(s.dir + Math.PI / 2) * 5 * s.side, oy = Math.sin(s.dir + Math.PI / 2) * 5 * s.side;
         footprints.push({ x: p.x + ox, y: p.y + oy, a: s.dir, color: p.color, owner: p.id, t: 18, maxT: 18, size: p.radius / 15 });
         // tiếng bước chân (của mình nhỏ, của địch to hơn để còn nghe ngóng)
         const mine = p.id === localId();
+        const sneak = p.adv === 'stealth', lp = localPlayer();
+        if (sneak && !mine && lp && dist(lp.x, lp.y, p.x, p.y) > 380) return; // Lẩn Trốn: ở xa không nghe thấy
         net.mute++;
-        try { AudioSys.playAt('step', p.x, p.y, (mine ? 0.06 : 0.3) * Math.min(1.4, p.radius / 15), 800); }
+        try { AudioSys.playAt('step', p.x, p.y, (mine ? 0.06 : sneak ? 0.12 : 0.3) * Math.min(1.4, p.radius / 15), sneak ? 380 : 800); }
         finally { net.mute--; }
     });
 }
