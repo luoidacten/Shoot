@@ -112,6 +112,22 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - **Lính Nhảy Dù giảm sức mạnh:** 40 máu, súng yếu, sống 10 giây, hồi chiêu 30 giây. Biệt Kích Dù thả 4 lính.
 - **Kỹ thuật cao cấp đủ mọi vũ khí:** Trang Bị Phụ có kỹ năng riêng cho Lục Giảm Thanh, AR Giảm Thanh, Lựu đạn, Lựu Đạn Điện Từ và 8 vũ khí gọi hoả lực. Song Đao không có địch gần thì ném quạt phi đao.
 
+## Chọn Ô trên bảng chiến thuật · Pháo Sáng · Robot
+- **Lưới ô 400×400** (A1, B2…) trên bảng chiến thuật. Chạm lại ô đã chọn để bỏ chọn.
+- **Vũ khí 🔥 Bộ Thiêu Huỷ Ô (2 lượt):** chọn 1 ô, cảnh báo hình vuông 1.5 giây. Sau đó cả ô bị thiêu rụi: 60 sát thương, cháy 6 giây, đốt sạch thùng gỗ và bụi.
+- **3 kỹ năng mới:**
+  - 🎯 Đánh Dấu Ô: chọn tối đa 3 ô; mỗi ô bị 5 quả bom và cháy.
+  - 🌀 Trọng Lực: chọn tối đa 2 ô; mỗi ô thành vùng làm chậm 5 giây, có dấu hiệu mũi tên tím.
+  - 🔒 Lồng Nhốt: chọn 1 ô; cảnh báo 2 giây rồi dựng lồng tường quanh ô, nhốt người bên trong 6 giây. Tường phá được, bên trong bị làm chậm.
+  - Thêm 3 phối hợp: Lò Sát Sinh, Ngục Trọng Lực, Bom Trọng Lực.
+- **Phép Pháo Sáng (làm lại):**
+  - Thả ngay chỗ bạn và đứng yên, không đi theo bạn.
+  - Soi sáng bán kính 1300 (gấp đôi Radar) trong 5 giây.
+  - Lộ vị trí mọi địch trong vùng 5 giây; bạn được tăng tốc 3 giây.
+- **Robot của map (sự kiện Giả Lập Robot):**
+  - Trâu hơn: thêm 300 máu, 100 giáp, nhận ít hơn 35% sát thương.
+  - Đòn đánh thường riêng, không cần đạn: gần thì Đấm Thép (đẩy xa và choáng), xa thì Pháo Đôi, mỗi đòn thứ 5 là Loạt Tên Lửa.
+
 ## 4 vũ khí mới · 2 vật phẩm mới
 - **🏏 Gậy Bóng Chày:** chạm thì đẩy lùi nhẹ; giữ càng lâu đánh địch bay càng xa. Địch bay đập vào tường nhận sát thương và choáng theo lực đánh (đầy lực là HOME RUN).
 - **🗡️ Trường Kiếm:** chém – chém – đâm. Mỗi thanh mang 1 trong 5 hành:
