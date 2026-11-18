@@ -131,6 +131,10 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - Cưa Máy: chạm = chém mạnh; giữ = rồ máy (chạy nhanh, giảm sát thương nhận, cưa liên tục thẳng phía trước, rất ồn).
 - Cung: bắn liên tên thì lướt nhẹ và vô hình; giữ thêm 0.6 giây sau khi đầy lực = mũi tên lớn xuyên thủng mọi thứ.
 
+## Phản đạn & Phản Đòn
+- Mọi viên đạn bị phản (Phản Xạ, Katana, Kiếm Vô Niệm, Kiếm Ánh Sáng, thế đỡ Đại Đao, tường phản xạ) có hiệu ứng mới: vòng sáng, tia lửa toả theo hướng mới, viên đạn phát sáng kèm vệt sao chổi.
+- Thẻ **Phản Đòn** (P): cầm vũ khí cận chiến hoặc tay không mà bị đánh cận chiến thì có cơ hội chặn và phản toàn bộ sát thương, kẻ đánh bị choáng 0.4 giây. Cơ hội 25% · Katana 50% · Khiên 75%. Mỗi lần phản tốn 1/4 độ bền tối đa. Phối hợp Bậc Thầy Phản Đòn (+ Kỹ Thuật Cận Chiến): +15% cơ hội, tốn nửa độ bền.
+
 ## Gọi hoả lực (20 thứ mới)
 - **10 thẻ:** Không Kích (máy bay bay xuyên bản đồ theo hướng chọn, rải bom), Thả Bom (mở bản đồ, chọn A rồi B), Laser Vệ Tinh (chọn A→B, tia laser quét), Pháo Kích, Bom Napalm; Liên Lạc Nhanh, Tải Trọng Lớn, Lính Liên Lạc, Hầm Trú Ẩn, Chỉ Điểm Mục Tiêu. 5 phối hợp mới.
 - **Bản đồ chọn điểm** không dừng trận. Bình thường chỉ hiện vị trí của bạn; có lợi thế Bản Đồ Nhỏ thì hiện thêm tường, bụi, vòng bo, địch, tiếng động.
