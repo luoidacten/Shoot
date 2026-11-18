@@ -375,6 +375,7 @@ const FIT_CHANCE = 0.55, EVO_CHANCE = 0.8;
 const _cardsForPick3 = cardsForPick;
 cardsForPick = function (p, kind, n) {
     if (kind !== 'build') return _cardsForPick3(p, kind, n);
+    const many = p.adv === 'manyChoices'; if (many) n += 1;
     const owned = new Set(p.build), rnd = a => a[Math.floor(Math.random() * a.length)];
     const skillsFull = p.build.filter(id => CARDS[id] && CARDS[id].kind === 'S').length >= (owned.has('altChoice') ? 3 : 2);
     let pool = Object.keys(CARDS).filter(id => !owned.has(id) && !CARDS[id].evo && !(skillsFull && CARDS[id].kind === 'S'));
@@ -383,7 +384,8 @@ cardsForPick = function (p, kind, n) {
     // 1 ô "hợp với bạn": hên xui
     const evo = Object.keys(CARDS).filter(id => evoReady(p, id));
     if (evo.length && Math.random() < EVO_CHANCE) out.push(rnd(evo));
-    else if (p.build.length && Math.random() < FIT_CHANCE) { const f = pool.filter(fits); if (f.length) take(rnd(f)); }
+    else if (p.build.length && (many || Math.random() < FIT_CHANCE)) { const f = pool.filter(fits); if (f.length) take(rnd(f)); }
+    if (many && p.build.length && Math.random() < 0.35) { const f = pool.filter(fits); if (f.length) take(rnd(f)); } // may mắn: lá hợp thứ 2
     // hiệp đầu: có cả kỹ năng lẫn nội tại
     if (!p.build.length) { const s1 = pool.filter(id => CARDS[id].kind === 'S'), p1 = pool.filter(id => CARDS[id].kind === 'P'); if (s1.length) take(rnd(s1)); if (p1.length && out.length < n) take(rnd(p1)); }
     // còn lại: ngẫu nhiên hoàn toàn, nhưng không thêm thẻ hợp thứ hai

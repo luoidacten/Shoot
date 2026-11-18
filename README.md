@@ -68,6 +68,10 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - 🩹 **Medkit**: không trúng đòn 2.5 giây thì tự hồi máu, càng lâu càng nhanh (tới 10/giây).
 - 🦺 **Giáp Chống Nổ**: mỗi hiệp 100 giáp, nổ -25%.
 - 🛠️ **Kỹ Thuật Cao Khởi Động**: có sẵn thẻ Kỹ Thuật Cao, nhưng lần nâng cấp tiếp theo bị chọn ngẫu nhiên.
+- 🃏 **Nhiều Lựa Chọn**: mỗi lần nâng cấp thêm 1 lá; luôn có 1 lá hợp với bạn, may mắn thì 2.
+- 🎯 **Bắn Chuẩn**: hòm chỉ ra súng; súng chính xác hơn 35%.
+- 🗡️ **Cận Chiến**: hòm chỉ ra vũ khí cận chiến; cận chiến +25% sát thương, chạy nhanh hơn 10%.
+- 🥷 **Lẩn Trốn**: tiếng chân nhỏ, chỉ nghe được trong 380; nửa số dấu chân; người nhỏ hơn.
 
 ## Chí mạng, headshot & 20 thẻ mới
 - Súng lục mạnh hơn: 24 sát thương, đạn bay nhanh, 30% chí mạng. Chí mạng mặc định ×1.6.
@@ -75,6 +79,20 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - Cường hoá súng: Chuyên Gia Súng Lục, Xạ Thủ Súng Trường, Đồ Tể Shotgun, Xạ Thủ Kỳ Cựu, **Xạ Thủ Liên Đạn** (Song Súng/Súng lục sấy đủ 1 giây rồi dừng → loạt đạn hình nón), Nòng Nóng.
 - 6 thẻ tầm nhìn: Mắt Kiểm Soát, Kính Nhìn Đêm, Kính Nhiệt, Ống Nhòm, Sóng Âm, Giác Quan Thứ Sáu.
 - 2 kỹ năng: Tâm Ngắm Hoàn Hảo (3 giây toàn chí mạng), Đạn Đánh Dấu.
+
+## Thẻ thoát chết (mỗi hiệp 1 lần mỗi thẻ)
+- 💉 **Adrenaline**: còn 1 máu, bất tử 3 giây, +40% sát thương; không hạ được ai thì chết, hạ được thì sống với 30% máu.
+- 🪢 **Thập Tử Nhất Sinh**: còn 1 máu, bất tử 1 giây.
+- 🃏 **Joker**: bất tử 0.5 giây, hồi 25% máu, dịch chuyển tới chỗ khác.
+- 🪶 **Phượng Hoàng**: nổ lửa quanh mình, bất tử 1.5 giây rồi hồi 30% máu.
+- ⚱️ **Hiến Tế**: mất 30 máu tối đa (hiệp này) để sống lại với 50% máu.
+- 👻 **Hồn Ma**: hoá hồn ma 2.5 giây (tàng hình, bất tử, không tấn công) rồi hiện lại với 15% máu.
+- Phối hợp với Vô Hình: Trò Đùa Cuối (Joker), Sát Thủ Bóng Đêm (Adrenaline), Bóng Ma Thật Sự (Hồn Ma).
+
+## Triệu hồi & ụ súng (20 thẻ)
+- 9 kỹ năng: Bầy Sói, Người Đá, Bầy Ong Máy, Drone Y Tế, Gọi Hồn, Ụ Súng Máy, Pháo Cối, Tháp Lửa, Tháp Tesla. Tháp Pháo cũ giờ cũng phá được.
+- 11 nội tại: Kỹ Sư, Ép Xung, Chủ Thú, Thủ Lĩnh Bầy, Linh Hồn Triệu Hồi, Ụ Tự Huỷ, Ụ Liên Kết, Nhặt Phế Liệu, Khế Ước Máu, Pháo Đài, Chỉ Huy.
+- Lính và ụ súng bị đạn địch bắn phá được, tự tìm địch, có thanh máu. 16 phối hợp riêng (Sói Đầu Đàn, Quá Tải, Bẫy Nổ, Chỉ Điểm…).
 
 ## Tiến hoá S-P-S (Kỹ năng · Nội tại · Đặc biệt)
 Chỉ xuất hiện khi đủ thẻ điều kiện, và thay thế thẻ kỹ năng gốc:
