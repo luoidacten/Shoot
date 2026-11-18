@@ -113,7 +113,7 @@ const _drawPicker17 = drawPicker;
 drawPicker = function (me, W, H, now) {
     const k = picker.kind, T0 = TAC[k], adv = me.adv;
     if (picker.need && T0) TAC[k] = { ...T0, need: picker.need };
-    if (adv === 'tacMap' || has(me, 'satLink')) me.adv = 'minimap';
+    if (adv === 'tacMap' || has(me, 'satLink') || has(me, 'miniMapCard')) me.adv = 'minimap';
     try { _drawPicker17(me, W, H, now); } finally { TAC[k] = T0; me.adv = adv; }
     if (!T0 || !T0.draw) return;
     const R = pickerRect(), X = x => R.x + x * R.k, Y = y => R.y + y * R.k, used = inkUsed(picker.pts);
@@ -139,7 +139,7 @@ drawPicker = function (me, W, H, now) {
 };
 
 /* ============================== LÍNH DÙ ============================== */
-SUMMON.para = { label: 'LÍNH DÙ', icon: '🪖', hp: 75, r: 12, sp: 175, t: 16, shoot: 9, rate: 0.45, range: 430 };
+SUMMON.para = { label: 'LÍNH DÙ', icon: '🪖', hp: 40, r: 12, sp: 150, t: 10, shoot: 4, rate: 0.7, range: 340 };
 SM_BY_LABEL['LÍNH DÙ'] = 'para'; KIND_BY_LABEL['LÍNH DÙ'] = 'sm';
 function paraDrop(p, x, y, n) {
     const warn = strikeWarnT(p, 1.3);
@@ -165,7 +165,7 @@ updateSummons = function (dt) {
         if (e) {
             d.angle = Math.atan2(e.y - d.y, e.x - d.x);
             if (best > 260) { tx = e.x; ty = e.y; }
-            if (d.cd <= 0) { d.cd = S.rate * (0.8 + Math.random() * 0.4); bullets.push({ x: d.x + Math.cos(d.angle) * 14, y: d.y + Math.sin(d.angle) * 14, px: d.x, py: d.y, angle: d.angle + (Math.random() - 0.5) * 0.14, speed: 19, damage: S.shoot * (o.dmgMult || 1), life: S.range / (19 * 60) + 0.1, owner: o.id, color: '#d9f99d', size: 3.5, knock: 20, bounces: 0, trail: 20, summon: true }); AudioSys.playAt('smg', d.x, d.y, 0.1); }
+            if (d.cd <= 0) { d.cd = S.rate * (0.8 + Math.random() * 0.4); bullets.push({ x: d.x + Math.cos(d.angle) * 14, y: d.y + Math.sin(d.angle) * 14, px: d.x, py: d.y, angle: d.angle + (Math.random() - 0.5) * 0.3, speed: 19, damage: S.shoot * (o.dmgMult || 1), life: S.range / (19 * 60) + 0.1, owner: o.id, color: '#d9f99d', size: 3.5, knock: 20, bounces: 0, trail: 20, summon: true }); AudioSys.playAt('smg', d.x, d.y, 0.1); }
         } else if (d.home && dist(d.x, d.y, d.home.x, d.home.y) > 50) { tx = d.home.x; ty = d.home.y; }
         if (tx !== null) {
             const a = Math.atan2(ty - d.y, tx - d.x), nx = d.x + Math.cos(a) * S.sp * dt, ny = d.y + Math.sin(a) * S.sp * dt;
@@ -230,7 +230,7 @@ updateStrikes = function (dt) {
         const s = strikes[i];
         if (s.kind === 'paraLand' && s.t <= 0) {
             strikes.splice(i, 1); const o = players.find(q => q.id === s.owner);
-            if (o && o.hp > 0) { const d = summon(o, 'para', s.x, s.y); d.home = { x: d.x, y: d.y }; if (has(o, 'radioman')) { d.hp += 30; d.maxHp += 30; } ring(s.x, s.y, 6, 50, '#a3e635', 0.4, 3); smoke(s.x, s.y, 5, 'rgba(160,170,150,0.4)', 16); }
+            if (o && o.hp > 0) { const d = summon(o, 'para', s.x, s.y); d.home = { x: d.x, y: d.y }; if (has(o, 'radioman')) { d.hp += 15; d.maxHp += 15; } ring(s.x, s.y, 6, 50, '#a3e635', 0.4, 3); smoke(s.x, s.y, 5, 'rgba(160,170,150,0.4)', 16); }
         } else if (s.kind === 'wallDrop' && s.t <= 0) { strikes.splice(i, 1); landWall(s); }
         else if (s.kind === 'htSpin') {
             s.tick -= dt; const o = players.find(q => q.id === s.owner);
@@ -252,7 +252,7 @@ updateStrikes = function (dt) {
 };
 
 /* ============================== 3 THẺ MỚI ============================== */
-defS('paraSquad', '🪂', 'Lính Nhảy Dù', 24, 'engage', 'Mở bảng chiến thuật, chọn 1 điểm: 3 lính dù có súng nhảy xuống, giữ vị trí và bắn địch trong 16 giây.', p => { const c = p.pickTarget ? p.pickTarget.a : autoPoint(p); paraDrop(p, c.x, c.y, 3); }, 2000);
+defS('paraSquad', '🪂', 'Lính Nhảy Dù', 30, 'engage', 'Mở bảng chiến thuật, chọn 1 điểm: 3 lính dù (40 máu, súng yếu) nhảy xuống, giữ vị trí và bắn địch trong 10 giây.', p => { const c = p.pickTarget ? p.pickTarget.a : autoPoint(p); paraDrop(p, c.x, c.y, 3); }, 2000);
 defS('sweepStrike', '🌊', 'Đợt Càn', 40, 'engage', 'Mở bảng chiến thuật, chọn điểm đầu và cuối (tối đa 1100): một đợt bom 3 hàng càn quét từ đầu tới cuối (50 sát thương mỗi quả, trúng nhiều quả liền).', p => { const t = p.pickTarget || (() => { const e = autoPoint(p), a = Math.atan2(e.y - p.y, e.x - p.x); return { a: { x: p.x + Math.cos(a) * 120, y: p.y + Math.sin(a) * 120 }, b: { x: e.x + Math.cos(a) * 300, y: e.y + Math.sin(a) * 300 } }; })(); sweepStrike(p, t.a, t.b); }, 2000);
 defS('structWall', '🧱', 'Cấu Trúc Hoá Chiến Thuật', 26, 'defend', 'Mở bảng chiến thuật, vẽ thoải mái (tổng 900). Bấm xác nhận: các khối tường rơi xuống dọc nét vẽ, đè trúng địch gây 55 sát thương + choáng, chặn di chuyển và đạn, phá được, tự biến mất sau 20 giây.', p => {
     let pts = p.pickPts;
@@ -322,7 +322,7 @@ const GAS_COMBO = { smoke: 'gasSmoke', tacSmoke: 'gasTac', smokeCut: 'gasCut', b
     { id: 'quietRadio', a: 'silentTab', b: 'decoySignal', name: 'Bóng Ma Vô Tuyến', desc: 'Mở bảng chiến thuật hoàn toàn im lặng, không ai nghe thấy.' },
     { id: 'netRecon', a: 'satLink', b: 'uavScan', name: 'Mạng Lưới Trinh Sát', desc: 'Trinh Sát UAV bay thêm 3 giây.' },
     { id: 'wiretap', a: 'eavesdrop', b: 'quickLink', name: 'Đánh Chặn Tín Hiệu', desc: 'Khi địch mở bảng chiến thuật, kỹ năng bảng của bạn hồi nhanh 3 giây.' },
-    { id: 'paraElite', a: 'paraSquad', b: 'radioman', name: 'Biệt Kích Dù', desc: 'Lính Nhảy Dù thả 5 lính thay vì 3.' },
+    { id: 'paraElite', a: 'paraSquad', b: 'radioman', name: 'Biệt Kích Dù', desc: 'Lính Nhảy Dù thả 4 lính thay vì 3.' },
     { id: 'fortWall', a: 'structWall', b: 'bigPayload', name: 'Pháo Đài', desc: 'Tường Cấu Trúc Hoá bền gấp đôi.' },
     { id: 'doomSweep', a: 'sweepStrike', b: 'fastComms', name: 'Càn Quét Chớp Nhoáng', desc: 'Đợt Càn tiến nhanh gấp đôi.' }
 ].forEach(c => { COMBOS.push(c); (COMBOS_OF[c.a] = COMBOS_OF[c.a] || []).push(c); (COMBOS_OF[c.b] = COMBOS_OF[c.b] || []).push(c); });
@@ -359,7 +359,7 @@ tacNoise = function (p) {
 const _uav18 = uavScan;
 uavScan = function (p, x, y) { _uav18(p, x, y); if (combo(p, 'netRecon')) { const s = strikes[strikes.length - 1]; if (s && s.kind === 'uav') { s.t += 3; const z = zones.find(q => q.type === 'flareLight' && q.owner === p.id && q.x === x && q.y === y); if (z) { z.t += 3; z.maxT = z.t; } } } };
 const _para18 = paraDrop;
-paraDrop = function (p, x, y, n) { return _para18(p, x, y, n === 3 && combo(p, 'paraElite') ? 5 : n); };
+paraDrop = function (p, x, y, n) { return _para18(p, x, y, n === 3 && combo(p, 'paraElite') ? 4 : n); };
 const _landWall18 = landWall;
 landWall = function (s) { _landWall18(s); const o = players.find(q => q.id === s.owner); if (o && combo(o, 'fortWall')) { const w = obstacles[obstacles.length - 1]; w.hp = w.maxHp = 360; } };
 const _sweep18 = sweepStrike;

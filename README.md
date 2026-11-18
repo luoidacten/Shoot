@@ -103,6 +103,13 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - **Khói:** ai đứng trong khói (kể cả bạn) chỉ nhìn thấy khoảng 115 quanh mình.
 - **Thẻ 🔇 Khói Cách Âm:** đứng trong khói thì không phát ra âm thanh, không để dấu chân.
   - Phối hợp với Bước Chân Mèo thành **Bóng Ma Trong Sương**: trong khói được tăng tốc, ra khỏi khói vẫn im lặng thêm 3 giây.
+- **Dấu hiệu mờ của người thường:** không có viền, chỉ chớp loé. Càng lại gần càng chớp nhiều, nhanh và rõ hơn (ở 140: khoảng 1 lần/giây và rất mờ; ở 20: khoảng 9 lần/giây).
+- **Thẻ 🗺️ Bản Đồ Mini:** giống lợi thế Bản Đồ Nhỏ: có minimap, nghe tiếng chân xa hơn, bảng chiến thuật hiện đầy đủ.
+- **13 phối hợp mới:**
+  - Nhà Bản Đồ, Tai Vách Mạch Rừng, Bản Đồ Sóng Âm.
+  - Thợ Săn Trong Khói, Mắt Sương, Tĩnh Lặng Chết Chóc, Cánh Bay Câm Lặng.
+  - Lô Cốt, Chỉ Huy Dù, Tận Thế Kép, Không Vận, Kỹ Thuật Số, Hoả Lực Vệ Tinh.
+- **Lính Nhảy Dù giảm sức mạnh:** 40 máu, súng yếu, sống 10 giây, hồi chiêu 30 giây. Biệt Kích Dù thả 4 lính.
 - **Kỹ thuật cao cấp đủ mọi vũ khí:** Trang Bị Phụ có kỹ năng riêng cho Lục Giảm Thanh, AR Giảm Thanh, Lựu đạn, Lựu Đạn Điện Từ và 8 vũ khí gọi hoả lực. Song Đao không có địch gần thì ném quạt phi đao.
 
 ## Thẻ thoát chết (mỗi hiệp 1 lần mỗi thẻ)
@@ -188,7 +195,7 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
   - 🛰️ Liên Kết Vệ Tinh: bảng hiện đầy đủ như Bản Đồ Nhỏ.
   - ⚡ Đường Truyền Nhanh: kỹ năng dùng bảng hồi nhanh hơn 20%.
 - **3 kỹ năng chiến thuật mới:**
-  - 🪂 Lính Nhảy Dù: 3 lính có súng nhảy xuống điểm chọn, giữ vị trí, sống 16 giây.
+  - 🪂 Lính Nhảy Dù: 3 lính dù (40 máu, súng yếu) nhảy xuống điểm chọn, giữ vị trí, sống 10 giây.
   - 🌊 Đợt Càn: một đợt bom 3 hàng càn quét từ điểm đầu tới điểm cuối (tối đa 1100).
   - 🧱 Cấu Trúc Hoá Chiến Thuật: vẽ tự do trên bảng (900 vật liệu). Các khối tường rơi xuống dọc nét vẽ, đè trúng địch gây 55 sát thương và choáng. Tường chặn di chuyển và đạn, phá được, biến mất sau 20 giây.
 - **3 vũ khí đánh dấu (dùng dần, không cần dùng hết 1 lần):**
