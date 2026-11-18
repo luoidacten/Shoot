@@ -85,7 +85,7 @@ function meleeTechCast(p) {
             smoke(p.x, p.y, 5, 'rgba(120,90,160,0.35)', 12);
             if (!pointInObstacle(bx, by, p.radius)) { p.x = bx; p.y = by; }
             p.angle = Math.atan2(e.y - p.y, e.x - p.x);
-            dealDamage(e, w.damage * 2.2 * m, p.id, { melee: true, angle: p.angle, knock: 160 });
+            dealDamage(e, w.damage * 2.6 * m, p.id, { melee: true, angle: p.angle, knock: 160 });
             floatText(p.x, p.y - 36, '🗡 ÁM SÁT!', '#c084fc', 16);
         } else { p.dashTime = 0.18; p.dashAngle = a; }
     } else if (g === 'blade') {
@@ -100,7 +100,7 @@ function meleeTechCast(p) {
         floatText(p.x, p.y - 36, '🔱 GIÁO XUYÊN!', '#fde68a', 16);
     } else if (g === 'heavy') {
         ring(p.x, p.y, 12, 170, '#fca5a5', 0.5, 8); addShake(10); AudioSys.playAt('slam', p.x, p.y, 0.5);
-        enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(p.x, p.y, e.x, e.y) < 170 + e.radius) { dealDamage(e, 30 * m, p.id, { melee: true, knock: 350, angle: Math.atan2(e.y - p.y, e.x - p.x) }); e.stun = Math.max(e.stun, 0.8); } });
+        enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(p.x, p.y, e.x, e.y) < 170 + e.radius) { dealDamage(e, 38 * m, p.id, { melee: true, knock: 350, angle: Math.atan2(e.y - p.y, e.x - p.x) }); e.stun = Math.max(e.stun, 0.9); } });
         floatText(p.x, p.y - 36, '💥 ĐỊA CHẤN!', '#fca5a5', 16);
     } else if (g === 'guard') {
         p.st.reflect = Math.max(p.st.reflect, 2); p.st.shield = Math.max(p.st.shield, 40); p.st.shieldT = Math.max(p.st.shieldT, 2.5);
@@ -108,7 +108,7 @@ function meleeTechCast(p) {
     } else if (g === 'saw') {
         p.st.rage = Math.max(p.st.rage, 3); p.st.haste = Math.max(p.st.haste, 3);
         floatText(p.x, p.y - 36, '⚙ CUỒNG CƯA!', '#f97316', 16);
-    } else { shockwave(p.x, p.y, p.id, 140, 28 * m); floatText(p.x, p.y - 36, '👊 ĐẤM NGÀN CÂN!', '#fde047', 16); }
+    } else { shockwave(p.x, p.y, p.id, 150, 36 * m); floatText(p.x, p.y - 36, '👊 ĐẤM NGÀN CÂN!', '#fde047', 16); }
 }
 defS('meleeTech', '🥋', 'Kỹ Thuật Cận Chiến Cao Cấp', 8, 'engage',
     '<b>Nội tại:</b> cận chiến +15% sát thương, +20% chí mạng.<br><b>Kỹ năng đổi theo vũ khí:</b> Dao/Song Đao = Ám Sát (dịch ra sau lưng địch, đâm ×2.2) · Katana/Kiếm = Nhất Kiếm (lướt chém xuyên) · Giáo = Giáo Xuyên (đâm xa & kéo về) · Búa/Rìu/Đại Đao = Địa Chấn (choáng vùng) · Khiên = Phản Đòn · Cưa Máy = Cuồng Cưa · tay không = Đấm Ngàn Cân.',

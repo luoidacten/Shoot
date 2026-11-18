@@ -126,6 +126,12 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - Cận chiến: Katana (chém vỡ đạn 25%/75%, lần 3 lướt đánh dấu nổ sau 2 giây), Kiếm Ánh Sáng (6 giây cường hoá, hư ảnh, chém bay đạn), Kiếm Liễu (kiếm khí, lần 5 vẽ ngôi sao), Giáo (nhảy đâm xuống), Rìu (Song Rìu gây cháy), Đại Đao (thế đỡ + phản kích, giữ để kéo lê rồi nhảy chém), Cưa Máy (Cuồng Cưa miễn khống), Khiên Tròn (ném khiên hồi máu + giáp).
 - Súng: Ổ Quay (nhắm rồi tự bắn mọi mục tiêu), Song Súng (cầu năng lượng), Gatling (xoay nòng 360°), Bắn tỉa (làm chậm, không đường đạn), Cung (mưa tên), Railgun (khiên + 2 drone trinh sát), Phun Lửa (cầu lửa, vệt lửa), Phóng Lựu, Pháo, Súng Điện, Súng Năng Lượng, Súng Lưới, Boomerang cũng có P + S riêng.
 
+## Vùng ngắm kỹ năng & hiệu ứng
+- Kỹ năng vũ khí của Bậc Thầy có vùng ngắm đúng hình: dải chém (Katana, Kiếm Liễu, Khiên Tròn…), hình nón (Ổ Quay, Bắn tỉa, Pháo…), vùng rơi (Giáo, Mưa Tên, nhảy chém Đại Đao). Kỹ năng tại chỗ (Búa, Rìu, Cưa, Khiên, SMG, Gatling, Railgun, Súng Điện) chạm là dùng.
+- Kỹ năng có thêm hiệu ứng: hư ảnh khi lướt, kiếm khí phát sáng, sóng chấn khi đáp đất.
+- Độ bền vũ khí cận chiến ×2.5. Kỹ năng cận chiến mạnh hơn ~25%; hồi chiêu Katana 3.6 giây, Kiếm Liễu 3.2 giây.
+- Nhảy đập: qua 50% thời gian lấy đà là đã bay lên trời — không bị đánh trúng, không bị khống chế.
+
 ## Đòn đánh thường (mọi người chơi)
 - Dao 50% chí mạng. Đại Đao chém sau cảnh báo 1 giây nhưng rộng hơn. Nhảy đập (Búa, Đại Đao, Giáo) có thời gian lấy đà 1–1.5 giây và vòng cảnh báo vùng đáp.
 - Cưa Máy: chạm = chém mạnh; giữ = rồ máy (chạy nhanh, giảm sát thương nhận, cưa liên tục thẳng phía trước, rất ồn).
