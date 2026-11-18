@@ -119,7 +119,7 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - Thông báo Chiến Công Đầu, Hạ Gục Kép/Ba/Tứ Sát/Huỷ Diệt, Chuỗi Thắng; huy hiệu 🔥 mạng và 🏆 chuỗi thắng cạnh bảng máu.
 - Hoạt ảnh đánh: vung vũ khí, lao người khi đâm, giật lùi khi bắn, lắc lư khi chạy.
 - Phép cần hướng (Pháo Tên Lửa, Tường Băng, Bom Mù, Tốc Biến): kéo nút để ngắm, thả ra mới dùng, kéo về giữa để huỷ.
-- Khiên Tròn 2 dạng: nút đánh giữ = ném khiên; nút B chạm = dựng khiên trước mặt / thu về.
+- Khiên Tròn 2 dạng trên cùng nút đánh: chạm = dựng khiên trước mặt (chạm lại để thu), giữ rồi thả = ném khiên.
 
 ## Tiến hoá S-P-S (Kỹ năng · Nội tại · Đặc biệt)
 Chỉ xuất hiện khi đủ thẻ điều kiện, và thay thế thẻ kỹ năng gốc:
