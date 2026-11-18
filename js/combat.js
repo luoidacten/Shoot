@@ -234,6 +234,7 @@ function updateBullets(dt) {
                 if (o.ownerPass === b.owner) continue; // bắn xuyên bao cát của mình
                 const t = segRect(b.px, b.py, b.x, b.y, o);
                 if (t < 0) continue;
+                if (b.ghostN > 0 || (b.ghostSeen && b.ghostSeen.has(o))) { if (!b.ghostSeen) b.ghostSeen = new Set(); if (!b.ghostSeen.has(o)) { b.ghostSeen.add(o); b.ghostN--; } continue; } // đạn xuyên tường
                 if (b.boomerang) { b.back = true; b.x = b.px; b.y = b.py; spark(b.x, b.y, '#f59e0b', 3, 120); break; }
                 const hx = b.px + (b.x - b.px) * t, hy = b.py + (b.y - b.py) * t;
                 if (b.pierce) { if (!b.pierced) { b.pierced = new Set(); } if (!b.pierced.has(o)) { b.pierced.add(o); damageObstacle(o, 40); spark(hx, hy, '#e9d5ff', 6, 200); } continue; }
