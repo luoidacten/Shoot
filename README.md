@@ -88,6 +88,23 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - 6 thẻ tầm nhìn: Mắt Kiểm Soát, Kính Nhìn Đêm, Kính Nhiệt, Ống Nhòm, Sóng Âm, Giác Quan Thứ Sáu.
 - 2 kỹ năng: Tâm Ngắm Hoàn Hảo (3 giây toàn chí mạng), Đạn Đánh Dấu.
 
+## Tùy Hứng · Tầm nhìn chuẩn · Khói
+- **Lợi thế 🎰 Tùy Hứng:**
+  - Luôn có 3 ô kỹ năng ngẫu nhiên, 20% ra bản tiến hoá.
+  - Dùng xong một kỹ năng thì ô đó tự quay gacha ra kỹ năng mới.
+  - Hồi chiêu cố định 12 giây, mỗi hòm nhặt giảm 0.25 giây (tối thiểu 3 giây).
+  - Bù lại: mất lần nâng cấp đầu và không được chọn thẻ kỹ năng khi nâng cấp.
+- **Tầm nhìn chuẩn:**
+  - Nguồn tầm nhìn chuẩn: thẻ tầm nhìn, Ưng Trạm, Drone, Drone Trinh Sát, Pháo Sáng, UAV, Radar, nón đèn pin.
+  - Trong vùng của chúng thấy RÕ bẫy, hòm bẫy, thùng giả và địch tàng hình, có nhãn cảnh báo.
+  - Người thường chỉ thấy dấu hiệu MỜ khi đứng rất gần.
+  - Mắt Kiểm Soát chỉ lộ bẫy, không lộ địch.
+- **Radar (phép):** 5 giây tầm nhìn chuẩn bán kính 650, soi sáng toàn vùng xuyên tường và sương mù.
+- **Khói:** ai đứng trong khói (kể cả bạn) chỉ nhìn thấy khoảng 115 quanh mình.
+- **Thẻ 🔇 Khói Cách Âm:** đứng trong khói thì không phát ra âm thanh, không để dấu chân.
+  - Phối hợp với Bước Chân Mèo thành **Bóng Ma Trong Sương**: trong khói được tăng tốc, ra khỏi khói vẫn im lặng thêm 3 giây.
+- **Kỹ thuật cao cấp đủ mọi vũ khí:** Trang Bị Phụ có kỹ năng riêng cho Lục Giảm Thanh, AR Giảm Thanh, Lựu đạn, Lựu Đạn Điện Từ và 8 vũ khí gọi hoả lực. Song Đao không có địch gần thì ném quạt phi đao.
+
 ## Thẻ thoát chết (mỗi hiệp 1 lần mỗi thẻ)
 - 💉 **Adrenaline**: còn 1 máu, bất tử 3 giây, +40% sát thương; không hạ được ai thì chết, hạ được thì sống với 30% máu.
 - 🪢 **Thập Tử Nhất Sinh**: còn 1 máu, bất tử 1 giây.
