@@ -163,6 +163,25 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
   - 📡 Trinh Sát UAV: làm lộ địch trong bán kính 420 trong 6 giây.
   - 📦 Thả Dù Tiếp Tế: thả hộp hỗ trợ xuống điểm chọn.
   - Thêm 2 phối hợp: Săn Trong Khói, Hành Lang Khói.
+- **Mở bảng chiến thuật phát tiếng rất lớn (cẩn thận!):** địch trong bán kính 1500 thấy vị trí của bạn 2 giây. Bot cũng phát tiếng khi gọi hoả lực.
+- **5 nâng cấp về bảng chiến thuật:**
+  - 📵 Bảng Cách Âm: tiếng nhỏ hơn 65%.
+  - 📻 Tín Hiệu Mồi: tiếng phát ra ở một điểm giả.
+  - 👂 Máy Nghe Lén: thấy địch mở bảng ở mọi khoảng cách.
+  - 🛰️ Liên Kết Vệ Tinh: bảng hiện đầy đủ như Bản Đồ Nhỏ.
+  - ⚡ Đường Truyền Nhanh: kỹ năng dùng bảng hồi nhanh hơn 20%.
+- **3 kỹ năng chiến thuật mới:**
+  - 🪂 Lính Nhảy Dù: 3 lính có súng nhảy xuống điểm chọn, giữ vị trí, sống 16 giây.
+  - 🌊 Đợt Càn: một đợt bom 3 hàng càn quét từ điểm đầu tới điểm cuối (tối đa 1100).
+  - 🧱 Cấu Trúc Hoá Chiến Thuật: vẽ tự do trên bảng (900 vật liệu). Các khối tường rơi xuống dọc nét vẽ, đè trúng địch gây 55 sát thương và choáng. Tường chặn di chuyển và đạn, phá được, biến mất sau 20 giây.
+- **3 vũ khí đánh dấu (dùng dần, không cần dùng hết 1 lần):**
+  - 🎯 Thả Bom Đánh Dấu: 3 lượt bom 110.
+  - 🪖 Thả Lính Đánh Dấu: 3 lính dù.
+  - 🧭 Thả Bom Định Hướng: vẽ đường bom, có 200 điện lượng.
+- **Lợi thế 📟 Bản Đồ Chiến Thuật:** bảng hiện đầy đủ như Bản Đồ Nhỏ. Mỗi hiệp có sẵn 1 vũ khí đánh dấu; hòm vũ khí chỉ ra 3 vũ khí đánh dấu. Tiếng ồn khi mở bảng nhỏ hơn một nửa.
+- **Khói + Bom Độc:** mọi loại khói (Bom Khói, Khói Chiến Thuật, Khói Cắt, Khói Mù Bao Phủ) phối hợp với Bom Độc thành khói độc. Thêm 6 phối hợp khác cho các thẻ chiến thuật.
+- **Kỹ Thuật Cao làm lại:** mỗi vũ khí có một kỹ năng riêng, ví dụ Dao = Đâm Lén, Katana = Nhất Thiểm, Búa = Động Đất, Cưa = Cưa Xoáy, Railgun = Xuyên Tâm, Cung = Mưa Tên, Súng Điện = Bão Điện.
+- **Vũ khí nhảy:** từ lúc lấy đà tới lúc đáp tối đa 0.75 giây.
 - **Vũ khí gọi hoả lực cũng dùng bảng chiến thuật**: Bộ Đàm Không Kích, Máy Tính Bảng Thả Bom, Bộ Chỉ Điểm Laser. Thêm 2 vũ khí mới: 🛩️ Bộ Đàm Khói Cắt và ☄️ Bộ Định Vị Vệ Tinh.
 - **Bản đồ chọn điểm** không dừng trận. Bình thường chỉ hiện vị trí của bạn; có lợi thế Bản Đồ Nhỏ thì hiện thêm tường, bụi, vòng bo, địch, tiếng động.
 - **5 phép:** Không Kích Nhẹ, Pháo Sáng, Rải Mìn, Màn Khói, Tiếp Tế Khẩn (+3 phối hợp phép).
