@@ -73,6 +73,8 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - 🗡️ **Cận Chiến**: hòm chỉ ra vũ khí cận chiến; cận chiến +25% sát thương, chạy nhanh hơn 10%.
 - 🥷 **Lẩn Trốn**: tiếng chân nhỏ, chỉ nghe được trong 380; nửa số dấu chân; người nhỏ hơn.
 - 👑 **Con Đường Độc Tôn**: không nhận thẻ kỹ năng / nội tại. Mỗi lần nâng cấp nhận 2 gói chỉ số, cấp tăng dần theo lần nâng cấp: cấp I ×1.5 → cấp V ×3.5.
+- ⚔️ **Bậc Thầy Cận Chiến**: có sẵn Kỹ Thuật Cận Chiến Cao Cấp, nhận ít hơn 18% sát thương đạn & nổ; mất lần nâng cấp đầu.
+- 🏹 **Bậc Thầy Tầm Xa**: có sẵn Trang Bị Phụ, tầm nhìn/tầm bắn/tốc bắn +15%; -20 máu tối đa và mất lần nâng cấp đầu.
 
 ## Nâng cấp chỉ số
 - 14 gói chỉ số (dùng cho Độc Tôn): Máu, Sát Thương, Tốc Chạy, Hồi Chiêu, Tốc Đánh, Giáp, **Tầm Nhìn**, **Chí Mạng**, **Chính Xác**, **Hồi Máu**, và 4 gói kép: **Toàn Diện**, **Chiến Binh**, **Thợ Săn**, **Linh Hoạt**.
@@ -98,6 +100,26 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - 9 kỹ năng: Bầy Sói, Người Đá, Bầy Ong Máy, Drone Y Tế, Gọi Hồn, Ụ Súng Máy, Pháo Cối, Tháp Lửa, Tháp Tesla. Tháp Pháo cũ giờ cũng phá được.
 - 11 nội tại: Kỹ Sư, Ép Xung, Chủ Thú, Thủ Lĩnh Bầy, Linh Hồn Triệu Hồi, Ụ Tự Huỷ, Ụ Liên Kết, Nhặt Phế Liệu, Khế Ước Máu, Pháo Đài, Chỉ Huy.
 - Lính và ụ súng bị đạn địch bắn phá được, tự tìm địch, có thanh máu. 16 phối hợp riêng (Sói Đầu Đàn, Quá Tải, Bẫy Nổ, Chỉ Điểm…).
+
+## Bot thông minh (Utility AI)
+- Mỗi bot có 1 trong 8 tính cách ẩn: Hổ Báo, Thận Trọng, Rình Rập, Du Kích, Tham Lam, Xạ Thủ, Kẻ Cơ Hội, Chiến Thuật Gia. Tính cách chỉ lộ ở bảng tổng kết.
+- Cứ 0.3 giây bot chấm điểm 7 ý định (Đánh, Thả Diều, Vòng Sườn, Rút Lui, Nhặt Đồ, Phục Kích, Truy Lùng) theo tính cách, máu, vũ khí, tầm nhìn rồi theo đuổi ý định cao điểm nhất. Chọn mục tiêu cũng bằng điểm (ưu tiên kẻ yếu, kẻ vừa đánh mình).
+- Lính triệu hồi cũng có tính cách: 😠 Hung Hãn, 🛡️ Trung Thành, 😨 Nhát Gan, 😏 Tinh Ranh. Lính và ụ súng được vẽ lại bằng hình vector.
+
+## Thẻ vũ khí & cổng
+- **Kỹ Thuật Cận Chiến Cao Cấp** (S): chiêu đổi theo vũ khí cận chiến (Ám Sát, Nhất Kiếm, Giáo Xuyên, Địa Chấn, Phản Đòn, Cuồng Cưa).
+- **Trang Bị Phụ** (S): phụ kiện đổi theo súng (phóng lựu dưới nòng AR, băng trống, đạn sên, ống ngắm nhiệt, đạn nảy…).
+- **Giáp Chống Đạn** (S): trâu hơn, giảm sát thương đạn; kỹ năng Tấm Kevlar.
+- **Cổng Không Gian** (S): 2 cổng A/B, người và đạn đi qua được. **Xuyên Tường** (P): đi thẳng vào tường thì xuyên qua, mỗi tường hồi riêng.
+- **Cổng Không Gian (S-P-S)** (tiến hoá từ 2 thẻ trên): hồi chiêu ngắn, đạn xuyên 1 tường, cổng bắn phụ khi bạn bắn.
+- 10 phối hợp mới (Kiếm Thánh, Chiến Binh Thép, Thợ Súng Bậc Thầy, Cổng Băng, Bóng Ma Xuyên Tường…).
+
+## Khác
+- Đại Đao chỉ có trong hòm thính huyền thoại, nerf nhẹ. Gatling bắn xa hơn, sấy 2 giây thì đạn xuyên tường. Súng phun lửa phun càng lâu càng xa.
+- Thông báo Chiến Công Đầu, Hạ Gục Kép/Ba/Tứ Sát/Huỷ Diệt, Chuỗi Thắng; huy hiệu 🔥 mạng và 🏆 chuỗi thắng cạnh bảng máu.
+- Hoạt ảnh đánh: vung vũ khí, lao người khi đâm, giật lùi khi bắn, lắc lư khi chạy.
+- Phép cần hướng (Pháo Tên Lửa, Tường Băng, Bom Mù, Tốc Biến): kéo nút để ngắm, thả ra mới dùng, kéo về giữa để huỷ.
+- Khiên Tròn 2 dạng: nút đánh giữ = ném khiên; nút B chạm = dựng khiên trước mặt / thu về.
 
 ## Tiến hoá S-P-S (Kỹ năng · Nội tại · Đặc biệt)
 Chỉ xuất hiện khi đủ thẻ điều kiện, và thay thế thẻ kỹ năng gốc:
