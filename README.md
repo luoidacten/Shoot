@@ -123,7 +123,7 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - Khiên Tròn 2 dạng trên cùng nút đánh: chạm = dựng khiên trước mặt (chạm lại để thu), giữ rồi thả = ném khiên.
 
 ## Bộ kỹ năng vũ khí của Bậc Thầy
-- Cận chiến: Katana (chém vỡ đạn 25%/75%, lần 3 lướt đánh dấu nổ sau 2 giây), Kiếm Ánh Sáng (6 giây cường hoá, hư ảnh, chém bay đạn), Kiếm Liễu (kiếm khí, lần 5 vẽ ngôi sao), Giáo (nhảy đâm xuống), Rìu (Song Rìu gây cháy), Đại Đao (thế đỡ + phản kích, giữ để kéo lê rồi nhảy chém), Cưa Máy (Cuồng Cưa miễn khống), Khiên Tròn (ném khiên hồi máu + giáp).
+- Cận chiến: Dao (Ảnh Sát: lướt chém rồi tàng hình), Song Đao (Ám Sát + 4 nhát chảy máu), Búa (Nện Đất 3 vòng), Khiên (Xung Kích), Tay không (Liên Hoàn Quyền), Katana (chém vỡ đạn 25%/75%, lần 3 lướt đánh dấu nổ sau 2 giây), Kiếm Ánh Sáng (6 giây cường hoá, hư ảnh, chém bay đạn), Kiếm Liễu (kiếm khí, lần 5 vẽ ngôi sao), Giáo (nhảy đâm xuống), Rìu (Song Rìu gây cháy), Đại Đao (thế đỡ + phản kích, giữ để kéo lê rồi nhảy chém), Cưa Máy (Cuồng Cưa miễn khống), Khiên Tròn (ném khiên hồi máu + giáp).
 - Súng: Ổ Quay (nhắm rồi tự bắn mọi mục tiêu), Song Súng (cầu năng lượng phóng điện), Gatling (Cuồng Phong: xả đạn loạn xạ), Bắn tỉa (Mắt Diều Hâu: tụ lực tức thì, toàn chí mạng), SMG (Băng Trống: bắn nhanh ×2, đạn nảy), Shotgun (đạn sên nổ mảnh), Cung (mưa tên), Railgun (khiên + 2 drone trinh sát), Phun Lửa (cầu lửa, vệt lửa), Phóng Lựu, Pháo, Súng Điện, Súng Năng Lượng, Súng Lưới, Boomerang cũng có P + S riêng.
 
 ## Vùng ngắm kỹ năng & hiệu ứng
