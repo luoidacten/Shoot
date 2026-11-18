@@ -102,10 +102,9 @@ drawTouchControls = function (p) {
     });
     // Khiên Tròn: nhãn riêng cho 2 nút
     const w = getCurrentWeapon(p);
-    if (w.id === 'ROUNDSHIELD' && L.B) {
+    if (w.id === 'ROUNDSHIELD') {
         const tag = (b, t, c) => { ctx.save(); ctx.font = `700 9px ${FONT}`; const tw = ctx.measureText(t).width + 10; ctx.fillStyle = 'rgba(6,10,24,0.8)'; rrect(ctx, b.x - tw / 2, b.y + b.r + 3, tw, 14, 7); ctx.fill(); ctx.fillStyle = c; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, b.x, b.y + b.r + 10); ctx.restore(); };
-        tag(L.A, w.out && !w.planted ? 'ĐANG BAY' : 'GIỮ: NÉM', '#7dd3fc');
-        tag(L.B, w.planted ? 'THU KHIÊN' : '🧱 DỰNG', '#fde68a');
+        tag(L.A, w.planted ? 'CHẠM: THU KHIÊN' : w.out ? 'ĐANG BAY' : 'CHẠM: DỰNG · GIỮ: NÉM', '#fde68a');
     }
 };
 // spellAim (tactics.js) và Tốc Biến (extra.js) ưu tiên hướng vừa kéo
@@ -119,8 +118,8 @@ flashMove = function (p, D) {
 };
 
 /* ============================== KHIÊN TRÒN: 2 DẠNG ============================== */
-// Nút đánh: chạm = húc, giữ rồi thả = NÉM khiên nảy qua 3 mục tiêu (như cũ)
-// Nút B: chạm = DỰNG khiên trước mặt thành bức chắn (140 máu, 6 giây), chạm lần nữa = thu về; giữ = vứt vũ khí
+// Nút đánh: CHẠM = DỰNG khiên trước mặt thành bức chắn (140 máu, 6 giây), chạm lần nữa = thu về
+//           GIỮ rồi thả = NÉM khiên nảy qua 3 mục tiêu. (Bot vẫn húc khiên như cũ.)
 function toggleShieldWall(p, w) {
     if (w.planted) {
         const i = obstacles.indexOf(w.planted); if (i >= 0) obstacles.splice(i, 1);
@@ -140,17 +139,14 @@ function toggleShieldWall(p, w) {
     }
     floatText(p.x, p.y - 30, 'Không đủ chỗ', '#94a3b8', 12);
 }
-const _handleThrow8 = handleThrowButton;
-handleThrowButton = function (p, w, input, dt, allowAct, enemy) {
-    if (w.id !== 'ROUNDSHIELD') return _handleThrow8(p, w, input, dt, allowAct, enemy);
-    if (!allowAct) { p.bHeldT = 0; return; }
-    if (input.b) {
-        p.bHeldT = (p.bHeldT || 0) + dt;
-        if (p.bHeldT >= 0.35 && !p.bThrown) { p.bThrown = true; if (!w.out) throwWeapon(p, w, enemy); }
-    } else if (p.bHeldT > 0) {
-        if (!p.bThrown) toggleShieldWall(p, w);
-        p.bHeldT = 0; p.bThrown = false;
+const _fireMelee8 = fireMelee;
+fireMelee = function (p, w, ang, charge, mult, isSuper, enemy) {
+    if (w.id === 'ROUNDSHIELD' && !p.isBot) {
+        if (w.planted) return toggleShieldWall(p, w);       // chạm khi đang dựng: thu về
+        if (w.out) return;                                   // đang bay
+        if (charge < 0.9) return toggleShieldWall(p, w);     // chạm: dựng khiên
     }
+    return _fireMelee8(p, w, ang, charge, mult, isSuper, enemy); // giữ đủ lực: ném
 };
 // khiên dựng bị phá / hết giờ → về tay
 const _upe8 = updatePartyExtras;
@@ -166,7 +162,7 @@ drawHUD = function (W, H, now) {
     if (!me || isTouch || me.hp <= 0 || getCurrentWeapon(me).id !== 'ROUNDSHIELD') return;
     const w = getCurrentWeapon(me);
     ctx.save(); ctx.font = `700 11px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(253,230,138,0.9)';
-    ctx.fillText(`🔵 Chuột trái / F: chạm húc · giữ NÉM khiên   ·   Chuột phải / G: ${w.planted ? 'THU khiên' : 'DỰNG khiên'}`, W / 2, H - 62);
+    ctx.fillText(w.planted ? '🔵 Chuột trái / F: chạm để THU khiên' : '🔵 Chuột trái / F: chạm DỰNG khiên · giữ rồi thả NÉM khiên', W / 2, H - 62);
     ctx.restore();
 };
 // vẽ khiên dựng (máy chủ / chơi offline): đè hình khiên lên bức chắn
