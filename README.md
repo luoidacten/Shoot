@@ -122,6 +122,15 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - Phép cần hướng (Pháo Tên Lửa, Tường Băng, Bom Mù, Tốc Biến): kéo nút để ngắm, thả ra mới dùng, kéo về giữa để huỷ.
 - Khiên Tròn 2 dạng trên cùng nút đánh: chạm = dựng khiên trước mặt (chạm lại để thu), giữ rồi thả = ném khiên.
 
+## Bộ kỹ năng vũ khí của Bậc Thầy
+- Cận chiến: Katana (chém vỡ đạn 25%/75%, lần 3 lướt đánh dấu nổ sau 2 giây), Kiếm Ánh Sáng (6 giây cường hoá, hư ảnh, chém bay đạn), Kiếm Liễu (kiếm khí, lần 5 vẽ ngôi sao), Giáo (nhảy đâm xuống), Rìu (Song Rìu gây cháy), Đại Đao (thế đỡ + phản kích, giữ để kéo lê rồi nhảy chém), Cưa Máy (Cuồng Cưa miễn khống), Khiên Tròn (ném khiên hồi máu + giáp).
+- Súng: Ổ Quay (nhắm rồi tự bắn mọi mục tiêu), Song Súng (cầu năng lượng), Gatling (xoay nòng 360°), Bắn tỉa (làm chậm, không đường đạn), Cung (mưa tên), Railgun (khiên + 2 drone trinh sát), Phun Lửa (cầu lửa, vệt lửa), Phóng Lựu, Pháo, Súng Điện, Súng Năng Lượng, Súng Lưới, Boomerang cũng có P + S riêng.
+
+## Đòn đánh thường (mọi người chơi)
+- Dao 50% chí mạng. Đại Đao chém sau cảnh báo 1 giây nhưng rộng hơn. Nhảy đập (Búa, Đại Đao, Giáo) có thời gian lấy đà 1–1.5 giây và vòng cảnh báo vùng đáp.
+- Cưa Máy: chạm = chém mạnh; giữ = rồ máy (chạy nhanh, giảm sát thương nhận, cưa liên tục thẳng phía trước, rất ồn).
+- Cung: bắn liên tên thì lướt nhẹ và vô hình; giữ thêm 0.6 giây sau khi đầy lực = mũi tên lớn xuyên thủng mọi thứ.
+
 ## Gọi hoả lực (20 thứ mới)
 - **10 thẻ:** Không Kích (máy bay bay xuyên bản đồ theo hướng chọn, rải bom), Thả Bom (mở bản đồ, chọn A rồi B), Laser Vệ Tinh (chọn A→B, tia laser quét), Pháo Kích, Bom Napalm; Liên Lạc Nhanh, Tải Trọng Lớn, Lính Liên Lạc, Hầm Trú Ẩn, Chỉ Điểm Mục Tiêu. 5 phối hợp mới.
 - **Bản đồ chọn điểm** không dừng trận. Bình thường chỉ hiện vị trí của bạn; có lợi thế Bản Đồ Nhỏ thì hiện thêm tường, bụi, vòng bo, địch, tiếng động.

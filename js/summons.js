@@ -132,7 +132,8 @@ const SUMMON = {
     mg:     { label: 'Ụ SÚNG MÁY', icon: '🔫', hp: 120, r: 16, t: 10, shoot: 4, rate: 0.12, range: 420, spread: 0.15, turret: true },
     mortar: { label: 'PHÁO CỐI', icon: '💣', hp: 100, r: 16, t: 10, lob: 55, rate: 1.6, range: 650, minR: 140, turret: true },
     flame:  { label: 'THÁP LỬA', icon: '🔥', hp: 110, r: 15, t: 9, flame: 3, rate: 0.08, range: 170, turret: true },
-    tesla:  { label: 'THÁP TESLA', icon: '⚡', hp: 90, r: 14, t: 10, zap: 14, rate: 0.9, range: 260, turret: true }
+    tesla:  { label: 'THÁP TESLA', icon: '⚡', hp: 90, r: 14, t: 10, zap: 14, rate: 0.9, range: 260, turret: true },
+    rdrone: { label: 'DRONE TRINH SÁT', icon: '🛰️', hp: 30, r: 9, t: 8, orbit: 70, fly: true, aura: 170 }
 };
 const SM_BY_LABEL = {};
 for (const k in SUMMON) { SM_BY_LABEL[SUMMON[k].label] = k; KIND_BY_LABEL[SUMMON[k].label] = 'sm'; }
@@ -311,6 +312,7 @@ function updateSummons(dt) {
             d.ph += dt * 2.4;
             const tx = o.x + Math.cos(d.ph) * S.orbit, ty = o.y + Math.sin(d.ph) * S.orbit;
             d.x += (tx - d.x) * Math.min(1, dt * 8); d.y += (ty - d.y) * Math.min(1, dt * 8);
+            if (S.aura) { enemiesOf(o).forEach(e => { if (dist(d.x, d.y, e.x, e.y) < S.aura) { spotFor(e, o.id, 0.3); if (!(e.st.cleanseT > 0)) e.st.slow = Math.max(e.st.slow || 0, 0.3); } }); return; }
             if (S.heal) { const rate = combo(o, 'medicSoul') ? 9 : S.heal; if (o.hp < o.maxHp) { o.hp = Math.min(o.maxHp, o.hp + rate * dt); if (Math.random() < 0.15) spark(o.x, o.y, '#4ade80', 1, 60, 0.5, 2); } return; }
             const e = summonTarget(d, o, S.range);
             if (e) { d.angle = Math.atan2(e.y - d.y, e.x - d.x); if (d.cd <= 0) { d.cd = S.rate; bullets.push({ x: d.x, y: d.y, px: d.x, py: d.y, angle: d.angle + (Math.random() - 0.5) * 0.12, speed: 19, damage: S.shoot * (o.dmgMult || 1), life: S.range / (19 * 60), owner: o.id, color: '#fde047', size: 2, knock: 20, bounces: 0, trail: 10 }); AudioSys.playAt('smg', d.x, d.y, 0.08); } }
@@ -492,6 +494,13 @@ function drawSummonArt(kind, d, r, now) {
         C.fillStyle = '#1f2937'; [-0.35, 0.1].forEach(x => C.fillRect(r * x, -r * 0.6, r * 0.18, r * 1.2));
         C.fillStyle = '#ef4444'; C.beginPath(); C.arc(r * 0.85, 0, 2, 0, Math.PI * 2); C.fill();
         C.fillStyle = '#9ca3af'; C.beginPath(); C.moveTo(-r * 1.05, -2); C.lineTo(-r * 1.5, 0); C.lineTo(-r * 1.05, 2); C.fill();
+        C.restore();
+    } else if (kind === 'rdrone') {
+        C.save(); C.translate(0, -5 + Math.sin(now * 7 + ph) * 2);
+        C.strokeStyle = 'rgba(56,189,248,0.25)'; C.lineWidth = 1; C.beginPath(); C.arc(0, 5, 34, 0, Math.PI * 2); C.stroke();
+        C.fillStyle = '#0f172a'; C.beginPath(); C.moveTo(r * 1.2, 0); C.lineTo(-r * 0.8, -r); C.lineTo(-r * 0.4, 0); C.lineTo(-r * 0.8, r); C.closePath(); C.fill();
+        C.strokeStyle = col; C.lineWidth = 1.5; C.stroke();
+        C.fillStyle = `rgba(56,189,248,${0.6 + Math.sin(now * 10 + ph) * 0.3})`; C.beginPath(); C.arc(r * 0.3, 0, 2.5, 0, Math.PI * 2); C.fill();
         C.restore();
     } else if (kind === 'medic') {
         C.save(); C.translate(0, -5 + Math.sin(now * 6 + ph) * 2);
