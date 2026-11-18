@@ -503,11 +503,40 @@ pickAugmentByIndex = function (pid, idx, fromRemote) {
     checkPhaseDone();
 };
 // nhiều lá (lợi thế 7, phép 10): xếp nhiều hàng; nhãn phím 1..9, 0; tiêu đề theo giai đoạn
+/** Nhiều lựa chọn: lưới ô icon + khung chi tiết. Chạm ô để xem, bấm CHỌN (hoặc chạm lại ô đó) để chốt. Phím số chọn thẳng. */
+function pickName(id, kind) { return kind === 'adv' ? ADVANTAGES[id].name : kind === 'spell' ? SPELLS[id].name : CARDS[id] ? CARDS[id].name : id; }
+function pickIcon(id, kind) { return kind === 'adv' ? ADVANTAGES[id].icon : kind === 'spell' ? SPELLS[id].icon : CARDS[id] ? CARDS[id].icon : '?'; }
+function buildPickGrid(box, ids, kind, owned, onPick) {
+    const html = ids.map(id => cardHTML(id, kind, owned, '')), cls = ids.map(id => cardClass(id, kind, owned));
+    box.innerHTML = '';
+    const tiles = document.createElement('div'); tiles.className = 'pick-tiles';
+    const detail = document.createElement('div'); detail.className = 'pick-detail';
+    let cur = -1;
+    const show = i => {
+        cur = i;
+        tiles.querySelectorAll('.aug-card').forEach((t, k) => t.classList.toggle('focus', k === i));
+        detail.className = 'pick-detail ' + cls[i];
+        detail.innerHTML = `<div class="pick-info">${html[i]}</div><button class="pick-go">✔ CHỌN ${pickName(ids[i], kind).toUpperCase()}</button>`;
+        detail.querySelector('.pick-go').addEventListener('click', () => onPick(i));
+    };
+    ids.forEach((id, i) => {
+        const t = document.createElement('div');
+        t.className = 'aug-card pick-tile ' + cls[i];
+        t.innerHTML = `<span class="aug-key"></span><div class="tile-icon">${pickIcon(id, kind)}</div><div class="tile-name">${pickName(id, kind)}</div>`;
+        t.addEventListener('click', () => { if (cur === i) onPick(i); else { show(i); AudioSys.play('tick', 0.2); } });
+        t.addEventListener('mouseenter', () => { if (!isTouch) show(i); });
+        tiles.appendChild(t);
+    });
+    box.append(tiles, detail);
+    show(0);
+}
 const _renderPick3 = renderPickCards;
 renderPickCards = function (side, pid, ids, kind, owned, minor, bonus, onPick) {
     _renderPick3(side, pid, ids, kind, owned, minor, bonus, onPick);
     const box = $(`p${side}-cards`);
-    box.classList.toggle('many', ids.length > 4);
+    box.classList.remove('many');
+    box.classList.toggle('grid', ids.length > 4);
+    if (ids.length > 4) buildPickGrid(box, ids, kind, owned, onPick);
     if (settings.mode !== 'pvp') box.querySelectorAll('.aug-key').forEach((k, i) => k.textContent = i < 9 ? String(i + 1) : i === 9 ? '0' : '');
     if (pickCtx && pickCtx.label) { const t = document.querySelector(`.p${side}-side .aug-title`); const who = pid === localId() ? 'BẠN' : (players.find(q => q.id === pid) || {}).label || 'P' + pid; t.innerHTML = `<span style="color:${pColor(pid)}">${who}</span> · ${pickCtx.label}`; }
 };
