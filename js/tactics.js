@@ -164,6 +164,7 @@ const PISTOLS = ['PISTOL', 'SPISTOL', 'REVOLVER', 'DUAL'], RIFLES = ['AR', 'SMG'
 function gunDmgBonus(p, wid) {
     let m = 1;
     if (p.pistolPro && PISTOLS.includes(wid)) m *= 1.25;
+    if (combo(p, 'cowboy') && PISTOLS.includes(wid)) m *= 1.1;
     if (p.rifleman && RIFLES.includes(wid)) m *= 1.18;
     if (p.shotgunPro && wid === 'SHOTGUN') m *= 1.15;
     if (p.marksman && MARKSMAN.includes(wid)) m *= 1.2;
@@ -175,6 +176,9 @@ function classCrit(p, wid) {
     if (p.pistolPro && PISTOLS.includes(wid)) c += 0.15;
     if (p.rifleman && RIFLES.includes(wid)) c += 0.08;
     if (p.marksman && MARKSMAN.includes(wid)) c += 0.1;
+    if (combo(p, 'cowboy') && PISTOLS.includes(wid)) c += 0.05;
+    if (combo(p, 'warVet') && RIFLES.includes(wid)) c += 0.08;
+    if (combo(p, 'calmAim') && MARKSMAN.includes(wid) && (p.stillT || 0) >= 1) c += 0.15;
     if (p.lotusT > world.time) c += 0.25;
     return c;
 }
@@ -197,6 +201,10 @@ spawnBullet = function (p, x, y, ang, o) {
         if (sm !== 1) b.life /= sm;
         if (p.deadeye) b.headR = 0.65;
         if (p.lotusT > world.time) b.bounces = Math.max(b.bounces, 1);
+        if (combo(p, 'fateBullet') && PISTOLS.includes(w.id) && w.magSize && w.mag === 0) b.critC = 1;
+        if (w.id === 'SHOTGUN' && combo(p, 'buckshot')) b.knock *= 2;
+        if (w.type === 'GUN' && combo(p, 'lavaRounds')) b.burn = true;
+        if (w.type === 'GUN' && combo(p, 'hotRicochet')) b.bounces += 1;
         if (p.markNext) { b.markShot = true; b.color = '#f472b6'; b.size = Math.max(b.size, 4); p.markNext = false; }
     }
     return b;
@@ -205,7 +213,8 @@ const _makeWeapon3 = makeWeapon;
 makeWeapon = function (id, p) { const w = _makeWeapon3(id, p); if (p && p.shotgunPro && id === 'SHOTGUN') w.count = (w.count || 6) + 2; return w; };
 function onCrit(atk, target) {
     if (atk.critChain) { (atk.skills || []).forEach(s => { if (s.cd > 0) s.cd = Math.max(0, s.cd - 1.5); }); atk.st.haste = Math.max(atk.st.haste, 0.8); }
-    if (atk.hollow && target.st) { target.st.slow = Math.max(target.st.slow || 0, 1); if (!target.pyro) { target.st.burn = Math.max(target.st.burn || 0, 2); target.st.burnBy = atk.id; } }
+    if (atk.hollow && target.st) { target.st.slow = Math.max(target.st.slow || 0, 1); if (!target.pyro) { target.st.burn = Math.max(target.st.burn || 0, combo(atk, 'deepWound') ? 4 : 2); target.st.burnBy = atk.id; } }
+    if (combo(atk, 'chainBerserk')) atk.st.rage = Math.max(atk.st.rage, 0.6);
 }
 
 const _dealDamage3 = dealDamage;
@@ -224,17 +233,19 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
         dmg *= gunDmgBonus(atk, wid);
         let chance = b ? (b.critC || 0) : (w.crit || 0) + (atk.critChance || 0);
         const head = !!(b && opts.head && atk.headshot && !b.explosive && !b.flame && !b.missile);
-        if (head) dmg *= 1.6;
-        if (atk.st.sureCrit > 0 || (head && atk.deadeye)) chance = 1;
+        if (head) dmg *= combo(atk, 'godShot') ? 1.9 : 1.6;
+        if (wid === 'SHOTGUN' && combo(atk, 'closeQuarters') && dist(atk.x, atk.y, target.x, target.y) < 120) dmg *= 1.25;
+        if (atk.st.sureCrit > 0 || (head && atk.deadeye) || (combo(atk, 'quickCrit') && atk.st.quickdraw > 0)) chance = 1;
         const crit = Math.random() < chance;
         if (crit) dmg *= atk.critDmgM || 1.6;
         if (head) floatText(target.x, target.y - 48, crit ? '🎯 HEADSHOT CHÍ MẠNG!' : '🎯 HEADSHOT!', '#fca5a5', crit ? 16 : 13);
         else if (crit) floatText(target.x, target.y - 48, 'CHÍ MẠNG!', '#fde047', 14);
         if (crit) onCrit(atk, target);
         if (b && b.exec) dmg += 0.15 * Math.max(0, target.maxHp - target.hp);
-        if (b && b.markShot) { st.mark = Math.max(st.mark || 0, 5); spotFor(target, atk.id, 5); floatText(target.x, target.y - 34, '📍 ĐÁNH DẤU', '#f472b6', 13); }
+        if (b && b.markShot) { const mt = combo(atk, 'skyMark') ? 8 : 5; st.mark = Math.max(st.mark || 0, mt); spotFor(target, atk.id, mt); floatText(target.x, target.y - 34, '📍 ĐÁNH DẤU', '#f472b6', 13); }
     }
     if (atk && atk !== target && has(atk, 'controlEye') && !opts.zone) spotFor(target, atk.id, 2);
+    if (atk && atk !== target && combo(target, 'mirrorBack') && Math.abs(angleDiff(Math.atan2(atk.y - target.y, atk.x - target.x), target.angle)) > 2.0) dmg *= 0.75;
     return _dealDamage3(target, dmg, attackerId, opts);
 };
 // đánh dấu sát thương nổ để Giáp Chống Nổ giảm được
@@ -271,11 +282,51 @@ defP('focusBeam', '🔆', 'Đèn Chiếu Xa', 'Nón đèn pin dài hơn 30% như
 defP('catEye', '🐱', 'Mắt Mèo', 'Vùng sáng tròn quanh bạn rộng hơn 60%.', p => {});
 defP('backSight', '🪞', 'Gương Chiếu Hậu', 'Có thêm 1 đèn nhỏ chiếu ra sau lưng.', p => {});
 // --- 2 kỹ năng ---
-defS('precision', '🎯', 'Tâm Ngắm Hoàn Hảo', 16, 'engage', 'Trong 3 giây mọi phát bắn và đòn đánh đều chí mạng.', p => { p.st.sureCrit = 3; ring(p.x, p.y, 5, 50, '#fde047', 0.4); AudioSys.playAt('select', p.x, p.y, 0.4); });
+defS('precision', '🎯', 'Tâm Ngắm Hoàn Hảo', 16, 'engage', 'Trong 3 giây mọi phát bắn và đòn đánh đều chí mạng.', p => { p.st.sureCrit = combo(p, 'deathMoment') ? 4.5 : 3; ring(p.x, p.y, 5, 50, '#fde047', 0.4); AudioSys.playAt('select', p.x, p.y, 0.4); });
 defS('markShot', '📍', 'Đạn Đánh Dấu', 12, 'engage', 'Viên đạn tiếp theo là đạn đánh dấu: trúng địch thì địch bị lộ với bạn và nhận thêm 15% sát thương trong 5 giây. Nạp ngay 1 viên.', p => {
     p.markNext = true; const w = getCurrentWeapon(p); if (w.magSize && w.mag < effMag(p, w)) w.mag++;
     floatText(p.x, p.y - 34, 'NẠP ĐẠN ĐÁNH DẤU', '#f472b6', 13);
 });
+
+/* ============================== 28 PHỐI HỢP CHO THẺ MỚI ============================== */
+[
+    { id: 'critCold', a: 'critEye', b: 'critDmg', name: 'Sát Thủ Lạnh Lùng', desc: '+8% chí mạng nữa. Máu tối đa -10.' },
+    { id: 'quickCrit', a: 'critEye', b: 'quickdraw', name: 'Rút Súng Chí Mạng', desc: 'Phát bắn ngay sau khi đổi vũ khí luôn chí mạng.' },
+    { id: 'godShot', a: 'headshot', b: 'deadeye', name: 'Thần Xạ', desc: 'Headshot +90% sát thương thay vì +60%.' },
+    { id: 'chainBerserk', a: 'critChain', b: 'berserk', name: 'Cuồng Sát', desc: 'Mỗi lần chí mạng được Cuồng Bạo 0.6 giây.' },
+    { id: 'deepWound', a: 'hollowPoint', b: 'critDmg', name: 'Vết Thương Sâu', desc: 'Chảy máu do chí mạng kéo dài 4 giây.' },
+    { id: 'deathMoment', a: 'precision', b: 'critDmg', name: 'Khoảnh Khắc Tử Thần', desc: 'Tâm Ngắm Hoàn Hảo kéo dài 4.5 giây.' },
+    { id: 'perfectShot', a: 'precision', b: 'marksman', name: 'Xạ Thủ Hoàn Hảo', desc: 'Tâm Ngắm Hoàn Hảo hồi chiêu nhanh hơn 5 giây.' },
+    { id: 'fateBullet', a: 'pistolPro', b: 'lastBullet', name: 'Viên Định Mệnh', desc: 'Viên cuối băng của súng lục luôn chí mạng.' },
+    { id: 'cowboy', a: 'pistolPro', b: 'quickdraw', name: 'Cao Bồi', desc: 'Súng lục +10% sát thương và +5% chí mạng nữa.' },
+    { id: 'warVet', a: 'rifleman', b: 'reloadShield', name: 'Lính Trận', desc: 'Súng trường +8% chí mạng nữa.' },
+    { id: 'rifleArmory', a: 'rifleman', b: 'armory', name: 'Kho Súng Trường', desc: 'Kho Vũ Khí luôn cho AR hoặc SMG.' },
+    { id: 'buckshot', a: 'shotgunPro', b: 'bulldozer', name: 'Xe Tăng Shotgun', desc: 'Shotgun đẩy lùi gấp đôi.' },
+    { id: 'closeQuarters', a: 'shotgunPro', b: 'antiMelee', name: 'Cận Chiến Toàn Diện', desc: 'Shotgun bắn gần (dưới 120) +25% sát thương.' },
+    { id: 'calmAim', a: 'marksman', b: 'meditate', name: 'Tĩnh Tâm Ngắm Bắn', desc: 'Đứng yên 1 giây: súng xạ thủ +15% chí mạng.' },
+    { id: 'drumCone', a: 'dualShooter', b: 'bigMag', name: 'Liên Hoàn Đạn', desc: 'Nón đạn Liên Đạn thêm 3 viên.' },
+    { id: 'runGun', a: 'dualShooter', b: 'swift', name: 'Chạy Và Bắn', desc: 'Bắn nón đạn xong được tăng tốc 1 giây.' },
+    { id: 'lavaRounds', a: 'hotBarrel', b: 'lavaWalker', name: 'Đạn Dung Nham', desc: 'Đạn súng gây bỏng.' },
+    { id: 'hotRicochet', a: 'hotBarrel', b: 'ricochet', name: 'Đạn Nảy Nóng', desc: 'Đạn súng nảy thêm 1 lần.' },
+    { id: 'skyMark', a: 'controlEye', b: 'markShot', name: 'Thiên Nhãn Đánh Dấu', desc: 'Đạn Đánh Dấu kéo dài 8 giây.' },
+    { id: 'watchPost', a: 'controlEye', b: 'periscope', name: 'Trạm Quan Sát', desc: 'Đứng yên 0.8 giây: tầm nhìn +15% nữa.' },
+    { id: 'nightBeast', a: 'nightVision', b: 'bushGrow', name: 'Thú Đêm', desc: 'Đứng trong bụi: vùng sáng quanh bạn +50%.' },
+    { id: 'owlEye', a: 'nightVision', b: 'catEye', name: 'Mắt Cú', desc: 'Vùng sáng quanh bạn +25% nữa.' },
+    { id: 'chemSight', a: 'thermal', b: 'poisonGas', name: 'Kính Hoá Học', desc: 'Kính Nhiệt thấy địch ẩn trong bán kính 380.' },
+    { id: 'batSonar', a: 'sonar', b: 'silent', name: 'Dơi Đêm', desc: 'Sóng Âm phát mỗi 4.5 giây.' },
+    { id: 'jamSonar', a: 'sonar', b: 'saboteur', name: 'Sóng Phá Hoại', desc: 'Sóng Âm làm chậm địch trúng sóng 1 giây.' },
+    { id: 'instinct', a: 'sixthSense', b: 'laststand', name: 'Bản Năng Sinh Tồn', desc: 'Dưới 35% máu: Giác Quan Thứ Sáu phát hiện trong bán kính 350.' },
+    { id: 'twinBeam', a: 'wideLens', b: 'focusBeam', name: 'Đèn Pha Kép', desc: 'Đèn Chiếu Xa không làm nón hẹp đi, và dài thêm 15%.' },
+    { id: 'mirrorBack', a: 'backSight', b: 'reflect', name: 'Gương Phản Chiếu', desc: 'Bị đánh từ sau lưng giảm 25% sát thương.' }
+].forEach(c => { COMBOS.push(c); (COMBOS_OF[c.a] = COMBOS_OF[c.a] || []).push(c); (COMBOS_OF[c.b] = COMBOS_OF[c.b] || []).push(c); });
+for (const id in COMBOS_OF) if (COMBOS_OF[id].length > 3) console.warn('Thẻ có hơn 3 phối hợp:', id, COMBOS_OF[id].length);
+const _skillCd3 = skillCooldown;
+skillCooldown = function (p, id) { let cd = _skillCd3(p, id); if (id === 'precision' && combo(p, 'perfectShot')) cd -= 5; return cd; };
+const _resetRound3 = resetPlayerForRound;
+resetPlayerForRound = function (p) {
+    _resetRound3(p);
+    if (combo(p, 'rifleArmory') && p.armory && p.inventory[1] && !['AR', 'SMG'].includes(p.inventory[1].id)) p.inventory[1] = makeWeapon(Math.random() < 0.5 ? 'AR' : 'SMG', p);
+};
 
 /* ============================== TIẾN HOÁ S-P-S (Kỹ năng · Nội tại · Đặc biệt) ============================== */
 defS('lienHoa', '🪷', 'Liên Hoa (S-P-S)', 10, 'engage',
@@ -318,17 +369,28 @@ function castElsuSPS(p) {
 }
 function evoReady(p, id) { const e = CARDS[id].evo; return e && !p.build.includes(id) && e.need.every(n => p.build.includes(n)); }
 
-// bộ chọn thẻ: ẩn thẻ tiến hoá cho tới khi đủ điều kiện, đủ thì luôn xuất hiện
+/** Bốc thẻ nâng cấp: tối đa 1 thẻ "hợp với bạn" (tạo phối hợp hoặc tiến hoá) và cũng chỉ là hên xui;
+ *  các thẻ còn lại bốc ngẫu nhiên đều nhau. Thẻ tiến hoá chỉ xuất hiện khi đủ điều kiện. */
+const FIT_CHANCE = 0.55, EVO_CHANCE = 0.8;
 const _cardsForPick3 = cardsForPick;
 cardsForPick = function (p, kind, n) {
     if (kind !== 'build') return _cardsForPick3(p, kind, n);
-    const evo = Object.keys(CARDS).filter(id => CARDS[id].evo), stash = {}, owned = p.build || [];
-    evo.forEach(id => { if (owned.includes(id)) return; stash[id] = CARDS[id]; delete CARDS[id]; });
-    let out;
-    try { out = _cardsForPick3(p, kind, n); } finally { Object.assign(CARDS, stash); }
-    const ready = evo.filter(id => evoReady(p, id));
-    ready.forEach(id => { out.pop(); out.unshift(id); });
-    return out;
+    const owned = new Set(p.build), rnd = a => a[Math.floor(Math.random() * a.length)];
+    const skillsFull = p.build.filter(id => CARDS[id] && CARDS[id].kind === 'S').length >= (owned.has('altChoice') ? 3 : 2);
+    let pool = Object.keys(CARDS).filter(id => !owned.has(id) && !CARDS[id].evo && !(skillsFull && CARDS[id].kind === 'S'));
+    const out = [], take = id => { out.push(id); pool = pool.filter(x => x !== id); };
+    const fits = id => (COMBOS_OF[id] || []).some(c => owned.has(c.a === id ? c.b : c.a));
+    // 1 ô "hợp với bạn": hên xui
+    const evo = Object.keys(CARDS).filter(id => evoReady(p, id));
+    if (evo.length && Math.random() < EVO_CHANCE) out.push(rnd(evo));
+    else if (p.build.length && Math.random() < FIT_CHANCE) { const f = pool.filter(fits); if (f.length) take(rnd(f)); }
+    // hiệp đầu: có cả kỹ năng lẫn nội tại
+    if (!p.build.length) { const s1 = pool.filter(id => CARDS[id].kind === 'S'), p1 = pool.filter(id => CARDS[id].kind === 'P'); if (s1.length) take(rnd(s1)); if (p1.length && out.length < n) take(rnd(p1)); }
+    // còn lại: ngẫu nhiên hoàn toàn, nhưng không thêm thẻ hợp thứ hai
+    const rest = pool.filter(id => !fits(id));
+    let src = rest.length >= n - out.length ? rest : pool;
+    while (out.length < n && src.length) { const id = rnd(src); take(id); src = src.filter(x => x !== id); }
+    return out.sort(() => Math.random() - 0.5);
 };
 const _randomBuild3 = randomBuild;
 randomBuild = function () { return _randomBuild3().filter(id => !CARDS[id].evo); };
@@ -367,6 +429,7 @@ applyBuild = function (p) {
     NEW_FLAGS.forEach(k => p[k] = false);
     p.critChance = 0; p.critDmgM = 1.6; p.markNext = false; p.lotusT = 0; p.elsuArmed = false; p.elsuWin = 0; p.hawkStorm = null; p.sprayT = 0; p.sonarT = 3;
     _applyBuild3(p);
+    if (combo(p, 'critCold')) { p.critChance += 0.08; p.maxHp -= 10; }
     if (p.adv === 'blastArmor') p.maxArmor += 100;
     if (p.adv === 'medkit') p.medkit = true;
     if (p.adv === 'minimap') p.minimap = true;
@@ -375,8 +438,9 @@ applyBuild = function (p) {
 
 /* ============================== MỖI KHUNG HÌNH (máy chủ) ============================== */
 function coneBurst(p, w) {
-    const n = has(p, 'lienHoa') ? 11 : 7, spread = 0.9, a0 = p.aimAngle !== undefined && p.aiming ? p.aimAngle : p.angle;
+    const n = (has(p, 'lienHoa') ? 11 : 7) + (combo(p, 'drumCone') ? 3 : 0), spread = 0.9, a0 = p.aimAngle !== undefined && p.aiming ? p.aimAngle : p.angle;
     for (let i = 0; i < n; i++) { const a = a0 - spread / 2 + spread * i / (n - 1), m = muzzle(p, w, a); spawnBullet(p, m.x, m.y, a, { speed: 21, damage: w.damage * 0.85, range: 300, color: '#fde68a', size: 2.6, trail: 18 }); }
+    if (combo(p, 'runGun')) p.st.haste = Math.max(p.st.haste, 1);
     floatText(p.x, p.y - 36, 'LIÊN ĐẠN!', '#fde68a', 14); AudioSys.playAt('shotgun', p.x, p.y, 0.4); addShake(3);
 }
 function updateTactics(dt) {
@@ -387,11 +451,11 @@ function updateTactics(dt) {
         if (st.cleanseT > 0) { p.stun = 0; Object.assign(st, { slow: 0, silence: 0, glued: 0, burn: 0, blind: 0 }); if (st.root > 0.15) st.root = 0; }
         // Radar: lộ địch trong 650
         if (st.radarT > 0) enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 650) spotFor(e, p.id, 0.3); });
-        if (p.sixthSense) enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 200) spotFor(e, p.id, 0.3); });
-        if (p.thermal) enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 230 && lineOfSight(p.x, p.y, e.x, e.y)) spotFor(e, p.id, 0.3); });
+        if (p.sixthSense) { const R6 = combo(p, 'instinct') && p.hp < p.maxHp * 0.35 ? 350 : 200; enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < R6) spotFor(e, p.id, 0.3); }); }
+        if (p.thermal) enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < (combo(p, 'chemSight') ? 380 : 230) && lineOfSight(p.x, p.y, e.x, e.y)) spotFor(e, p.id, 0.3); });
         if (p.sonar) {
             p.sonarT -= dt;
-            if (p.sonarT <= 0) { p.sonarT = 7; ring(p.x, p.y, 20, 520, '#a5b4fc', 0.7, 2); enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 520) spotFor(e, p.id, 1.2); }); }
+            if (p.sonarT <= 0) { p.sonarT = combo(p, 'batSonar') ? 4.5 : 7; ring(p.x, p.y, 20, 520, '#a5b4fc', 0.7, 2); enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 520) { spotFor(e, p.id, 1.2); if (combo(p, 'jamSonar') && !(e.st.cleanseT > 0)) e.st.slow = Math.max(e.st.slow, 1); } }); }
         }
         // Medkit
         if (p.medkit && gameState === 'PLAYING') {
@@ -456,6 +520,7 @@ visionRange = function (viewer) {
     if (has(v, 'nightVision')) { if (world.darkness) r *= VISION / 260; r *= 1.1; }
     if (has(v, 'controlEye')) r *= 1.15;
     if (v.st && v.st.radarT > 0) r *= 1.2;
+    if (combo(v, 'watchPost') && (v.stillT || 0) >= 0.8) r *= 1.15;
     if (v.st && v.st.blind > 0) r *= 0.45;
     return r;
 };

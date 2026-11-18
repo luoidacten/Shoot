@@ -199,6 +199,8 @@ function nearRadius(v) {
     let r = visionRange(v) * NEAR_K;
     if (has(v, 'catEye')) r *= 1.6;
     if (has(v, 'nightVision')) r *= 1.3;
+    if (combo(v, 'owlEye')) r *= 1.25;
+    if (combo(v, 'nightBeast') && inBush(v.x, v.y)) r *= 1.5;
     return r;
 }
 /** Thông số nón: { len, half, near } */
@@ -210,7 +212,7 @@ function visionCone(v) {
     if (w.id === 'BOW') len *= 1.15;
     if (w.id === 'RAILGUN' && (v.railLv || 1) >= 2) len *= 1.4;
     if (has(v, 'wideLens')) half *= 1.5;
-    if (has(v, 'focusBeam')) { len *= 1.3; half *= 0.8; }
+    if (has(v, 'focusBeam')) { len *= 1.3; if (combo(v, 'twinBeam')) len *= 1.15; else half *= 0.8; }
     if (has(v, 'periscope') && (v.stillT || 0) >= 0.8) len *= 1.4;
     if (v.aiming) {
         if (w.id === 'SNIPER' && v.charge > 0) {

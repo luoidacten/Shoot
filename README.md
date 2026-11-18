@@ -15,7 +15,8 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 
 - Chỉ chọn nâng cấp **5 lần** cả trận (trước hiệp 1, 3, 5, 7, 9). Người đang bị dẫn được chọn trong 4 lá thay vì 3.
 - 37 kỹ năng (S) và 40 nội tại (P), trong đó có 5 thẻ vượt địa hình: Cất Cánh (ba lô tên lửa), Móc Leo, Bước Nhảy Vọt, Vượt Rào, Xe Ủi.
-- 92 phối hợp: sở hữu đúng cặp thẻ thì cả hai mạnh lên kèm một đánh đổi. Mỗi thẻ tham gia tối đa 3 phối hợp.
+- 135 phối hợp: sở hữu đúng cặp thẻ thì mạnh lên. Mỗi thẻ tham gia tối đa 3 phối hợp. 24 thẻ mới (chí mạng, súng, tầm nhìn) có 28 phối hợp riêng, ví dụ Thần Xạ (Thiện Xạ + Bách Phát Bách Trúng), Viên Định Mệnh (Chuyên Gia Súng Lục + Viên Cuối), Dơi Đêm (Sóng Âm + Bước Chân Mèo), Đèn Pha Kép (Đèn Pin Góc Rộng + Đèn Chiếu Xa).
+- Bốc thẻ: mỗi lượt có tối đa **1 thẻ hợp với bạn** (tạo phối hợp), và cũng chỉ là hên xui (~55%). Các thẻ còn lại hoàn toàn ngẫu nhiên. Thẻ tiến hoá đủ điều kiện thì xuất hiện ~80%.
 - Thẻ tầm nhìn (Mắt Đại Bàng, Lính Gác, Thợ Săn) và hiệu ứng làm lộ địch (Pháo Sáng, Dây Bẫy…) hiện mũi tên chỉ về phía địch.
 
 ## Tầm nhìn kiểu đèn pin
