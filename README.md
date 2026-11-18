@@ -71,7 +71,7 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - 🃏 **Nhiều Lựa Chọn**: mỗi lần nâng cấp thêm 1 lá; luôn có 1 lá hợp với bạn, may mắn thì 2.
 - 🥷 **Lẩn Trốn**: tiếng chân nhỏ, chỉ nghe được trong 380; nửa số dấu chân; người nhỏ hơn.
 - 👑 **Con Đường Độc Tôn**: không nhận thẻ kỹ năng / nội tại. Mỗi lần nâng cấp nhận 2 gói chỉ số, cấp tăng dần theo lần nâng cấp: cấp I ×1.5 → cấp V ×3.5.
-- ⚔️ **Bậc Thầy Cận Chiến** (gộp lợi thế Cận Chiến): chỉ dùng vũ khí cận chiến; mỗi vũ khí cận chiến có 1 nội tại + 1 kỹ năng riêng (ví dụ Dao: đâm lén/phục kích ×3, kỹ năng lướt nhỏ); +25% sát thương cận chiến, chạy nhanh 10%, nhận ít hơn 18% sát thương đạn & nổ; mất lần nâng cấp đầu.
+- ⚔️ **Bậc Thầy Cận Chiến** (gộp lợi thế Cận Chiến): chỉ dùng vũ khí cận chiến (tay không cũng tính); mỗi vũ khí cận chiến có 1 nội tại + 1 kỹ năng riêng (ví dụ Dao: đâm lén/phục kích ×3, kỹ năng lướt nhỏ); +25% sát thương cận chiến, chạy nhanh 10%, nhận ít hơn 18% sát thương đạn & nổ; mất lần nâng cấp đầu.
 - 🏹 **Bậc Thầy Tầm Xa** (gộp lợi thế Bắn Chuẩn): chỉ dùng súng; mỗi loại súng có 1 nội tại + 1 kỹ năng riêng; súng chính xác hơn, tầm nhìn/tầm bắn/tốc bắn +15%; -20 máu, mất lần nâng cấp đầu.
 - 🗡️🏹 **Bậc Thầy Vũ Khí**: có cả 2 Bậc Thầy, dùng mọi vũ khí, +10% tốc chạy, +15% sát thương; mất 3 lần nâng cấp đầu.
 - 🤾 **Ném Đồ**: vũ khí ném ×1.8 sát thương, lựu đạn mạnh và rộng hơn 30%, khiên/rìu ném mạnh hơn.
