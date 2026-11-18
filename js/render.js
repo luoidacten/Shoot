@@ -107,6 +107,7 @@ function draw() {
         const bob = Math.sin(now * 3 + c.blinkOffset) * 2;
         const s = c.size * (0.6 + 0.4 * pop);
         const look = c.type === 'FAKE' ? c.look : c.type;
+        if (c.type === 'SUPPORT' && c.look && typeof drawSupportCrate === 'function' && drawSupportCrate(c, s, bob, now)) return; // hộp hỗ trợ nhiều loại
         let col = look === 'SUPPORT' ? COLORS.crate_sup : look === 'LEGEND' ? COLORS.gold : COLORS.crate_wep;
         // bẫy nguỵ trang thành hòm vũ khí, thỉnh thoảng nháy đỏ
         if (c.type === 'TRAP' && Math.sin(now * 2 + c.blinkOffset * 3) > 0.93) col = '#ff3344';

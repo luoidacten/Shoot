@@ -378,7 +378,7 @@ cardsForPick = function (p, kind, n) {
     const many = p.adv === 'manyChoices'; if (many) n += 1;
     const owned = new Set(p.build), rnd = a => a[Math.floor(Math.random() * a.length)];
     const skillsFull = p.build.filter(id => CARDS[id] && CARDS[id].kind === 'S').length >= (owned.has('altChoice') ? 3 : 2);
-    let pool = Object.keys(CARDS).filter(id => !owned.has(id) && !CARDS[id].evo && !(skillsFull && CARDS[id].kind === 'S'));
+    let pool = Object.keys(CARDS).filter(id => !owned.has(id) && !CARDS[id].evo && !CARDS[id].masterOnly && !(skillsFull && CARDS[id].kind === 'S'));
     const out = [], take = id => { out.push(id); pool = pool.filter(x => x !== id); };
     const fits = id => (COMBOS_OF[id] || []).some(c => owned.has(c.a === id ? c.b : c.a));
     // 1 ô "hợp với bạn": hên xui
@@ -395,7 +395,7 @@ cardsForPick = function (p, kind, n) {
     return out.sort(() => Math.random() - 0.5);
 };
 const _randomBuild3 = randomBuild;
-randomBuild = function () { return _randomBuild3().filter(id => !CARDS[id].evo); };
+randomBuild = function () { return _randomBuild3().filter(id => !CARDS[id].evo && !CARDS[id].masterOnly); };
 const _botPickCard3 = botPickCard;
 botPickCard = function (p, ids, kind) { if (kind === 'build') { const i = ids.findIndex(id => CARDS[id] && CARDS[id].evo); if (i >= 0) return i; } return _botPickCard3(p, ids, kind); };
 const _cardHTML3 = cardHTML;
