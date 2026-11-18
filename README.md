@@ -69,12 +69,13 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - 🦺 **Giáp Chống Nổ**: mỗi hiệp 100 giáp, nổ -25%.
 - 🛠️ **Kỹ Thuật Cao Khởi Động**: có sẵn thẻ Kỹ Thuật Cao, nhưng lần nâng cấp tiếp theo bị chọn ngẫu nhiên.
 - 🃏 **Nhiều Lựa Chọn**: mỗi lần nâng cấp thêm 1 lá; luôn có 1 lá hợp với bạn, may mắn thì 2.
-- 🎯 **Bắn Chuẩn**: hòm chỉ ra súng; súng chính xác hơn 35%.
-- 🗡️ **Cận Chiến**: hòm chỉ ra vũ khí cận chiến; cận chiến +25% sát thương, chạy nhanh hơn 10%.
 - 🥷 **Lẩn Trốn**: tiếng chân nhỏ, chỉ nghe được trong 380; nửa số dấu chân; người nhỏ hơn.
 - 👑 **Con Đường Độc Tôn**: không nhận thẻ kỹ năng / nội tại. Mỗi lần nâng cấp nhận 2 gói chỉ số, cấp tăng dần theo lần nâng cấp: cấp I ×1.5 → cấp V ×3.5.
-- ⚔️ **Bậc Thầy Cận Chiến**: có sẵn Kỹ Thuật Cận Chiến Cao Cấp, nhận ít hơn 18% sát thương đạn & nổ; mất lần nâng cấp đầu.
-- 🏹 **Bậc Thầy Tầm Xa**: có sẵn Trang Bị Phụ, tầm nhìn/tầm bắn/tốc bắn +15%; -20 máu tối đa và mất lần nâng cấp đầu.
+- ⚔️ **Bậc Thầy Cận Chiến** (gộp lợi thế Cận Chiến): chỉ dùng vũ khí cận chiến; mỗi vũ khí cận chiến có 1 nội tại + 1 kỹ năng riêng (ví dụ Dao: đâm lén/phục kích ×3, kỹ năng lướt nhỏ); +25% sát thương cận chiến, chạy nhanh 10%, nhận ít hơn 18% sát thương đạn & nổ; mất lần nâng cấp đầu.
+- 🏹 **Bậc Thầy Tầm Xa** (gộp lợi thế Bắn Chuẩn): chỉ dùng súng; mỗi loại súng có 1 nội tại + 1 kỹ năng riêng; súng chính xác hơn, tầm nhìn/tầm bắn/tốc bắn +15%; -20 máu, mất lần nâng cấp đầu.
+- 🗡️🏹 **Bậc Thầy Vũ Khí**: có cả 2 Bậc Thầy, dùng mọi vũ khí, +10% tốc chạy, +15% sát thương; mất 3 lần nâng cấp đầu.
+- 🤾 **Ném Đồ**: vũ khí ném ×1.8 sát thương, lựu đạn mạnh và rộng hơn 30%, khiên/rìu ném mạnh hơn.
+- 🩹 **Medkit** (buff): mọi nguồn hồi máu +30%, nhặt hộp hỗ trợ luôn hồi thêm 25 máu.
 
 ## Nâng cấp chỉ số
 - 14 gói chỉ số (dùng cho Độc Tôn): Máu, Sát Thương, Tốc Chạy, Hồi Chiêu, Tốc Đánh, Giáp, **Tầm Nhìn**, **Chí Mạng**, **Chính Xác**, **Hồi Máu**, và 4 gói kép: **Toàn Diện**, **Chiến Binh**, **Thợ Săn**, **Linh Hoạt**.
@@ -120,6 +121,15 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - Hoạt ảnh đánh: vung vũ khí, lao người khi đâm, giật lùi khi bắn, lắc lư khi chạy.
 - Phép cần hướng (Pháo Tên Lửa, Tường Băng, Bom Mù, Tốc Biến): kéo nút để ngắm, thả ra mới dùng, kéo về giữa để huỷ.
 - Khiên Tròn 2 dạng trên cùng nút đánh: chạm = dựng khiên trước mặt (chạm lại để thu), giữ rồi thả = ném khiên.
+
+## Gọi hoả lực (20 thứ mới)
+- **10 thẻ:** Không Kích (máy bay bay xuyên bản đồ theo hướng chọn, rải bom), Thả Bom (mở bản đồ, chọn A rồi B), Laser Vệ Tinh (chọn A→B, tia laser quét), Pháo Kích, Bom Napalm; Liên Lạc Nhanh, Tải Trọng Lớn, Lính Liên Lạc, Hầm Trú Ẩn, Chỉ Điểm Mục Tiêu. 5 phối hợp mới.
+- **Bản đồ chọn điểm** không dừng trận. Bình thường chỉ hiện vị trí của bạn; có lợi thế Bản Đồ Nhỏ thì hiện thêm tường, bụi, vòng bo, địch, tiếng động.
+- **5 phép:** Không Kích Nhẹ, Pháo Sáng, Rải Mìn, Màn Khói, Tiếp Tế Khẩn (+3 phối hợp phép).
+- **5 vật phẩm:** Súng Pháo Sáng, Bộ Đàm Mini, Mìn Cá Nhân, Tiêm Adrenaline, Bộ Vá Giáp.
+- **3 vũ khí nhặt được:** Bộ Đàm Không Kích, Máy Tính Bảng Thả Bom, Bộ Chỉ Điểm Laser.
+- **Hộp hỗ trợ 10 loại** mỗi loại một hình & màu: Hộp Y Tế, Tim Lớn, Thùng Giáp, Hộp Đạn, Viên Năng Lượng, Lon Tăng Lực, Bình Cuồng Nộ, Thảo Dược, Hộp Quà, Nước Thánh.
+- **Nút ném (B):** kéo để ngắm, thả ra để ném; kéo về giữa để huỷ.
 
 ## Tiến hoá S-P-S (Kỹ năng · Nội tại · Đặc biệt)
 Chỉ xuất hiện khi đủ thẻ điều kiện, và thay thế thẻ kỹ năng gốc:

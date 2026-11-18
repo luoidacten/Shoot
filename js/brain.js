@@ -28,7 +28,7 @@ const persona = p => PERSONAS[(p.brain && p.brain.persona) || 'tactician'];
 
 /** Chọn mục tiêu bằng điểm: thấy được, gần, máu thấp (Kẻ Cơ Hội), kẻ vừa đánh mình, giữ mục tiêu cũ */
 botTarget = function (p) {
-    const B = p.brain, P = persona(p);
+    const B = p.brain || (p.brain = createBrain()), P = persona(p);
     let best = null, bs = -1e9;
     for (const e of enemiesOf(p)) {
         const vis = targetable(p, e), d = dist(p.x, p.y, e.x, e.y);

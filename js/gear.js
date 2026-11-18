@@ -37,21 +37,23 @@ Object.assign(ADVANTAGES, {
 });
 ADV_IDS.push('meleeMaster', 'rangeMaster');
 const SKIP_R1 = ['meleeMaster', 'rangeMaster'];
+/** Người chơi này có bị bỏ lần nâng cấp hiện tại không (Bậc Thầy: lần 1 · Bậc Thầy Vũ Khí: 3 lần đầu) */
+function skipsPick(p) { return !!p && ((SKIP_R1.includes(p.adv) && pickCount === 0) || (p.adv === 'weaponMaster' && pickCount < 3)); }
 const _advPhase7 = advPhase;
 advPhase = function () {
     const ph = _advPhase7(), op = ph.onPick;
     ph.onPick = (p, id) => { op(p, id); if (id === 'meleeMaster' && !p.build.includes('meleeTech')) p.build.push('meleeTech'); if (id === 'rangeMaster' && !p.build.includes('gunMod')) p.build.push('gunMod'); };
     return ph;
 };
-const R1_SKIP = '⏭ BỎ QUA LẦN NÂNG CẤP ĐẦU (lợi thế Bậc Thầy)';
+const R1_SKIP = '⏭ BỎ QUA LẦN NÂNG CẤP NÀY (lợi thế Bậc Thầy)';
 const _openAug7 = openAugmentScreen;
 openAugmentScreen = function () {
-    const first = isPickRound(currentRound) && pickCount === 0 && matchPreDone, lp = players.find(q => q.id === localId());
-    if (first && lp && SKIP_R1.includes(lp.adv)) pickCtx = { label: R1_SKIP };
+    const first = isPickRound(currentRound) && matchPreDone, lp = players.find(q => q.id === localId());
+    if (first && lp && skipsPick(lp)) pickCtx = { label: R1_SKIP };
     _openAug7();
     if (!first || gameState !== 'AUGMENT' || augState.phase) return;
     players.forEach(p => {
-        if (!SKIP_R1.includes(p.adv) || augState.picked[p.id]) return;
+        if (!skipsPick(p) || augState.picked[p.id]) return;
         augState.picked[p.id] = '__solo';
         const side = pickSide(p.id); if (side) { $(`p${side}-cards`).innerHTML = ''; $(`p${side}-wait`).classList.remove('hidden'); }
     });
@@ -59,7 +61,7 @@ openAugmentScreen = function () {
 };
 const _netSendTo7 = netSendTo;
 netSendTo = function (id, msg) {
-    if (msg && msg.t === 'aug' && msg.kind === 'build' && pickCount === 0) { const p = players.find(q => q.id === id); if (p && SKIP_R1.includes(p.adv)) { msg.ids = []; msg.ctx = { label: R1_SKIP }; } }
+    if (msg && msg.t === 'aug' && msg.kind === 'build') { const p = players.find(q => q.id === id); if (p && skipsPick(p)) { msg.ids = []; msg.ctx = { label: R1_SKIP }; } }
     return _netSendTo7(id, msg);
 };
 
