@@ -124,7 +124,7 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 
 ## Bộ kỹ năng vũ khí của Bậc Thầy
 - Cận chiến: Katana (chém vỡ đạn 25%/75%, lần 3 lướt đánh dấu nổ sau 2 giây), Kiếm Ánh Sáng (6 giây cường hoá, hư ảnh, chém bay đạn), Kiếm Liễu (kiếm khí, lần 5 vẽ ngôi sao), Giáo (nhảy đâm xuống), Rìu (Song Rìu gây cháy), Đại Đao (thế đỡ + phản kích, giữ để kéo lê rồi nhảy chém), Cưa Máy (Cuồng Cưa miễn khống), Khiên Tròn (ném khiên hồi máu + giáp).
-- Súng: Ổ Quay (nhắm rồi tự bắn mọi mục tiêu), Song Súng (cầu năng lượng), Gatling (xoay nòng 360°), Bắn tỉa (làm chậm, không đường đạn), Cung (mưa tên), Railgun (khiên + 2 drone trinh sát), Phun Lửa (cầu lửa, vệt lửa), Phóng Lựu, Pháo, Súng Điện, Súng Năng Lượng, Súng Lưới, Boomerang cũng có P + S riêng.
+- Súng: Ổ Quay (nhắm rồi tự bắn mọi mục tiêu), Song Súng (cầu năng lượng phóng điện), Gatling (Cuồng Phong: xả đạn loạn xạ), Bắn tỉa (Mắt Diều Hâu: tụ lực tức thì, toàn chí mạng), SMG (Băng Trống: bắn nhanh ×2, đạn nảy), Shotgun (đạn sên nổ mảnh), Cung (mưa tên), Railgun (khiên + 2 drone trinh sát), Phun Lửa (cầu lửa, vệt lửa), Phóng Lựu, Pháo, Súng Điện, Súng Năng Lượng, Súng Lưới, Boomerang cũng có P + S riêng.
 
 ## Vùng ngắm kỹ năng & hiệu ứng
 - Kỹ năng vũ khí của Bậc Thầy có vùng ngắm đúng hình: dải chém (Katana, Kiếm Liễu, Khiên Tròn…), hình nón (Ổ Quay, Bắn tỉa, Pháo…), vùng rơi (Giáo, Mưa Tên, nhảy chém Đại Đao). Kỹ năng tại chỗ (Búa, Rìu, Cưa, Khiên, SMG, Gatling, Railgun, Súng Điện) chạm là dùng.
