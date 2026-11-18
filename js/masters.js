@@ -19,6 +19,7 @@ advPhase = function () {
 };
 const isMeleeWep = w => !!w && (w.type === 'MELEE' || w.type === 'SHIELD') && w.id !== 'NONE';
 const isGunWep = w => !!w && w.type === 'GUN';
+const isMeleeOrFist = w => isMeleeWep(w) || (!!w && w.id === 'NONE'); // tay không cũng là cận chiến
 // Bậc Thầy chỉ nhận đúng loại vũ khí của mình
 const _makeWeapon9 = makeWeapon;
 makeWeapon = function (id, p) {
@@ -50,14 +51,14 @@ const MELEE_P = {
     KNIFE: 'Đâm sau lưng / phục kích (đang tàng hình, trong bụi hoặc địch không thấy bạn) ×3 sát thương; đòn đánh luôn là đâm.',
     DAGGERS: 'Mỗi đòn thứ 3 gây chảy máu 2 giây.', KATANA: 'Hút 10% sát thương thành máu.', LIGHTSABER: 'Mỗi đòn trúng giảm 1 giây hồi chiêu kỹ năng cận chiến.',
     RAPIER: '+30% chí mạng.', SPEAR: 'Đánh trúng từ xa (trên 60) +25% sát thương.', HAMMER: 'Đòn đánh làm choáng 0.4 giây.', AXE: 'Đòn đánh làm chậm 1 giây.',
-    GREATSWORD: '+15% sát thương, đẩy lùi mạnh hơn.', CHAINSAW: 'Hút 15% sát thương thành máu.', SHIELD: 'Mỗi đòn trúng +10 giáp.', ROUNDSHIELD: 'Khiên ném nảy thêm 2 mục tiêu.'
+    GREATSWORD: '+15% sát thương, đẩy lùi mạnh hơn.', CHAINSAW: 'Hút 15% sát thương thành máu.', SHIELD: 'Mỗi đòn trúng +10 giáp.', ROUNDSHIELD: 'Khiên ném nảy thêm 2 mục tiêu.', NONE: 'Đấm +20% sát thương; mỗi cú đấm thứ 3 làm choáng 0.5 giây.'
 };
 const GUN_P = {
     PISTOL: '+20% chí mạng.', SPISTOL: '+20% chí mạng.', REVOLVER: '+25% sát thương.', DUAL: 'Mỗi viên trúng hồi 1 máu.', AR: 'Vùng headshot rộng hơn, +10% sát thương.', SAR: 'Vùng headshot rộng hơn, +10% sát thương.',
     SMG: 'Đạn làm chậm 0.3 giây.', MINIGUN: 'Đạn xuyên tường chỉ sau 1 giây sấy.', SHOTGUN: 'Bắn gần (dưới 120) +30%.', SNIPER: 'Bắn xa (trên 400) +25% và làm lộ địch 3 giây.',
     BOW: 'Bắn xa (trên 400) +25% và làm lộ địch 3 giây.', RAILGUN: 'Bắn xa (trên 400) +25% và làm lộ địch 3 giây.', FLAME: 'Lửa đốt lâu gấp đôi.'
 };
-CARDS.meleeTech.desc = '<b>Chỉ hoạt động khi cầm vũ khí cận chiến</b> (tay không không tính).<br><b>P theo vũ khí:</b> Dao = đâm lén/phục kích ×3 (đòn luôn là đâm) · Song Đao = chảy máu · Katana = hút máu · Kiếm Ánh Sáng = giảm hồi chiêu · Kiếm Liễu = chí mạng · Giáo = đâm xa mạnh · Búa = choáng · Rìu = làm chậm · Đại Đao = mạnh & đẩy xa · Cưa = hút máu · Khiên = +giáp · Khiên Tròn = nảy thêm.<br><b>S theo vũ khí:</b> Dao = lướt nhỏ + đòn sau ×1.5 · Song Đao = Ám Sát · Katana/Kiếm = Nhất Kiếm · Giáo = Giáo Xuyên · Búa/Rìu/Đại Đao = Địa Chấn · Khiên = Phản Đòn · Cưa = Cuồng Cưa.';
+CARDS.meleeTech.desc = '<b>Chỉ hoạt động khi cầm vũ khí cận chiến hoặc tay không.</b><br><b>P theo vũ khí:</b> Dao = đâm lén/phục kích ×3 (đòn luôn là đâm) · Song Đao = chảy máu · Katana = hút máu · Kiếm Ánh Sáng = giảm hồi chiêu · Kiếm Liễu = chí mạng · Giáo = đâm xa mạnh · Búa = choáng · Rìu = làm chậm · Đại Đao = mạnh & đẩy xa · Cưa = hút máu · Khiên = +giáp · Khiên Tròn = nảy thêm · Tay không = đấm mạnh, cú thứ 3 choáng.<br><b>S theo vũ khí:</b> Dao = lướt nhỏ + đòn sau ×1.5 · Song Đao = Ám Sát · Katana/Kiếm = Nhất Kiếm · Giáo = Giáo Xuyên · Búa/Rìu/Đại Đao = Địa Chấn · Khiên = Phản Đòn · Cưa = Cuồng Cưa · Tay không = Đấm Ngàn Cân (sóng chấn hất văng).';
 CARDS.gunMod.desc = '<b>Chỉ hoạt động khi cầm súng.</b><br><b>P theo súng:</b> Súng lục = chí mạng · Ổ Quay = sát thương · Song Súng = hút máu · AR = headshot · SMG = làm chậm · Gatling = xuyên tường sớm · Shotgun = gần mạnh · Bắn tỉa/Cung/Railgun = xa mạnh + lộ địch · Phun lửa = đốt lâu.<br><b>S theo súng:</b> AR = phóng lựu dưới nòng · SMG/Gatling = băng trống · Shotgun = đạn sên · Bắn tỉa/Cung/Railgun = ống ngắm nhiệt · Súng lục = đạn nảy · súng khác = ống phóng 3 lựu.';
 // kỹ năng chỉ dùng được khi cầm đúng loại vũ khí; Dao: lướt nhỏ
 const _castSkill9 = castSkill;
@@ -65,7 +66,7 @@ castSkill = function (p, slot, aimVec) {
     const s = p.skills && p.skills[slot];
     if (s && s.cd <= 0) {
         const w = getCurrentWeapon(p);
-        if (s.id === 'meleeTech' && !isMeleeWep(w)) { if (!p.isBot) floatText(p.x, p.y - 30, 'Cần vũ khí cận chiến', '#94a3b8', 12); return; }
+        if (s.id === 'meleeTech' && !isMeleeOrFist(w)) { if (!p.isBot) floatText(p.x, p.y - 30, 'Cần vũ khí cận chiến', '#94a3b8', 12); return; }
         if (s.id === 'gunMod' && !isGunWep(w)) { if (!p.isBot) floatText(p.x, p.y - 30, 'Cần cầm súng', '#94a3b8', 12); return; }
     }
     return _castSkill9(p, slot, aimVec);
@@ -105,7 +106,7 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
     let after = null;
     if (atk && atk !== target && target && target.st && target.hp > 0 && !opts.zone) {
         const w = getCurrentWeapon(atk);
-        if (opts.melee && has(atk, 'meleeTech') && isMeleeWep(w)) {
+        if (opts.melee && has(atk, 'meleeTech') && isMeleeOrFist(w)) {
             const behind = Math.abs(angleDiff(Math.atan2(atk.y - target.y, atk.x - target.x), target.angle)) > 2.0;
             const ambush = atk.st.invis > 0 || inBush(atk.x, atk.y) || !targetable(target, atk);
             switch (w.id) {
@@ -119,6 +120,7 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
                 case 'HAMMER': target.stun = Math.max(target.stun, 0.4); break;
                 case 'AXE': target.st.slow = Math.max(target.st.slow || 0, 1); break;
                 case 'GREATSWORD': dmg *= 1.15; opts = { ...opts, knock: (opts.knock || 100) * 1.5 }; break;
+                case 'NONE': atk.fistN = (atk.fistN || 0) + 1; dmg *= 1.2; if (atk.fistN % 3 === 0) { target.stun = Math.max(target.stun, 0.5); floatText(target.x, target.y - 46, '👊 CHOÁNG!', '#fde047', 13); } break;
                 case 'SHIELD': atk.armor = Math.min(Math.max(150, atk.maxArmor), (atk.armor || 0) + 10); break;
             }
         } else if (opts.bullet && has(atk, 'gunMod')) {
