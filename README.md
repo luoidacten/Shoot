@@ -3,8 +3,8 @@
 Game bắn súng đối kháng 1v1 góc nhìn từ trên xuống, chơi trên trình duyệt và tối ưu cho điện thoại.
 
 ## Chế độ chơi
-- **Đấu bot**: bạn + bot, chọn 2–4 người trong trận. Bot có 3 độ khó và dùng kỹ năng như người.
-- **Online tối đa 4 máy**: tạo phòng, gửi mã 5 ký tự hoặc link mời; chỗ trống tự thêm bot (ví dụ 3 người + 1 bot). Hai máy nối thẳng qua WebRTC (PeerJS).
+- **Đấu bot**: bạn + bot, chọn 2, 3, 4, 6 hoặc 8 người trong trận (từ 5 người trở lên dùng bản đồ lớn). Bot có 3 độ khó và dùng kỹ năng như người.
+- **Online tối đa 8 máy**: tạo phòng, gửi mã 5 ký tự hoặc link mời; chỗ trống tự thêm bot (ví dụ 3 người + 1 bot). Hai máy nối thẳng qua WebRTC (PeerJS).
   - Sương mù chiến trận, tiếng chân/súng theo hướng, dấu chân trên sàn.
   - Người rời phòng giữa trận sẽ được bot thay.
 - **2 người 1 máy** (chỉ trên PC, bàn phím): 2 người + bot cho đủ số.
@@ -143,6 +143,20 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 
 ## Gọi hoả lực (20 thứ mới)
 - **10 thẻ:** Không Kích (máy bay bay xuyên bản đồ theo hướng chọn, rải bom), Thả Bom (mở bản đồ, chọn A rồi B), Laser Vệ Tinh (chọn A→B, tia laser quét), Pháo Kích, Bom Napalm; Liên Lạc Nhanh, Tải Trọng Lớn, Lính Liên Lạc, Hầm Trú Ẩn, Chỉ Điểm Mục Tiêu. 5 phối hợp mới.
+- **Bảng chiến thuật (kiểu Brimstone):** mọi đòn gọi hoả lực mở một máy tính bảng riêng. Bảng có lưới toạ độ A1–F5, tia quét radar và hướng dẫn từng bước; chạm trên bản đồ để chọn điểm hoặc hướng, có nút HUỶ và nút XÁC NHẬN (phím Enter). Trận không dừng khi mở bảng.
+  - Không Kích: chọn điểm mục tiêu rồi chọn hướng bay.
+  - Thả Bom và Laser: chọn A rồi B.
+  - Napalm: chọn đầu và cuối vệt lửa.
+  - Pháo Kích, Quỹ Đạo, Bom Cháy, Bom Chùm: chọn 1 vùng.
+  - Khói Chiến Thuật: chọn tối đa 3 điểm.
+- **HUD riêng "📟 Bảng Chiến Thuật"** ở bên trái màn hình, hiện các đòn gọi hoả lực bạn có và thời gian hồi chiêu.
+- **Sát thương rất lớn:** bom máy bay 100 mỗi quả, Thả Bom 95, pháo 75, laser ~180/giây, Quỹ Đạo ~260/giây.
+- **4 đòn mới:**
+  - ☄️ Quỹ Đạo Huỷ Diệt: cột năng lượng bán kính 190, kéo dài 2.6 giây.
+  - 🔥 Bom Cháy: biển lửa bán kính 140, cháy 5 giây.
+  - 💥 Bom Chùm: 14 quả bom nhỏ.
+  - 🌫️ Khói Chiến Thuật: 3 điểm khói.
+  - Thêm 3 phối hợp: Ngày Tận Thế, Bão Lửa, Màn Khói Thần Tốc.
 - **Bản đồ chọn điểm** không dừng trận. Bình thường chỉ hiện vị trí của bạn; có lợi thế Bản Đồ Nhỏ thì hiện thêm tường, bụi, vòng bo, địch, tiếng động.
 - **5 phép:** Không Kích Nhẹ, Pháo Sáng, Rải Mìn, Màn Khói, Tiếp Tế Khẩn (+3 phối hợp phép).
 - **5 vật phẩm:** Súng Pháo Sáng, Bộ Đàm Mini, Mìn Cá Nhân, Tiêm Adrenaline, Bộ Vá Giáp.
@@ -209,6 +223,9 @@ Ngoài ra trận nào cũng có vòng bo, thính vàng (vũ khí huyền thoại
 **Chuột (PC):** di chuột để ngắm, chuột trái bắn (giữ để tụ lực), chuột phải nạp/ném, lăn chuột đổi vũ khí.
 
 Điện thoại dùng joystick nổi cùng các nút đánh, ném, đổi và 2 nút kỹ năng. Game cũng hỗ trợ tay cầm.
+
+## Sắp tới
+- **Sinh Tồn (Battleground)**: mới có kế hoạch, xem `docs/KE_HOACH_SINH_TON.md`.
 
 ## Chạy thử
 Không cần cài gì, chỉ cần một web server tĩnh:

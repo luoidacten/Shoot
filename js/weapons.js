@@ -165,7 +165,7 @@ function spawnBullet(p, x, y, ang, o) {
     const sp = o.speed || 20;
     const b = {
         x, y, px: x, py: y, angle: ang, speed: sp, damage: o.damage, life: Math.max(10, (o.range || 500) - dist(p.x, p.y, x, y)) / (sp * 60), owner: p.id, // dừng đúng mép vùng ngắm (tính từ tâm người bắn)
-        color: o.color || PBULLET[(p.id - 1) % 4], size: o.size || 2.6, knock: o.knock || 60,
+        color: o.color || PBULLET[(p.id - 1) % PBULLET.length], size: o.size || 2.6, knock: o.knock || 60,
         bounces: o.bounces !== undefined ? o.bounces : (p.bounces || 0), pierce: !!o.pierce, explosive: !!o.explosive, blastSmall: !!o.blastSmall,
         trail: o.trail || 26, burn: o.burn !== undefined ? o.burn : p.pyro, slowHit: o.slow || 0, root: o.root || 0,
         flame: !!o.flame, net: !!o.net, arrow: !!o.arrow

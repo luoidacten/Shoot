@@ -34,7 +34,7 @@ function planeStrike(p, ang, cx, cy, opt = {}) {
     warnLine(p, ax, ay, bx, by, warn, false);
     const lead = 900; // máy bay bay vào từ xa (bên kia tường) rồi bay qua hết
     strikes.push({ kind: 'plane', owner: p.id, t: warn, ang, sx: cx + dx * (from - lead), sy: cy + dy * (from - lead), cx, cy, from, to, travel: 0, next: from, gap: opt.gap || 70,
-        dmg: (opt.dmg || 40) * payload(p), R: (opt.R || 90) * payload(p), speed: 1500, total: to - from + lead * 2, rockets: has(p, 'radioman') && combo(p, 'gunship') ? 2 : 0 });
+        dmg: (opt.dmg || 100) * payload(p), R: (opt.R || 105) * payload(p), speed: 1500, total: to - from + lead * 2, rockets: has(p, 'radioman') && combo(p, 'gunship') ? 2 : 0 });
     floatText(p.x, p.y - 40, opt.label || '✈️ KHÔNG KÍCH!', '#fde68a', 16); AudioSys.playAt('alarm', p.x, p.y, 0.3);
     if (has(p, 'radioman')) enemiesOf(p).forEach(e => { const t = Math.max(from, Math.min(to, (e.x - cx) * dx + (e.y - cy) * dy)); if (dist(e.x, e.y, cx + dx * t, cy + dy * t) < 160) spotFor(e, p.id, 3); });
 }
@@ -43,14 +43,14 @@ function carpetStrike(p, a, b, n) {
     const warn = strikeWarnT(p, 1.2);
     warnLine(p, a.x, a.y, b.x, b.y, warn, false);
     const cnt = (n || 8) + (combo(p, 'carpetPlus') ? 3 : 0);
-    for (let i = 0; i < cnt; i++) { const k = cnt === 1 ? 0.5 : i / (cnt - 1); dropBomb(p, a.x + (b.x - a.x) * k + (Math.random() - 0.5) * 20, a.y + (b.y - a.y) * k + (Math.random() - 0.5) * 20, 42 * payload(p), 85 * payload(p), warn + 0.5 + i * 0.12); }
+    for (let i = 0; i < cnt; i++) { const k = cnt === 1 ? 0.5 : i / (cnt - 1); dropBomb(p, a.x + (b.x - a.x) * k + (Math.random() - 0.5) * 20, a.y + (b.y - a.y) * k + (Math.random() - 0.5) * 20, 95 * payload(p), 100 * payload(p), warn + 0.5 + i * 0.12); }
     floatText(p.x, p.y - 40, '💣 THẢ BOM!', '#fb923c', 16); AudioSys.playAt('alarm', p.x, p.y, 0.3);
 }
 /* ---------- 3. Laser vệ tinh quét A→B ---------- */
 function laserStrike(p, a, b, opt = {}) {
     const warn = strikeWarnT(p, 1.0);
     warnLine(p, a.x, a.y, b.x, b.y, warn, true);
-    strikes.push({ kind: 'laser', owner: p.id, t: warn, a, b, dur: opt.dur || 2, k: 0, tick: 0, dmg: (opt.dmg || 7) * payload(p) });
+    strikes.push({ kind: 'laser', owner: p.id, t: warn, a, b, dur: opt.dur || 2, k: 0, tick: 0, dmg: (opt.dmg || 18) * payload(p) });
     floatText(p.x, p.y - 40, '🛰️ LASER VỆ TINH!', '#f472b6', 16); AudioSys.playAt('rail', p.x, p.y, 0.25);
 }
 /* ---------- 4. Pháo kích quanh 1 điểm ---------- */
@@ -58,8 +58,8 @@ function artyStrike(p, x, y) {
     const waves = combo(p, 'rapidArty') ? 4 : 3;
     for (let w = 0; w < waves; w++) for (let i = 0; i < 3; i++) {
         const a = Math.random() * 6.28, r = Math.random() * 120, sx = x + Math.cos(a) * r, sy = y + Math.sin(a) * r, d = strikeWarnT(p, 0.8) + w * 0.6 + i * 0.1;
-        zones.push({ type: 'artyWarn', x: sx, y: sy, r: 70 * payload(p), t: d, maxT: d, owner: p.id, tick: 0 });
-        strikes.push({ kind: 'bomb', owner: p.id, x: sx, y: sy, t: d, dmg: 32 * payload(p), R: 70 * payload(p) });
+        zones.push({ type: 'artyWarn', x: sx, y: sy, r: 85 * payload(p), t: d, maxT: d, owner: p.id, tick: 0 });
+        strikes.push({ kind: 'bomb', owner: p.id, x: sx, y: sy, t: d, dmg: 75 * payload(p), R: 85 * payload(p) });
     }
     floatText(p.x, p.y - 40, '🎯 PHÁO KÍCH!', '#fca5a5', 16);
 }
