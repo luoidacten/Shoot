@@ -18,6 +18,12 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
 - 92 phối hợp: sở hữu đúng cặp thẻ thì cả hai mạnh lên kèm một đánh đổi. Mỗi thẻ tham gia tối đa 3 phối hợp.
 - Thẻ tầm nhìn (Mắt Đại Bàng, Lính Gác, Thợ Săn) và hiệu ứng làm lộ địch (Pháo Sáng, Dây Bẫy…) hiện mũi tên chỉ về phía địch.
 
+## Tầm nhìn kiểu đèn pin
+- Quanh bạn có một vùng sáng tròn nhỏ (~170). Phía trước là nón đèn pin (~57°) chiếu xa hơn trước (~620). Sương mù vẽ mềm: mép ánh sáng loang dần vào bóng tối, cuối đèn pin tắt dần.
+- Nón quay theo hướng nhìn / hướng ngắm. Ngắm Sniper: nón hẹp dần theo độ tụ lực nhưng dài tới hết tầm bắn, vùng sáng quanh người thu nhỏ (Elsu thì không).
+- Thẻ tầm nhìn: Mắt Kiểm Soát, Kính Nhìn Đêm (vùng sáng +30%), Kính Nhiệt, Ống Nhòm (đứng yên: đèn pin +40%), Sóng Âm, Giác Quan Thứ Sáu, **Đèn Pin Góc Rộng**, **Đèn Chiếu Xa**, **Mắt Mèo**, **Gương Chiếu Hậu**.
+- Bom khói: người ném và đồng đội thấy khói rất mờ (viền đứt) và nhìn xuyên được khói của mình.
+
 ## Ngắm & vũ khí
 - Không còn tự ngắm. Chạm nhẹ nút đánh = hỗ trợ nhắm địch gần nhất; kéo nút đánh để ngắm tay, kéo về giữa để huỷ.
 - Kỹ năng cần hướng/vị trí (Lướt, Bom Khói, Bước Nhảy…): kéo nút kỹ năng để chọn, thả ra để dùng. Chạm nhẹ thì tự nhắm.
@@ -32,7 +38,14 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
   - **Huyền thoại:** Minigun, Railgun.
 
 ## Phép bổ trợ & vật phẩm
-- Đầu trận mỗi người được 2 phép bổ trợ ngẫu nhiên (thẻ Túi Phép: 3): Tốc Biến, Hồi Máu, Thanh Tẩy (dùng được cả khi bị choáng), Gia Tốc, Trừng Phạt, Ngất Ngư.
+- **Đầu trận tự chọn** phép bổ trợ (không ngẫu nhiên). Mặc định 1 phép; lợi thế Song Phép: 2; thẻ Túi Phép: +1 (chọn ngay khi lấy thẻ, tối đa 3).
+- 10 phép: Tốc Biến, Hồi Máu, Thanh Tẩy, Gia Tốc, Trừng Phạt, Ngất Ngư, **Tường Băng**, **Pháo Tên Lửa**, **Bom Mù**, **Radar**.
+  - **Thanh Tẩy**: gỡ hiệu ứng xấu và miễn nhiễm 3 giây với choáng, làm chậm, trói, câm lặng, keo, đốt, độc và sát thương theo thời gian.
+  - **Tường Băng**: dựng tường chắn đạn trước mặt, vuông góc hướng ngắm (5 giây).
+  - **Pháo Tên Lửa**: bay càng xa càng đau (tối đa ×3.2), nổ lan nhỏ.
+  - **Bom Mù**: ném bom khói và tăng tốc; địch trong vùng nổ bị mù 3 giây.
+  - **Radar**: 5 giây lộ mọi địch trong 650 (cả trong bụi, khói, tàng hình), tầm nhìn +20%.
+- 7 phối hợp phép (có cả 2 phép): Tên Lửa Dẫn Đường (Radar + Tên Lửa), Tên Lửa Băng (Tường Băng + Tên Lửa), Ảo Ảnh (Bom Mù + Tốc Biến), Án Tử (Radar + Trừng Phạt), Băng Giá (Ngất Ngư + Tường Băng), Bóng Ma (Bom Mù + Gia Tốc), Thánh Quang (Thanh Tẩy + Hồi Máu).
 - 1 ô vật phẩm tiêu hao (thẻ Túi Vật Dụng: 2 ô). Mỗi hiệp có sẵn 1 vật phẩm, hòm hỗ trợ có thể rơi thêm.
 - Có 12 loại vật phẩm: 6 cuộn phép dùng 1 lần, Bình Máu Lớn, Thuốc Khiên, Lựu Khói, Drone Định Vị, Bù Nhìn Mini, Thuốc Cuồng Nộ.
 - Thẻ mới:
@@ -40,6 +53,27 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
   - **Elsu**: ngắm thì đứng yên nhưng nhìn xa; kỹ năng cắm Ưng Trạm cho tầm nhìn.
   - **Kỹ Thuật Cao**: kỹ năng đổi theo vũ khí đang cầm.
   - Phù Thủy Bổ Trợ, Túi Phép, Túi Đồ (3 ô vũ khí), Túi Vật Dụng, Lựa Chọn Thay Thế (3 kỹ năng).
+
+## Lợi thế đầu trận (chọn 1, xem được hết)
+- 🗺️ **Bản Đồ Nhỏ**: minimap góc phải (tường, bụi, vòng bo, địch đang thấy, tiếng động); nghe tiếng chân xa hơn 60%.
+- ✖️2 **Khởi Đầu Gấp Đôi**: lần nâng cấp đầu được chọn 2 thẻ.
+- 📜 **Song Phép**: 2 phép bổ trợ (có Túi Phép thì 3).
+- 🎖️ **Túi Quân Dụng**: mỗi hiệp có sẵn 1 súng ngẫu nhiên + dao.
+- 🩹 **Medkit**: không trúng đòn 2.5 giây thì tự hồi máu, càng lâu càng nhanh (tới 10/giây).
+- 🦺 **Giáp Chống Nổ**: mỗi hiệp 100 giáp, nổ -25%.
+- 🛠️ **Kỹ Thuật Cao Khởi Động**: có sẵn thẻ Kỹ Thuật Cao, nhưng lần nâng cấp tiếp theo bị chọn ngẫu nhiên.
+
+## Chí mạng, headshot & 20 thẻ mới
+- Súng lục mạnh hơn: 24 sát thương, đạn bay nhanh, 30% chí mạng. Chí mạng mặc định ×1.6.
+- Chí mạng / headshot: Mắt Chí Mạng, Đòn Hiểm, Thiện Xạ (headshot +60%), Bách Phát Bách Trúng, Chuỗi Chí Mạng, Đạn Rỗng Đầu.
+- Cường hoá súng: Chuyên Gia Súng Lục, Xạ Thủ Súng Trường, Đồ Tể Shotgun, Xạ Thủ Kỳ Cựu, **Xạ Thủ Liên Đạn** (Song Súng/Súng lục sấy đủ 1 giây rồi dừng → loạt đạn hình nón), Nòng Nóng.
+- 6 thẻ tầm nhìn: Mắt Kiểm Soát, Kính Nhìn Đêm, Kính Nhiệt, Ống Nhòm, Sóng Âm, Giác Quan Thứ Sáu.
+- 2 kỹ năng: Tâm Ngắm Hoàn Hảo (3 giây toàn chí mạng), Đạn Đánh Dấu.
+
+## Tiến hoá S-P-S (Kỹ năng · Nội tại · Đặc biệt)
+Chỉ xuất hiện khi đủ thẻ điều kiện, và thay thế thẻ kỹ năng gốc:
+- 🪷 **Liên Hoa** (cần Kỹ Thuật Cao + Xạ Thủ Liên Đạn): xoay tròn bắn 2 vòng đạn hoa sen và nạp đầy đạn; nón đạn chỉ cần sấy 0.6 giây, 11 viên; 3 giây sau kỹ năng đạn nảy và +25% chí mạng.
+- 🦅 **Elsu (S-P-S)** (cần Elsu + Mắt Kiểm Soát + Xạ Thủ Kỳ Cựu): lướt bất tử, nạp đạn, 3 phát ×1.5. Trong 3 giây sau khi lướt bấm lại → Bão Ưng: bay lên xoay tròn xả đạn, vòng sát thương liên tục bán kính 170.
 
 ## Vũ khí đặc biệt mới
 - **Rìu**: chém 2 phát, phát 3 bổ cực đau và choáng. Giữ để ném rìu rồi rìu tự quay về.

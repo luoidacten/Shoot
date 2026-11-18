@@ -95,7 +95,7 @@ function updateModes(dt) {
         if (world.chaosT <= 0) { world.chaosT = 2.5 + Math.random() * 3; world.timeScale = [0.55, 0.7, 1, 1.35, 1.7][Math.floor(Math.random() * 5)]; showBanner(world.timeScale > 1 ? 'TĂNG TỐC!' : world.timeScale < 1 ? 'CHẬM LẠI…' : 'BÌNH THƯỜNG', `x${world.timeScale}`, '#c084fc', 0.9, 34); }
     } else if (ev === 'poison') {
         world.poisonT = (world.poisonT || 0) + dt;
-        if (world.poisonT > 0.5) { world.poisonT = 0; players.forEach(p => { if (p.hp > 1) dealDamage(p, 1.2, -1, { zone: true, raw: !p.gasMask }); }); }
+        if (world.poisonT > 0.5) { world.poisonT = 0; players.forEach(p => { if (p.hp > 1) dealDamage(p, 1.2, -1, { zone: true, raw: !p.gasMask, poison: true }); }); }
     } else if (ev === 'robot' && world.robot) {
         const r = world.robot, p = players.find(q => q.hp > 0 && dist(q.x, q.y, r.x, r.y) < q.radius + 30);
         if (p) {
@@ -191,21 +191,46 @@ applySnapshot = function (s) {
 };
 
 /* ============================== TẦM NHÌN: Sniper, Cung, Railgun, Elsu, Ưng Trạm, đồng đội ============================== */
-function visionAt(v, ang) {
-    let base = visionRange(v);
-    if (!v || !v.inventory) return base;
-    const w = getCurrentWeapon(v), elsu = v.cardSet && v.cardSet.has('elsu');
-    if (w.id === 'BOW') base *= 1.15;
-    if (w.id === 'RAILGUN' && (v.railLv || 1) >= 2) base *= 1.4;
-    if (!v.aiming) return base;
-    const fwd = Math.abs(angleDiff(ang, v.aimAngle !== undefined ? v.aimAngle : v.angle));
-    if (w.id === 'SNIPER' && v.charge > 0) {
-        const half = Math.max(0.1, spreadAt(w, v.charge) * 0.6 + 0.08);
-        if (fwd < half) return Math.max(base, chargeRange(w, v.charge, v) + 40);
-        return elsu ? base : base * (1 - 0.4 * v.charge);
+/** Tầm nhìn kiểu ĐÈN PIN: vùng sáng tròn nhỏ quanh người + nón sáng dài phía trước (hướng nhìn/ngắm).
+ *  Ngắm Sniper: nón hẹp dần nhưng dài tới hết tầm bắn. Thẻ tầm nhìn chỉnh bán kính / độ dài / độ rộng nón. */
+const CONE_HALF = 0.5, CONE_LEN = 1.45, NEAR_K = 0.4, CONE_EDGE = 0.22;
+function lookDir(v) { return v.aiming && v.aimAngle !== undefined ? v.aimAngle : v.angle; }
+function nearRadius(v) {
+    let r = visionRange(v) * NEAR_K;
+    if (has(v, 'catEye')) r *= 1.6;
+    if (has(v, 'nightVision')) r *= 1.3;
+    return r;
+}
+/** Thông số nón: { len, half, near } */
+function visionCone(v) {
+    const base = visionRange(v);
+    let len = base * CONE_LEN, half = CONE_HALF, near = nearRadius(v);
+    if (!v || !v.inventory) return { len, half, near };
+    const w = getCurrentWeapon(v), elsu = v.cardSet && (v.cardSet.has('elsu') || v.cardSet.has('elsuSPS'));
+    if (w.id === 'BOW') len *= 1.15;
+    if (w.id === 'RAILGUN' && (v.railLv || 1) >= 2) len *= 1.4;
+    if (has(v, 'wideLens')) half *= 1.5;
+    if (has(v, 'focusBeam')) { len *= 1.3; half *= 0.8; }
+    if (has(v, 'periscope') && (v.stillT || 0) >= 0.8) len *= 1.4;
+    if (v.aiming) {
+        if (w.id === 'SNIPER' && v.charge > 0) {
+            half = Math.max(0.1, half * (1 - 0.8 * v.charge));
+            len = Math.max(len, chargeRange(w, v.charge, v) + 80);
+            if (!elsu) near *= 1 - 0.35 * v.charge;
+        } else if (w.type === 'GUN') {
+            if (elsu) { len *= 1.6; half *= 0.75; } else { len *= 1.1; half *= 0.85; }
+        }
     }
-    if (elsu && w.type === 'GUN' && fwd < 0.35) return base * 1.6;
-    return base;
+    return { len, half, near };
+}
+function visionAt(v, ang) {
+    if (!v || !v.inventory) return visionRange(v);
+    const c = visionCone(v), d = Math.abs(angleDiff(ang, lookDir(v)));
+    let r = c.near;
+    if (d <= c.half) r = c.len;
+    else if (d < c.half + CONE_EDGE) r = c.near + (c.len - c.near) * (1 - (d - c.half) / CONE_EDGE);
+    if (has(v, 'backSight')) { const b = Math.abs(angleDiff(ang, lookDir(v) + Math.PI)); if (b < 0.35) r = Math.max(r, c.near + 120); }
+    return r;
 }
 function canSeeFrom(ax, ay, x, y, pad = 0, viewer) {
     const R = viewer && viewer.inventory ? visionAt(viewer, Math.atan2(y - ay, x - ax)) : visionRange(viewer);
@@ -238,36 +263,48 @@ function visPolyFn(px, py, Rf, Rmax) {
     }
     return pts;
 }
+/** Sương mù mềm: vẽ ở độ phân giải thấp + làm mờ rồi phóng to → mép ánh sáng loang dần vào bóng tối */
+const FOG_RES = 0.25;
+const fogSmall = document.createElement('canvas'), fogSmallCtx = fogSmall.getContext('2d');
+const FOG_BLUR = 'filter' in fogSmallCtx;
 function drawFogOfWar(zoom) {
     const me = localPlayer(), W = SCREEN_W, H = SCREEN_H;
-    if (fogCanvas.width !== canvas.width || fogCanvas.height !== canvas.height) { fogCanvas.width = canvas.width; fogCanvas.height = canvas.height; }
-    fogCtx.setTransform(PIXEL_RATIO, 0, 0, PIXEL_RATIO, 0, 0);
-    fogCtx.globalCompositeOperation = 'source-over';
-    fogCtx.clearRect(0, 0, W, H);
-    fogCtx.fillStyle = 'rgba(3, 5, 12, 0.9)'; fogCtx.fillRect(0, 0, W, H);
-    if (me.hp > 0) {
-        const sx = x => (x - camera.x) * zoom + W / 2, sy = y => (y - camera.y) * zoom + H / 2;
-        fogCtx.globalCompositeOperation = 'destination-out';
-        const cut = (px, py, Rf, base, Rmax) => {
-            const pts = visPolyFn(px, py, Rf, Rmax);
-            const g = fogCtx.createRadialGradient(sx(px), sy(py), base * 0.2 * zoom, sx(px), sy(py), Rmax * zoom);
-            const k = Math.min(0.95, base / Rmax);
-            g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(k * 0.7, 'rgba(0,0,0,0.95)'); g.addColorStop(k, Rmax > base * 1.05 ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.55)');
-            fogCtx.fillStyle = g; fogCtx.beginPath();
-            for (let i = 0; i < pts.length; i += 2) { const X = sx(pts[i]), Y = sy(pts[i + 1]); i ? fogCtx.lineTo(X, Y) : fogCtx.moveTo(X, Y); }
-            fogCtx.closePath(); fogCtx.fill();
-        };
-        const base = visionRange(me);
-        let Rmax = base; for (let a = -Math.PI; a < Math.PI; a += 0.05) Rmax = Math.max(Rmax, visionAt(me, a));
-        cut(me.x, me.y, a => visionAt(me, a), base, Rmax);
-        players.forEach(q => { if (q.hp > 0 && sameTeam(me, q)) { const b = visionRange(q); cut(q.x, q.y, () => b, b, b); } });
-        myWards(me).forEach(d => cut(d.x, d.y, () => 300, 300, 300));
-        fogCtx.fillStyle = 'rgba(0,0,0,0.9)'; fogCtx.beginPath(); fogCtx.arc(sx(me.x), sy(me.y), 34 * zoom, 0, Math.PI * 2); fogCtx.fill();
-        particles.forEach(pt => { if (!pt.glow || pt.size < 20) return; fogCtx.fillStyle = 'rgba(0,0,0,0.75)'; fogCtx.beginPath(); fogCtx.arc(sx(pt.x), sy(pt.y), pt.size * 1.6 * zoom, 0, Math.PI * 2); fogCtx.fill(); });
-    } else fogCtx.clearRect(0, 0, W, H);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(fogCanvas, 0, 0);
-    ctx.setTransform(PIXEL_RATIO, 0, 0, PIXEL_RATIO, 0, 0);
+    const fw = Math.max(1, Math.ceil(W * FOG_RES)), fh = Math.max(1, Math.ceil(H * FOG_RES));
+    if (fogSmall.width !== fw || fogSmall.height !== fh) { fogSmall.width = fw; fogSmall.height = fh; }
+    const c = fogSmallCtx;
+    c.setTransform(FOG_RES, 0, 0, FOG_RES, 0, 0);
+    c.globalCompositeOperation = 'source-over'; c.filter = 'none';
+    c.clearRect(0, 0, W, H);
+    if (me.hp <= 0) return;
+    c.fillStyle = 'rgba(2, 3, 8, 0.955)'; c.fillRect(0, 0, W, H);
+    const sx = x => (x - camera.x) * zoom + W / 2, sy = y => (y - camera.y) * zoom + H / 2;
+    c.globalCompositeOperation = 'destination-out';
+    if (FOG_BLUR) c.filter = `blur(${Math.max(1.5, 14 * zoom * FOG_RES).toFixed(1)}px)`;
+    const cut = (px, py, Rf, near, Rmax) => {
+        const pts = visPolyFn(px, py, Rf, Rmax);
+        const g = c.createRadialGradient(sx(px), sy(py), 0, sx(px), sy(py), Rmax * zoom);
+        if (Rmax <= near * 1.05) { g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.55, 'rgba(0,0,0,1)'); g.addColorStop(0.85, 'rgba(0,0,0,0.6)'); g.addColorStop(1, 'rgba(0,0,0,0)'); }
+        else {
+            const k = near / Rmax;
+            g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(k * 0.7, 'rgba(0,0,0,1)');
+            g.addColorStop(Math.min(0.6, k * 1.1), 'rgba(0,0,0,0.9)'); // đèn pin: sáng đều rồi tắt dần ở cuối
+            g.addColorStop(0.75, 'rgba(0,0,0,0.72)'); g.addColorStop(0.92, 'rgba(0,0,0,0.3)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+        }
+        c.fillStyle = g; c.beginPath();
+        for (let i = 0; i < pts.length; i += 2) { const X = sx(pts[i]), Y = sy(pts[i + 1]); i ? c.lineTo(X, Y) : c.moveTo(X, Y); }
+        c.closePath(); c.fill();
+    };
+    const coneCut = q => { const near = nearRadius(q); let Rmax = near; for (let a = -Math.PI; a < Math.PI; a += 0.05) Rmax = Math.max(Rmax, visionAt(q, a)); cut(q.x, q.y, a => visionAt(q, a), near, Rmax); };
+    coneCut(me);
+    players.forEach(q => { if (q.hp > 0 && q !== me && sameTeam(me, q)) coneCut(q); });
+    myWards(me).forEach(d => cut(d.x, d.y, () => 300, 300, 300));
+    // ánh lửa / vụ nổ lớn hắt sáng vùng xung quanh
+    particles.forEach(pt => { if (!pt.glow || pt.size < 20) return; c.fillStyle = 'rgba(0,0,0,0.6)'; c.beginPath(); c.arc(sx(pt.x), sy(pt.y), pt.size * 1.6 * zoom, 0, Math.PI * 2); c.fill(); });
+    c.filter = 'none';
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(fogSmall, 0, 0, fw / FOG_RES, fh / FOG_RES);
+    ctx.restore();
 }
 
 /* ============================== VẼ: vật thể mới ============================== */

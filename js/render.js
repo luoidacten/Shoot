@@ -471,7 +471,13 @@ function drawGroundZones(now) {
 function drawAirZones(now) {
     zones.forEach(z => {
         if (z.type === 'smoke') {
-            const k = Math.max(0, Math.min(1, z.t / 0.8));
+            const lid = localId(), mine = lid !== null && (z.owner === lid || sameTeamId(lid, z.owner));
+            let k = Math.max(0, Math.min(1, z.t / 0.8));
+            if (mine) { // khói của mình: chỉ mờ nhẹ + viền đứt để còn nhìn rõ bên trong
+                ctx.save(); ctx.strokeStyle = `rgba(203,213,225,${0.5 * k})`; ctx.lineWidth = 2; ctx.setLineDash([8, 8]); ctx.lineDashOffset = -now * 20;
+                ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+                k *= 0.22;
+            }
             for (let i = 0; i < 7; i++) {
                 const a = i * 0.9 + now * 0.3, rr = z.r * 0.45;
                 ctx.fillStyle = `rgba(150,160,180,${0.38 * k})`;

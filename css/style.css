@@ -244,3 +244,11 @@ html, body { height: 100dvh; }
 #destiny-screen .destiny-block:not(.flip-touch) { width: min(720px, 90vw); box-sizing: border-box; }
 .mc-name { bottom: -30px; }
 @media (max-height: 460px) { #destiny-screen { gap: 30px; } #destiny-screen .destiny-name { font-size: clamp(1.2rem, 4vw, 2.2rem); } }
+
+/* nhiều lá (lợi thế, phép bổ trợ) */
+.aug-cards.many { flex-wrap: wrap; max-width: 980px; }
+.aug-cards.many .aug-card { flex: 0 1 170px; min-height: 110px; }
+.aug-card.spell { border-color: #facc15; background: linear-gradient(180deg, #2a2410, #15120a); }
+.aug-card.evo { border-color: #f472b6; box-shadow: 0 0 26px rgba(244, 114, 182, 0.45); }
+.aug-card.evo .aug-desc { text-align: left; }
+@media (max-height: 520px) { .aug-cards.many .aug-card { flex-basis: 130px; min-height: 84px; } .aug-cards.many .aug-desc { font-size: 0.56rem; } }

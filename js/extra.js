@@ -191,7 +191,7 @@ function flashMove(p, D) {
 const SPELLS = {
     flash:   { icon: '⚡', name: 'Tốc Biến', cd: 40, cast: p => { flashMove(p, combo(p, 'doubleFlash') ? 300 : 200); if (combo(p, 'doubleFlash')) { const s = (p.skills || []).find(q => q.id === 'blink'); if (s) s.cd = 0; } } },
     heal:    { icon: '💗', name: 'Hồi Máu', cd: 45, cast: p => { p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.25); p.st.haste = Math.max(p.st.haste, 1); ring(p.x, p.y, 5, 60, '#4ade80', 0.4); AudioSys.playAt('pickup', p.x, p.y, 0.4); } },
-    cleanse: { icon: '🌀', name: 'Thanh Tẩy', cd: 40, cast: p => { p.stun = 0; Object.assign(p.st, { slow: 0, root: 0, silence: 0, glued: 0, burn: 0 }); p.st.shield = Math.max(p.st.shield, 25); p.st.shieldT = Math.max(p.st.shieldT, 1.5); ring(p.x, p.y, 5, 55, '#e0f2fe', 0.4); AudioSys.playAt('select', p.x, p.y, 0.4); } },
+    cleanse: { icon: '🌀', name: 'Thanh Tẩy', cd: 40, cast: p => { cleanseNow(p); p.st.cleanseT = 3; ring(p.x, p.y, 5, 55, '#e0f2fe', 0.4); AudioSys.playAt('select', p.x, p.y, 0.4); } },
     sprint:  { icon: '👟', name: 'Gia Tốc', cd: 35, cast: p => { p.st.haste = Math.max(p.st.haste, 3); p.st.slow = 0; AudioSys.playAt('go', p.x, p.y, 0.25); } },
     execute: { icon: '🗡', name: 'Trừng Phạt', cd: 40, cast: p => {
         const e = enemiesOf(p).filter(q => targetable(p, q) && dist(p.x, p.y, q.x, q.y) < 300).sort((a, b) => a.hp - b.hp)[0];
@@ -259,7 +259,7 @@ function handleSpellButtons(p, input, allowAct) {
     ['sp1', 'sp2', 'sp3', 'it1', 'it2'].forEach(k => {
         const down = !!input[k], was = !!(p.wasSp && p.wasSp[k]);
         if (down && !was && allowAct && p.hp > 0) {
-            if (k[0] === 's') { const i = +k[2] - 1, s = p.spells[i]; if (s && (p.stun <= 0 || s.id === 'cleanse')) castSpell(p, i); }
+            if (k[0] === 's') { const i = +k[2] - 1, s = p.spells[i]; if (s && (p.stun <= 0 || s.id === 'cleanse')) { p.spellAng = p.angle; castSpell(p, i); } }
             else if (p.stun <= 0) useItem(p, +k[2] - 1);
         }
         (p.wasSp = p.wasSp || {})[k] = down;
@@ -272,7 +272,8 @@ function botSpells(p, dt) {
     const e = enemyOf(p), d = e ? dist(p.x, p.y, e.x, e.y) : 1e9, vis = e && targetable(p, e), low = p.hp < p.maxHp * 0.35;
     const want = id => ({ heal: low, cleanse: p.stun > 0.3 || p.st.root > 0.3 || p.st.slow > 0.6, sprint: low && vis && d < 320, flash: p.hp < p.maxHp * 0.25 && vis && d < 220,
         execute: vis && d < 290 && e.hp < 45, stunS: vis && d < 140, bigPotion: p.hp < p.maxHp * 0.5, shieldPotion: vis && d < 300 && p.hp < p.maxHp * 0.6,
-        smokeBomb: low && vis, drone: !vis && world.time > 6, scareDoll: vis && d < 350 && low, ragePotion: vis && d < 300 })[id];
+        smokeBomb: low && vis, drone: !vis && world.time > 6, scareDoll: vis && d < 350 && low, ragePotion: vis && d < 300,
+        iceWall: vis && d < 420 && d > 120 && p.hp < p.maxHp * 0.6, missile: vis && d > 200 && d < 560, blind: low && vis && d < 400, radar: !vis && world.time > 4 })[id];
     (p.spells || []).forEach((s, i) => { if (s.cd <= 0 && want(s.id) && Math.random() < 0.7) castSpell(p, i); });
     (p.items || []).forEach((it, i) => { if (want(it.id) && Math.random() < 0.5) useItem(p, i); });
 }
@@ -309,7 +310,7 @@ defS('elsu', '🦅', 'Elsu', 16, 'place', 'Khi ngắm: đứng yên nhưng tầm
 }, 420);
 defS('hightech', '🛠️', 'Kỹ Thuật Cao', 12, 'engage', 'Kỹ năng đặc trưng đổi theo vũ khí đang cầm: cận chiến = Lốc Xoáy, súng = Xả Đạn, tụ lực = Phát Bắn Hoàn Hảo, ném/nổ = Mưa Bom, lửa/điện = Quá Tải, tay không = Chấn Động.', p => weaponSkill(p), 400);
 defP('arcanist', '🔮', 'Phù Thủy Bổ Trợ', 'Phép bổ trợ hồi chiêu nhanh hơn 35%.', p => { p.arcanist = true; });
-defP('spellbook', '📖', 'Túi Phép', 'Có 3 phép bổ trợ thay vì 2.', p => { p.spellbook = true; });
+defP('spellbook', '📖', 'Túi Phép', 'Thêm 1 phép bổ trợ (được chọn ngay): 1 → 2, có Song Phép thì 3.', p => { p.spellbook = true; });
 defP('bag', '🎒', 'Túi Đồ', 'Có 3 ô vũ khí; mỗi vũ khí đang mang +8% sát thương.', p => { p.bag = true; if (p.inventory.length < 3) p.inventory.push(combo(p, 'mobileArmory') ? makeWeapon(['SMG', 'SHOTGUN', 'AR', 'BOW'][Math.floor(Math.random() * 4)], p) : { ...WEAPONS.NONE }); });
 defP('pouch', '👝', 'Túi Vật Dụng', 'Thêm 1 ô vật phẩm tiêu hao; hòm hỗ trợ dễ rơi vật phẩm hơn.', p => { p.pouch = true; });
 defP('altChoice', '🧩', 'Lựa Chọn Thay Thế', 'Được giữ 3 kỹ năng (S) thay vì 2.', p => { p.altChoice = true; });
@@ -378,7 +379,6 @@ applyBuild = function (p) {
     if (combo(p, 'grandMage')) p.maxHp -= 10;
     if (combo(p, 'versatile')) p.maxHp -= 10;
     if (combo(p, 'fullPlate')) p.moveMult *= 0.95;
-    if (p.spellbook && p.spells && p.spells.length < 3) p.spells.push(...randomSpells(1, p.spells.map(s => s.id)).map(id => ({ id, cd: 0 })));
 };
 
 /* ---------- Sát thương: chống cận chiến, mặt nạ, túi đồ, đồng đội ---------- */
@@ -420,7 +420,7 @@ function updateExtras(dt) {
             });
         }
         // Elsu: ngắm súng là đứng yên
-        if (p.cardSet && p.cardSet.has('elsu') && p.aiming && w.type === 'GUN') p.st.root = Math.max(p.st.root || 0, 0.05);
+        if (p.cardSet && (p.cardSet.has('elsu') || p.cardSet.has('elsuSPS')) && p.aiming && w.type === 'GUN') p.st.root = Math.max(p.st.root || 0, 0.05);
         if (p.fireBoost > 0) p.fireBoost -= dt;
     });
     // vùng EMP, vùng độc
@@ -466,7 +466,7 @@ updatePartyExtras = function (dt) { _upe(dt); updateExtras(dt); if (typeof updat
 /* ---------- Mỗi hiệp: phép hồi xong, 1 vật phẩm ngẫu nhiên ---------- */
 const _resetPlayerForRound = resetPlayerForRound;
 resetPlayerForRound = function (p) {
-    if (!p.spells) p.spells = randomSpells(2).map(id => ({ id, cd: 0 }));
+    if (!p.spells) p.spells = randomSpells(spellCount(p)).map(id => ({ id, cd: 0 }));
     p.items = [];
     p.railT = 0; p.railLv = 1; p.railBurst = null; p.mech = false; p.fireBoost = 0; p.wasSp = {};
     _resetPlayerForRound(p);
