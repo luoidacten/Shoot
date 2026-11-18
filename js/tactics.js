@@ -222,12 +222,16 @@ defP('marksman', '🎖️', 'Xạ Thủ Kỳ Cựu', 'Bắn tỉa, Cung, Railgun
 defP('dualShooter', '🔫', 'Xạ Thủ Liên Đạn', 'Song Súng / Súng lục: sấy liên tục đủ 1 giây rồi dừng → bắn ra 1 loạt 7 viên hình nón.', p => { p.dualShooter = true; });
 defP('hotBarrel', '♨️', 'Nòng Nóng', 'Đạn súng bay nhanh hơn 20% và xa hơn 10%.', p => { p.hotBarrel = true; });
 // --- 6 nâng cấp tầm nhìn ---
-defP('controlEye', '👁️', 'Mắt Kiểm Soát', 'Tầm nhìn +15%. Địch bị bạn gây sát thương sẽ lộ vị trí với bạn 2 giây.', p => { p.controlEye = true; });
-defP('nightVision', '🌙', 'Kính Nhìn Đêm', 'Tầm nhìn +10%, không bị bóng tối thu hẹp; miễn nhiễm MÙ của Bom Mù.', p => { p.nightVision = true; });
+defP('controlEye', '👁️', 'Mắt Kiểm Soát', 'Tầm nhìn (vùng sáng & đèn pin) +15%. Địch bị bạn gây sát thương sẽ lộ vị trí với bạn 2 giây.', p => { p.controlEye = true; });
+defP('nightVision', '🌙', 'Kính Nhìn Đêm', 'Vùng sáng quanh bạn +30%, tầm nhìn +10%, không bị bóng tối thu hẹp; miễn nhiễm MÙ của Bom Mù.', p => { p.nightVision = true; });
 defP('thermal', '🌡️', 'Kính Nhiệt', 'Thấy địch ẩn trong bụi rậm, khói, tàng hình trong bán kính 230.', p => { p.thermal = true; });
-defP('periscope', '🔭', 'Ống Nhòm', 'Đứng yên 0.8 giây: tầm nhìn +35%.', p => { p.periscope = true; });
+defP('periscope', '🔭', 'Ống Nhòm', 'Đứng yên 0.8 giây: đèn pin chiếu xa thêm 40%.', p => { p.periscope = true; });
 defP('sonar', '📶', 'Sóng Âm', 'Mỗi 7 giây phát sóng âm làm lộ địch trong bán kính 520 (1.2 giây).', p => { p.sonar = true; });
 defP('sixthSense', '🦇', 'Giác Quan Thứ Sáu', 'Địch trong bán kính 200 quanh bạn luôn bị lộ, kể cả sau tường.', p => { p.sixthSense = true; });
+defP('wideLens', '🔦', 'Đèn Pin Góc Rộng', 'Nón đèn pin rộng hơn 50%.', p => {});
+defP('focusBeam', '🔆', 'Đèn Chiếu Xa', 'Nón đèn pin dài hơn 30% nhưng hẹp hơn 20%.', p => {});
+defP('catEye', '🐱', 'Mắt Mèo', 'Vùng sáng tròn quanh bạn rộng hơn 60%.', p => {});
+defP('backSight', '🪞', 'Gương Chiếu Hậu', 'Có thêm 1 đèn nhỏ chiếu ra sau lưng.', p => {});
 // --- 2 kỹ năng ---
 defS('precision', '🎯', 'Tâm Ngắm Hoàn Hảo', 16, 'engage', 'Trong 3 giây mọi phát bắn và đòn đánh đều chí mạng.', p => { p.st.sureCrit = 3; ring(p.x, p.y, 5, 50, '#fde047', 0.4); AudioSys.playAt('select', p.x, p.y, 0.4); });
 defS('markShot', '📍', 'Đạn Đánh Dấu', 12, 'engage', 'Viên đạn tiếp theo là đạn đánh dấu: trúng địch thì địch bị lộ với bạn và nhận thêm 15% sát thương trong 5 giây. Nạp ngay 1 viên.', p => {
@@ -413,7 +417,6 @@ visionRange = function (viewer) {
     if (!v) return r;
     if (has(v, 'nightVision')) { if (world.darkness) r *= VISION / 260; r *= 1.1; }
     if (has(v, 'controlEye')) r *= 1.15;
-    if (has(v, 'periscope') && (v.stillT || 0) >= 0.8) r *= 1.35;
     if (v.st && v.st.radarT > 0) r *= 1.2;
     if (v.st && v.st.blind > 0) r *= 0.45;
     return r;

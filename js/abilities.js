@@ -318,7 +318,7 @@ function targetable(viewer, t) {
         if (d > watchR) return false;
     }
     const sm = inSmoke(t.x, t.y);
-    if (sm && d > 60 && !(dist(viewer.x, viewer.y, sm.x, sm.y) < sm.r)) return false;
+    if (sm && d > 60 && !(dist(viewer.x, viewer.y, sm.x, sm.y) < sm.r) && !(viewer.id !== undefined && (sm.owner === viewer.id || sameTeamId(viewer.id, sm.owner)))) return false; // khói của mình / đồng đội: nhìn xuyên được
     if (fogGameplay() && !canSeeFrom(viewer.x, viewer.y, t.x, t.y, t.radius, viewer)) return false;
     return true;
 }

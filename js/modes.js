@@ -191,21 +191,46 @@ applySnapshot = function (s) {
 };
 
 /* ============================== TẦM NHÌN: Sniper, Cung, Railgun, Elsu, Ưng Trạm, đồng đội ============================== */
-function visionAt(v, ang) {
-    let base = visionRange(v);
-    if (!v || !v.inventory) return base;
+/** Tầm nhìn kiểu ĐÈN PIN: vùng sáng tròn nhỏ quanh người + nón sáng dài phía trước (hướng nhìn/ngắm).
+ *  Ngắm Sniper: nón hẹp dần nhưng dài tới hết tầm bắn. Thẻ tầm nhìn chỉnh bán kính / độ dài / độ rộng nón. */
+const CONE_HALF = 0.6, CONE_LEN = 1.45, NEAR_K = 0.4, CONE_EDGE = 0.18;
+function lookDir(v) { return v.aiming && v.aimAngle !== undefined ? v.aimAngle : v.angle; }
+function nearRadius(v) {
+    let r = visionRange(v) * NEAR_K;
+    if (has(v, 'catEye')) r *= 1.6;
+    if (has(v, 'nightVision')) r *= 1.3;
+    return r;
+}
+/** Thông số nón: { len, half, near } */
+function visionCone(v) {
+    const base = visionRange(v);
+    let len = base * CONE_LEN, half = CONE_HALF, near = nearRadius(v);
+    if (!v || !v.inventory) return { len, half, near };
     const w = getCurrentWeapon(v), elsu = v.cardSet && (v.cardSet.has('elsu') || v.cardSet.has('elsuSPS'));
-    if (w.id === 'BOW') base *= 1.15;
-    if (w.id === 'RAILGUN' && (v.railLv || 1) >= 2) base *= 1.4;
-    if (!v.aiming) return base;
-    const fwd = Math.abs(angleDiff(ang, v.aimAngle !== undefined ? v.aimAngle : v.angle));
-    if (w.id === 'SNIPER' && v.charge > 0) {
-        const half = Math.max(0.1, spreadAt(w, v.charge) * 0.6 + 0.08);
-        if (fwd < half) return Math.max(base, chargeRange(w, v.charge, v) + 40);
-        return elsu ? base : base * (1 - 0.4 * v.charge);
+    if (w.id === 'BOW') len *= 1.15;
+    if (w.id === 'RAILGUN' && (v.railLv || 1) >= 2) len *= 1.4;
+    if (has(v, 'wideLens')) half *= 1.5;
+    if (has(v, 'focusBeam')) { len *= 1.3; half *= 0.8; }
+    if (has(v, 'periscope') && (v.stillT || 0) >= 0.8) len *= 1.4;
+    if (v.aiming) {
+        if (w.id === 'SNIPER' && v.charge > 0) {
+            half = Math.max(0.1, half * (1 - 0.8 * v.charge));
+            len = Math.max(len, chargeRange(w, v.charge, v) + 80);
+            if (!elsu) near *= 1 - 0.35 * v.charge;
+        } else if (w.type === 'GUN') {
+            if (elsu) { len *= 1.6; half *= 0.75; } else { len *= 1.1; half *= 0.85; }
+        }
     }
-    if (elsu && w.type === 'GUN' && fwd < 0.35) return base * 1.6;
-    return base;
+    return { len, half, near };
+}
+function visionAt(v, ang) {
+    if (!v || !v.inventory) return visionRange(v);
+    const c = visionCone(v), d = Math.abs(angleDiff(ang, lookDir(v)));
+    let r = c.near;
+    if (d <= c.half) r = c.len;
+    else if (d < c.half + CONE_EDGE) r = c.near + (c.len - c.near) * (1 - (d - c.half) / CONE_EDGE);
+    if (has(v, 'backSight')) { const b = Math.abs(angleDiff(ang, lookDir(v) + Math.PI)); if (b < 0.35) r = Math.max(r, c.near + 120); }
+    return r;
 }
 function canSeeFrom(ax, ay, x, y, pad = 0, viewer) {
     const R = viewer && viewer.inventory ? visionAt(viewer, Math.atan2(y - ay, x - ax)) : visionRange(viewer);
@@ -257,10 +282,9 @@ function drawFogOfWar(zoom) {
             for (let i = 0; i < pts.length; i += 2) { const X = sx(pts[i]), Y = sy(pts[i + 1]); i ? fogCtx.lineTo(X, Y) : fogCtx.moveTo(X, Y); }
             fogCtx.closePath(); fogCtx.fill();
         };
-        const base = visionRange(me);
-        let Rmax = base; for (let a = -Math.PI; a < Math.PI; a += 0.05) Rmax = Math.max(Rmax, visionAt(me, a));
-        cut(me.x, me.y, a => visionAt(me, a), base, Rmax);
-        players.forEach(q => { if (q.hp > 0 && sameTeam(me, q)) { const b = visionRange(q); cut(q.x, q.y, () => b, b, b); } });
+        const coneCut = q => { const near = nearRadius(q); let Rmax = near; for (let a = -Math.PI; a < Math.PI; a += 0.05) Rmax = Math.max(Rmax, visionAt(q, a)); cut(q.x, q.y, a => visionAt(q, a), near, Rmax); };
+        coneCut(me);
+        players.forEach(q => { if (q.hp > 0 && q !== me && sameTeam(me, q)) coneCut(q); });
         myWards(me).forEach(d => cut(d.x, d.y, () => 300, 300, 300));
         fogCtx.fillStyle = 'rgba(0,0,0,0.9)'; fogCtx.beginPath(); fogCtx.arc(sx(me.x), sy(me.y), 34 * zoom, 0, Math.PI * 2); fogCtx.fill();
         particles.forEach(pt => { if (!pt.glow || pt.size < 20) return; fogCtx.fillStyle = 'rgba(0,0,0,0.75)'; fogCtx.beginPath(); fogCtx.arc(sx(pt.x), sy(pt.y), pt.size * 1.6 * zoom, 0, Math.PI * 2); fogCtx.fill(); });
