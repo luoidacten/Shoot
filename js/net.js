@@ -77,7 +77,7 @@ function buildSnapshot() {
         it: items.map(i => [R1(i.x), R1(i.y), R1(i.angle), i.type.id, i.type.color, i.type.len || 14, R1(i.fuse), R1(i.z || 0)]),
         cr: crates.map(c => [R1(c.x), R1(c.y), c.size, c.type, R1(c.blinkOffset), R1(c.born), c.owner || 0, c.look || '']),
         bu: bushes.map(b => [R1(b.x), R1(b.y), R1(b.r), R1(b.seed), b.t === undefined ? -1 : R1(b.t), b.owner || 0]),
-        ob: obstacles.map(o => [R1(o.x), R1(o.y), R1(o.w), R1(o.h), o.wood ? 1 : 0, o.hp || 0, o.maxHp || 0, o.hit > 0 ? 1 : 0, o.ice ? 1 : 0, o.reflect ? 1 : 0, o.sandbag ? 1 : 0, o.ownerPass || 0]),
+        ob: obstacles.map(o => [R1(o.x), R1(o.y), R1(o.w), R1(o.h), o.wood ? 1 : 0, o.hp || 0, o.maxHp || 0, o.hit > 0 ? 1 : 0, o.ice ? 1 : 0, o.reflect ? 1 : 0, o.sandbag ? 1 : 0, o.ownerPass || 0, o.shieldOf || 0]),
         zn: zones.map(z => [z.type, R1(z.x), R1(z.y), R1(z.r), R1(z.t), z.maxT, z.owner, z.phase || 0, z.totem ? 1 : 0]),
         tu: turrets.map(t => [R1(t.x), R1(t.y), t.owner, R1(t.angle * 100) / 100, R1(t.t), t.color]),
         mi: mines.map(m => [R1(m.x), R1(m.y), m.owner, R1(m.arm), m.kind || 'spike', R1(m.angle || 0), R1(m.x2 || 0), R1(m.y2 || 0)]),
@@ -121,7 +121,7 @@ function applySnapshot(s) {
     bullets.length = 0; s.b.forEach(b => bullets.push({ x: b[0], y: b[1], angle: b[2], speed: b[3], color: b[4], size: b[5], trail: b[6], explosive: !!b[7], blastSmall: !!b[8] }));
     items.length = 0; s.it.forEach(i => items.push({ x: i[0], y: i[1], angle: i[2], type: { id: i[3], color: i[4], len: i[5] }, fuse: i[6], z: i[7] }));
     crates.length = 0; s.cr.forEach(c => crates.push({ x: c[0], y: c[1], size: c[2], type: c[3], blinkOffset: c[4], born: c[5], owner: c[6], look: c[7] }));
-    obstacles.length = 0; s.ob.forEach(o => obstacles.push({ x: o[0], y: o[1], w: o[2], h: o[3], wood: !!o[4], hp: o[5], maxHp: o[6], hit: o[7] ? 0.1 : 0, ice: !!o[8], reflect: !!o[9], sandbag: !!o[10], ownerPass: o[11] || undefined, temp: (o[8] || o[10]) ? 1 : undefined }));
+    obstacles.length = 0; s.ob.forEach(o => obstacles.push({ x: o[0], y: o[1], w: o[2], h: o[3], wood: !!o[4], hp: o[5], maxHp: o[6], hit: o[7] ? 0.1 : 0, ice: !!o[8], reflect: !!o[9], sandbag: !!o[10], ownerPass: o[11] || undefined, temp: (o[8] || o[10] || o[12]) ? 1 : undefined, shieldOf: o[12] || undefined }));
     bushes.length = 0; (s.bu || []).forEach(b => bushes.push({ x: b[0], y: b[1], r: b[2], seed: b[3], t: b[4] < 0 ? undefined : b[4], owner: b[5] }));
     zones.length = 0; s.zn.forEach(z => zones.push({ type: z[0], x: z[1], y: z[2], r: z[3], t: z[4] === null ? Infinity : z[4], maxT: z[5], owner: z[6], phase: z[7], tick: 0, totem: !!z[8] }));
     turrets.length = 0; s.tu.forEach(t => turrets.push({ x: t[0], y: t[1], owner: t[2], angle: t[3], t: t[4], color: t[5] }));

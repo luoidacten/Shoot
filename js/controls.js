@@ -133,7 +133,7 @@ function toggleShieldWall(p, w) {
         if (o) {
             o.ice = false; o.hp = o.maxHp = 140; o.shieldOf = p.id; o.shieldColor = w.color;
             w.planted = o; w.out = true;
-            floatText(p.x, p.y - 30, '🧱 DỰNG KHIÊN', '#fde68a', 13); AudioSys.playAt('block', p.x, p.y, 0.45); addShake(3);
+            floatText(p.x, p.y - 30, 'DỰNG KHIÊN', '#fde68a', 13); AudioSys.playAt('block', p.x, p.y, 0.45); addShake(3);
             return;
         }
     }

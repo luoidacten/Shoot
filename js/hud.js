@@ -415,9 +415,17 @@ function drawNewWeaponArt(c, w, r, x0, ch, box, now, p) {
             c.strokeStyle = 'rgba(0,0,0,0.5)'; c.lineWidth = 1.5; c.stroke(); break;
         }
         case 'ROUNDSHIELD': {
-            const g = c.createRadialGradient(r + 6, -3, 2, r + 8, 0, 14); g.addColorStop(0, '#bae6fd'); g.addColorStop(1, '#0369a1');
-            c.fillStyle = g; c.beginPath(); c.arc(r + 8, 0, 13, 0, Math.PI * 2); c.fill();
-            c.strokeStyle = '#fbbf24'; c.lineWidth = 2; c.stroke(); c.fillStyle = '#fbbf24'; c.beginPath(); c.arc(r + 8, 0, 3, 0, Math.PI * 2); c.fill(); break;
+            if (w.out) break; // đã ném đi / đang dựng: tay không
+            if (p && p.aiming && (p.charge || 0) > 0.08) { // chuẩn bị ném: khiên tròn
+                const g = c.createRadialGradient(r + 6, -3, 2, r + 8, 0, 14); g.addColorStop(0, '#bae6fd'); g.addColorStop(1, '#0369a1');
+                c.fillStyle = g; c.beginPath(); c.arc(r + 8, 0, 13, 0, Math.PI * 2); c.fill();
+                c.strokeStyle = '#fbbf24'; c.lineWidth = 2; c.stroke(); c.fillStyle = '#fbbf24'; c.beginPath(); c.arc(r + 8, 0, 3, 0, Math.PI * 2); c.fill(); break;
+            }
+            // bình thường: tấm khiên dựng dọc trước mặt (nhìn từ trên xuống)
+            const g = c.createLinearGradient(r + 2, 0, r + 12, 0); g.addColorStop(0, '#0369a1'); g.addColorStop(1, '#7dd3fc');
+            c.fillStyle = g; rrect(c, r + 2, -17, 10, 34, 5); c.fill();
+            c.strokeStyle = '#e0f2fe'; c.lineWidth = 1.5; c.stroke();
+            c.fillStyle = '#fbbf24'; c.beginPath(); c.arc(r + 7, 0, 3, 0, Math.PI * 2); c.fill(); break;
         }
         case 'SPISTOL': box(x0, -3, 14, 6, '#475569'); box(x0 + 13, -2.5, 12, 5, '#1e293b'); box(x0 - 2, 1, 5, 7, '#334155'); break;
         case 'SAR': box(x0 - 2, -3.5, 20, 7, '#334155'); box(x0 + 17, -3, 14, 6, '#0f172a'); box(x0 + 4, 2, 4, 7, '#1e293b'); break;
