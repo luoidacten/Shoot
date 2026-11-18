@@ -45,7 +45,12 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
   - **Pháo Tên Lửa**: bay càng xa càng đau (tối đa ×3.2), nổ lan nhỏ.
   - **Bom Mù**: ném bom khói và tăng tốc; địch trong vùng nổ bị mù 3 giây.
   - **Radar**: 5 giây lộ mọi địch trong 650 (cả trong bụi, khói, tàng hình), tầm nhìn +20%.
-- 7 phối hợp phép (có cả 2 phép): Tên Lửa Dẫn Đường (Radar + Tên Lửa), Tên Lửa Băng (Tường Băng + Tên Lửa), Ảo Ảnh (Bom Mù + Tốc Biến), Án Tử (Radar + Trừng Phạt), Băng Giá (Ngất Ngư + Tường Băng), Bóng Ma (Bom Mù + Gia Tốc), Thánh Quang (Thanh Tẩy + Hồi Máu).
+- 18 phối hợp phép (có cả 2 phép thì mạnh lên, mỗi phép 3–4 phối hợp; bot cũng ưu tiên chọn phép tạo phối hợp):
+  - Tên Lửa Dẫn Đường (Radar + Tên Lửa), Tên Lửa Băng (Tường Băng + Tên Lửa), Kết Liễu (Trừng Phạt + Tên Lửa)
+  - Ảo Ảnh (Bom Mù + Tốc Biến), Chớp Choáng (Tốc Biến + Ngất Ngư), Hồi Phục Tức Thì (Tốc Biến + Hồi Máu)
+  - Án Tử (Radar + Trừng Phạt), Đòn Kết Thúc (Ngất Ngư + Trừng Phạt), Mắt Trong Khói (Radar + Bom Mù), Tâm Tĩnh (Thanh Tẩy + Radar)
+  - Băng Giá (Ngất Ngư + Tường Băng), Choáng Mù (Ngất Ngư + Bom Mù), Trượt Băng (Gia Tốc + Tường Băng), Giáp Băng (Hồi Máu + Tường Băng)
+  - Bóng Ma (Bom Mù + Gia Tốc), Thoát Thân (Thanh Tẩy + Gia Tốc), Chạy Hồi Sức (Hồi Máu + Gia Tốc), Thánh Quang (Thanh Tẩy + Hồi Máu)
 - 1 ô vật phẩm tiêu hao (thẻ Túi Vật Dụng: 2 ô). Mỗi hiệp có sẵn 1 vật phẩm, hòm hỗ trợ có thể rơi thêm.
 - Có 12 loại vật phẩm: 6 cuộn phép dùng 1 lần, Bình Máu Lớn, Thuốc Khiên, Lựu Khói, Drone Định Vị, Bù Nhìn Mini, Thuốc Cuồng Nộ.
 - Thẻ mới:
