@@ -1,9 +1,10 @@
 /** ==================== 4 NGƯỜI CHƠI · AIM THỦ CÔNG · VŨ KHÍ, THẺ ĐỊA HÌNH · ONLINE 4 MÁY ====================
  *  File này nạp sau các file lõi: các hàm cùng tên ở đây là phiên bản mới (đã gỡ bản cũ).
  */
-const PCOLORS = ['#ff4d5e', '#3ba8ff', '#4ade80', '#fbbf24'];
-const PBULLET = ['#ffb3a8', '#bfe3ff', '#bbf7d0', '#fde68a'];
-const PNAMES = ['ĐỎ', 'XANH', 'LỤC', 'VÀNG'];
+const PCOLORS = ['#ff4d5e', '#3ba8ff', '#4ade80', '#fbbf24', '#a855f7', '#f97316', '#ec4899', '#2dd4bf'];
+const PBULLET = ['#ffb3a8', '#bfe3ff', '#bbf7d0', '#fde68a', '#e9d5ff', '#fed7aa', '#fbcfe8', '#99f6e4'];
+const PNAMES = ['ĐỎ', 'XANH', 'LỤC', 'VÀNG', 'TÍM', 'CAM', 'HỒNG', 'NGỌC'];
+const MAX_PLAYERS = 8;
 const MAX_PICKS = 5;
 let pickCount = 0;
 const pColor = id => PCOLORS[(id - 1) % PCOLORS.length] || '#ffffff';
@@ -52,7 +53,8 @@ function createPlayer(id, kind) {
 function spawnAt(p) {
     const n = players.length, i = Math.max(0, players.indexOf(p));
     const a = Math.PI + i * Math.PI * 2 / n + (n === 4 ? Math.PI / 4 : 0);
-    p.x = MAP_W / 2 + Math.cos(a) * (n > 2 ? 470 : 340); p.y = MAP_H / 2 + Math.sin(a) * (n > 2 ? 360 : 0);
+    const rx = n > 4 ? MAP_W * 0.36 : n > 2 ? 470 : 340, ry = n > 4 ? MAP_H * 0.34 : n > 2 ? 360 : 0;
+    p.x = MAP_W / 2 + Math.cos(a) * rx; p.y = MAP_H / 2 + Math.sin(a) * ry;
     p.angle = Math.atan2(MAP_H / 2 - p.y, MAP_W / 2 - p.x);
     if (pointInObstacle(p.x, p.y, p.radius + 4)) {
         outer: for (let r = 20; r < 260; r += 20) for (let k = 0; k < 12; k++) {
@@ -68,11 +70,11 @@ function startMatch() {
     document.body.classList.toggle('pvp', settings.mode === 'pvp');
     if (isTouch) goFullscreen();
     players.length = 0;
-    const n = Math.max(2, Math.min(4, settings.count || 4));
+    const n = Math.max(2, Math.min(MAX_PLAYERS, settings.count || 4));
     if (settings.mode === 'online') {
         const humans = [1, ...net.guests.map(g => g.id)];
-        const total = Math.min(4, Math.max(humans.length, n));
-        for (let id = 1; id <= 4 && players.length < total; id++) {
+        const total = Math.min(MAX_PLAYERS, Math.max(humans.length, n));
+        for (let id = 1; id <= MAX_PLAYERS && players.length < total; id++) {
             if (humans.includes(id)) players.push(createPlayer(id, id === 1 ? 'human' : 'remote'));
             else if (players.length + (humans.filter(h => h > id).length) < total) players.push(createPlayer(id, 'bot'));
         }
@@ -843,9 +845,9 @@ function renderLobby() {
     const el = $('lobby-list');
     const ids = net.role === 'host' ? lobbyIds() : (net.lobby || []);
     if (!net.role || !ids.length) { el.classList.add('hidden'); $('lobby-start').classList.add('hidden'); return; }
-    const total = Math.min(4, Math.max(ids.length, settings.count || 4));
+    const total = Math.min(MAX_PLAYERS, Math.max(ids.length, settings.count || 4));
     let html = '';
-    for (let id = 1; id <= 4; id++) {
+    for (let id = 1; id <= MAX_PLAYERS; id++) {
         const human = ids.includes(id), bot = !human && id <= total;
         html += `<div class="lobby-slot ${human ? 'on' : bot ? 'bot' : 'off'}" style="--c:${pColor(id)}"><b>${PNAMES[id - 1]}</b><span>${human ? (id === net.myId ? 'BẠN' : id === 1 ? 'CHỦ PHÒNG' : 'NGƯỜI CHƠI') : bot ? '🤖 BOT' : '—'}</span></div>`;
     }
@@ -863,20 +865,20 @@ async function hostRoom() {
     net.peer.on('open', () => {
         net.role = 'host'; net.myId = 1; enterOnline();
         $('room-code').textContent = net.code; $('room-code-box').classList.remove('hidden');
-        setNetStatus('Đã tạo phòng! Gửi mã cho tối đa 3 bạn. Chỗ trống sẽ là bot.', 'wait');
+        setNetStatus('Đã tạo phòng! Gửi mã cho tối đa 7 bạn. Chỗ trống sẽ là bot.', 'wait');
         renderLobby();
     });
     net.peer.on('connection', conn => {
         conn.on('open', () => {
             const used = net.guests.map(g => g.id); let id = 2; while (used.includes(id)) id++;
-            if (id > 4 || !['MENU', 'GAMEOVER'].includes(gameState)) { try { conn.send({ t: id > 4 ? 'full' : 'busy' }); } catch (e) {} setTimeout(() => conn.close(), 300); return; }
+            if (id > MAX_PLAYERS || !['MENU', 'GAMEOVER'].includes(gameState)) { try { conn.send({ t: id > MAX_PLAYERS ? 'full' : 'busy' }); } catch (e) {} setTimeout(() => conn.close(), 300); return; }
             const g = { id, conn, remote: blankRemote() };
             net.guests.push(g);
             conn.on('data', m => onHostData(g, m));
             conn.on('close', () => guestLeft(g)); conn.on('error', () => guestLeft(g));
             conn.send({ t: 'welcome', id, maxWins: settings.maxWins });
             AudioSys.play('select', 0.4);
-            setNetStatus(`${PNAMES[id - 1]} đã vào phòng! (${net.guests.length + 1}/4)`, 'ok');
+            setNetStatus(`${PNAMES[id - 1]} đã vào phòng! (${net.guests.length + 1}/${MAX_PLAYERS})`, 'ok');
             broadcastLobby();
         });
     });

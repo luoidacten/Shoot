@@ -55,7 +55,7 @@ initRound = function () {
     world.event = null; world.robot = null; world.timeScale = 1; world.team = false; world.bright = false;
     removeTempBots();
     const d = currentDestiny || {};
-    if (d.more) { for (let k = 0; k < 4; k++) { let id = 1; while (players.some(q => q.id === id)) id++; const b = createPlayer(id, 'bot'); b.temp = true; b.label = 'BOT+' + id; b.build = randomBuild(); players.push(b); } }
+    if (d.more) { for (let k = 0; k < 4 && players.length < 12; k++) { let id = 1; while (players.some(q => q.id === id)) id++; const b = createPlayer(id, 'bot'); b.temp = true; b.label = 'BOT+' + id; b.build = randomBuild(); players.push(b); } }
     const big = players.length > 4 || d.wide;
     setMapSize(big ? 3200 : 2400, big ? 2400 : 1800);
     _initRound();
