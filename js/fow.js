@@ -82,7 +82,7 @@ function onHeard(type, x, y) {
     if (!fowActive() || canSee(x, y, 10)) return;
     const me = localPlayer(); if (!me) return;
     const kind = type === 'step' ? 'step' : type === 'explosion' ? 'boom' : ['swing', 'hit', 'crit', 'block'].includes(type) ? 'melee' : 'gun';
-    if (kind === 'step' && dist(me.x, me.y, x, y) > 800) return;
+    if (kind === 'step' && dist(me.x, me.y, x, y) > (me.adv === 'minimap' ? 1300 : 800)) return;
     const jit = kind === 'step' ? 30 : 50;
     pings.push({ x: x + (Math.random() - 0.5) * jit, y: y + (Math.random() - 0.5) * jit, kind, life: kind === 'step' ? 0.7 : 1.1, maxLife: kind === 'step' ? 0.7 : 1.1 });
 }

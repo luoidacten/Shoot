@@ -282,7 +282,8 @@ function updateBullets(dt) {
                         spark(b.x, b.y, '#e2e8f0', 6, 220, 0.3, 2); AudioSys.playAt('block', p.x, p.y, 0.3); reduceDurability(p, w, b.damage > 50 ? 40 : 10);
                     } else if (!b.explosive || b.super) {
                         const owner = players.find(q => q.id === b.owner); if (owner) owner.stats.hits++;
-                        dealDamage(p, b.damage * (b.falloff ? Math.max(0.35, 1 - dist(b.sx, b.sy, p.x, p.y) / b.falloff) : 1), b.owner, { angle: b.angle, knock: b.knock, burn: b.burn, slow: b.freeze ? 2.5 : (b.slowHit || 0), storm: b.storm, super: b.super });
+                        const perp = dist(p.x, p.y, b.px + dx * t, b.py + dy * t), ramp = b.ramp ? Math.min(b.rampMax || 3, 1 + dist(b.sx, b.sy, p.x, p.y) / b.ramp) : 1;
+                        dealDamage(p, b.damage * ramp * (b.falloff ? Math.max(0.35, 1 - dist(b.sx, b.sy, p.x, p.y) / b.falloff) : 1), b.owner, { angle: b.angle, knock: b.knock, burn: b.burn, slow: b.freeze ? 2.5 : (b.slowHit || 0), storm: b.storm, super: b.super, bullet: b, head: perp < p.radius * (b.headR || 0.45) });
                         if (b.root && p.st) { p.st.root = Math.max(p.st.root || 0, b.root); floatText(p.x, p.y - 34, 'BỊ TRÓI!', '#e5e7eb', 14); ring(p.x, p.y, 5, 30, '#e5e7eb', 0.4); }
                         if (b.hook) hookHit(owner, p);
                         if (b.freeze) ring(p.x, p.y, 5, 40, '#93c5fd', 0.3);

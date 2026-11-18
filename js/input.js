@@ -129,7 +129,7 @@ function onPadPress(pad, btn) {
 function onKeyPress(code) {
     if (code === 'Escape' || code === 'KeyP') { togglePause(); return; }
     if (gameState === 'AUGMENT') {
-        const p1 = { KeyF: 0, KeyG: 1, KeyH: 2, Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3 };
+        const p1 = { KeyF: 0, KeyG: 1, KeyH: 2, Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4, Digit6: 5, Digit7: 6, Digit8: 7, Digit9: 8, Digit0: 9 };
         const p2 = { KeyK: 0, KeyL: 1, Semicolon: 2, Comma: 0, Period: 1, Slash: 2, Numpad1: 0, Numpad2: 1, Numpad3: 2, Quote: 3 };
         if (settings.mode === 'bot' || settings.mode === 'online') {
             const idx = p1[code] ?? p2[code];

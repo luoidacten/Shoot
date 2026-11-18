@@ -95,7 +95,7 @@ function updateModes(dt) {
         if (world.chaosT <= 0) { world.chaosT = 2.5 + Math.random() * 3; world.timeScale = [0.55, 0.7, 1, 1.35, 1.7][Math.floor(Math.random() * 5)]; showBanner(world.timeScale > 1 ? 'TĂNG TỐC!' : world.timeScale < 1 ? 'CHẬM LẠI…' : 'BÌNH THƯỜNG', `x${world.timeScale}`, '#c084fc', 0.9, 34); }
     } else if (ev === 'poison') {
         world.poisonT = (world.poisonT || 0) + dt;
-        if (world.poisonT > 0.5) { world.poisonT = 0; players.forEach(p => { if (p.hp > 1) dealDamage(p, 1.2, -1, { zone: true, raw: !p.gasMask }); }); }
+        if (world.poisonT > 0.5) { world.poisonT = 0; players.forEach(p => { if (p.hp > 1) dealDamage(p, 1.2, -1, { zone: true, raw: !p.gasMask, poison: true }); }); }
     } else if (ev === 'robot' && world.robot) {
         const r = world.robot, p = players.find(q => q.hp > 0 && dist(q.x, q.y, r.x, r.y) < q.radius + 30);
         if (p) {
@@ -194,7 +194,7 @@ applySnapshot = function (s) {
 function visionAt(v, ang) {
     let base = visionRange(v);
     if (!v || !v.inventory) return base;
-    const w = getCurrentWeapon(v), elsu = v.cardSet && v.cardSet.has('elsu');
+    const w = getCurrentWeapon(v), elsu = v.cardSet && (v.cardSet.has('elsu') || v.cardSet.has('elsuSPS'));
     if (w.id === 'BOW') base *= 1.15;
     if (w.id === 'RAILGUN' && (v.railLv || 1) >= 2) base *= 1.4;
     if (!v.aiming) return base;
