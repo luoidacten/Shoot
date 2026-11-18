@@ -14,7 +14,11 @@ const TAC = {
     orbital:   { name: '☄️ QUỸ ĐẠO HUỶ DIỆT', need: 1, r: 190, col: '#a78bfa', steps: ['CHẠM VÙNG HUỶ DIỆT'] },
     incend:    { name: '🔥 BOM CHÁY', need: 1, r: 140, col: '#fb923c', steps: ['CHẠM ĐIỂM THẢ'] },
     cluster:   { name: '💥 BOM CHÙM', need: 1, r: 170, col: '#facc15', steps: ['CHẠM ĐIỂM THẢ'] },
-    smokes:    { name: '🌫️ KHÓI CHIẾN THUẬT', need: 3, multi: true, r: 135, col: '#cbd5e1', steps: ['CHẠM TỐI ĐA 3 ĐIỂM KHÓI · BẤM XÁC NHẬN'] }
+    smokes:    { name: '🌫️ KHÓI CHIẾN THUẬT', need: 3, multi: true, r: 135, col: '#cbd5e1', steps: ['CHẠM TỐI ĐA 3 ĐIỂM KHÓI · BẤM XÁC NHẬN'] },
+    smokeCut:  { name: '🛩️ KHÓI CẮT', need: 2, line: 1000, col: '#e2e8f0', steps: ['CHẠM ĐIỂM A (máy bay bắt đầu thả khói)', 'CHẠM ĐIỂM B (tối đa 1000)'] },
+    blanket:   { name: '☁️ KHÓI MÙ BAO PHỦ', need: 1, r: 300, col: '#94a3b8', steps: ['CHẠM VÙNG PHỦ KHÓI'] },
+    uav:       { name: '📡 TRINH SÁT UAV', need: 1, r: 420, col: '#38bdf8', steps: ['CHẠM VÙNG TRINH SÁT'] },
+    supply:    { name: '📦 THẢ DÙ TIẾP TẾ', need: 1, r: 50, col: '#4ade80', steps: ['CHẠM ĐIỂM THẢ HỘP'] }
 };
 
 /* ============================== 4 ĐÒN MỚI ============================== */
@@ -238,30 +242,6 @@ drawPicker = function (me, W, H, now) {
     ctx.restore();
 };
 
-/* ============================== HUD RIÊNG: bảng nhỏ hiện các đòn gọi hoả lực & hồi chiêu ============================== */
-const _drawHUD16 = drawHUD;
-drawHUD = function (W, H, now) {
-    _drawHUD16(W, H, now);
-    const me = localPlayer();
-    if (!me || me.hp <= 0 || picker || !['PLAYING', 'KO', 'COUNTDOWN'].includes(gameState)) return;
-    const list = (me.skills || []).filter(s => CARDS[s.id] && CARDS[s.id].picker);
-    if (!list.length) return;
-    const x0 = 14, y0 = Math.round(H * 0.34), w = 190, rh = 26;
-    ctx.save();
-    ctx.fillStyle = 'rgba(11,18,32,0.82)'; rrect(ctx, x0, y0, w, 22 + list.length * rh, 10); ctx.fill();
-    ctx.strokeStyle = 'rgba(251,191,36,0.55)'; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.fillStyle = '#fbbf24'; ctx.font = `700 9px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('📟 BẢNG CHIẾN THUẬT', x0 + 9, y0 + 11);
-    list.forEach((s, i) => {
-        const c = CARDS[s.id], y = y0 + 22 + i * rh, ready = s.cd <= 0, max = skillCooldown(me, s.id);
-        ctx.fillStyle = 'rgba(255,255,255,0.06)'; rrect(ctx, x0 + 6, y + 2, w - 12, rh - 5, 6); ctx.fill();
-        if (!ready) { ctx.fillStyle = 'rgba(251,191,36,0.25)'; rrect(ctx, x0 + 6, y + 2, (w - 12) * (1 - s.cd / Math.max(0.1, max)), rh - 5, 6); ctx.fill(); }
-        ctx.font = `13px ${FONT}`; ctx.fillStyle = '#fff'; ctx.fillText(c.icon, x0 + 12, y + rh / 2);
-        ctx.font = `700 9px ${FONT}`; ctx.fillStyle = ready ? '#fde68a' : '#94a3b8'; ctx.fillText(ready ? `${c.name} · SẴN SÀNG` : `${c.name} · ${Math.ceil(s.cd)}s`, x0 + 30, y + rh / 2);
-        if (ready) { ctx.strokeStyle = `rgba(253,224,71,${0.4 + Math.sin(now * 6) * 0.3})`; ctx.lineWidth = 1.2; rrect(ctx, x0 + 6, y + 2, w - 12, rh - 5, 6); ctx.stroke(); }
-    });
-    ctx.restore();
-};
-
 /* ============================== VẼ: Quỹ Đạo Huỷ Diệt ============================== */
 const _drawNetZones16 = drawNetZones;
 drawNetZones = function (now) {
@@ -285,4 +265,106 @@ drawNetZones = function (now) {
             for (let i = 0; i < 3; i++) { const a = Math.random() * 6.28, r = Math.random() * z.r; particles.push({ x: z.x + Math.cos(a) * r, y: z.y + Math.sin(a) * r, vx: 0, vy: -200 - Math.random() * 200, life: 0.4, maxLife: 0.4, color: Math.random() < 0.5 ? '#c4b5fd' : '#ffffff', size: 3, glow: true }); }
         }
     });
+};
+
+/* ============================== KỸ NĂNG KHÓI / TRINH SÁT / TIẾP TẾ DÙNG BẢNG CHIẾN THUẬT ============================== */
+// Khói Cắt: máy bay bay xuyên bản đồ theo hướng A→B, xả khói dọc đoạn A→B
+function smokeCutStrike(p, a, b) {
+    b = clampLen(a, b, 1000);
+    const L = dist(a.x, a.y, b.x, b.y) || 1, ang = Math.atan2(b.y - a.y, b.x - a.x), lead = 900, warn = strikeWarnT(p, 0.8);
+    warnLine(p, a.x, a.y, b.x, b.y, warn, false);
+    strikes.push({ kind: 'smokePlane', owner: p.id, t: warn, ang, ax: a.x, ay: a.y, L, sx: a.x - Math.cos(ang) * lead, sy: a.y - Math.sin(ang) * lead, travel: 0, next: 0, total: L + lead * 2, speed: 1400 });
+    floatText(p.x, p.y - 42, '🛩️ KHÓI CẮT!', '#e2e8f0', 16); AudioSys.playAt('alarm', p.x, p.y, 0.25);
+}
+function blanketSmoke(p, x, y) {
+    const warn = strikeWarnT(p, 0.6);
+    zones.push({ type: 'artyWarn', x, y, r: 300, t: warn, maxT: warn, owner: p.id, tick: 0 });
+    strikes.push({ kind: 'smokeDrop', owner: p.id, x, y, t: warn, big: true });
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; strikes.push({ kind: 'smokeDrop', owner: p.id, x: x + Math.cos(a) * 170, y: y + Math.sin(a) * 170, t: warn + 0.1 + i * 0.05 }); }
+    floatText(p.x, p.y - 42, '☁️ KHÓI MÙ BAO PHỦ', '#cbd5e1', 15);
+}
+function uavScan(p, x, y) {
+    zones.push({ type: 'flareLight', x, y, r: 420, t: 6, maxT: 6, owner: p.id, tick: 0 });
+    enemiesOf(p).forEach(e => { if (dist(e.x, e.y, x, y) < 420) spotFor(e, p.id, 6); });
+    strikes.push({ kind: 'uav', owner: p.id, x, y, t: 6, tick: 0 });
+    floatText(p.x, p.y - 42, '📡 UAV TRINH SÁT', '#7dd3fc', 15); AudioSys.playAt('legend', x, y, 0.25);
+}
+function airSupply(p, x, y) {
+    zones.push({ type: 'artyWarn', x, y, r: 40, t: 2, maxT: 2, owner: p.id, tick: 0 });
+    strikes.push({ kind: 'crate', owner: p.id, x, y, t: 2 });
+    if (has(p, 'radioman')) strikes.push({ kind: 'crate', owner: p.id, x: x + 50, y: y + 20, t: 2.3 });
+    floatText(p.x, p.y - 42, '📦 THẢ DÙ TIẾP TẾ', '#86efac', 15);
+}
+const _updateStrikes17 = updateStrikes;
+updateStrikes = function (dt) {
+    _updateStrikes17(dt);
+    for (let i = strikes.length - 1; i >= 0; i--) {
+        const s = strikes[i];
+        if (s.kind === 'smokePlane') {
+            if (s.t > 0) continue;
+            if (!s.z) { s.z = { type: 'plane', x: s.sx, y: s.sy, r: 26, t: 9, maxT: 9, owner: s.owner, tick: 0, phase: Math.round(s.ang * 1000) }; zones.push(s.z); AudioSys.playAt('whoosh', s.ax, s.ay, 0.6, 3000); }
+            s.travel += s.speed * dt;
+            const dx = Math.cos(s.ang), dy = Math.sin(s.ang), x = s.sx + dx * s.travel, y = s.sy + dy * s.travel;
+            s.z.x = x; s.z.y = y; s.z.t = 9;
+            const along = (x - s.ax) * dx + (y - s.ay) * dy;
+            while (along >= s.next && s.next <= s.L) { strikes.push({ kind: 'smokeDrop', owner: s.owner, x: s.ax + dx * s.next, y: s.ay + dy * s.next, t: 0.25, r: 110 }); s.next += 130; }
+            if (s.travel > s.total) { strikes.splice(i, 1); s.z.t = 0; }
+        } else if (s.kind === 'uav') { // UAV bay vòng: liên tục làm lộ địch bước vào vùng
+            s.tick -= dt;
+            if (s.tick <= 0) { s.tick = 0.5; const o = players.find(q => q.id === s.owner); if (o) enemiesOf(o).forEach(e => { if (dist(e.x, e.y, s.x, s.y) < 420) spotFor(e, o.id, 1.2); }); }
+            if (s.t <= 0) strikes.splice(i, 1);
+        }
+    }
+};
+// khói lớn cho Khói Mù Bao Phủ / Khói Cắt (cùng vòng xử lý smokeDrop ở trên → chỉnh bán kính sau khi rơi)
+const _updateStrikes17b = updateStrikes;
+updateStrikes = function (dt) {
+    const drops = strikes.filter(s => s.kind === 'smokeDrop' && (s.big || s.r) && s.t - dt <= 0).map(s => ({ x: s.x, y: s.y, r: s.big ? 230 : s.r }));
+    _updateStrikes17b(dt);
+    drops.forEach(d => { const z = zones.find(q => q.type === 'smoke' && q.x === d.x && q.y === d.y); if (z) { z.r = d.r; if (d.r > 200) { z.t = z.maxT = 11; } } });
+};
+
+defS('smokeCut', '🛩️', 'Khói Cắt', 20, 'escape', 'Mở bảng chiến thuật, chọn A rồi B (tối đa 1000): máy bay bay xuyên bản đồ, xả một dải khói dày dọc đường bay từ A tới B.', p => { const t = p.pickTarget || autoLine(p); smokeCutStrike(p, t.a, t.b); }, 2000);
+defS('blanketSmoke', '☁️', 'Khói Mù Bao Phủ', 26, 'escape', 'Mở bảng chiến thuật, chọn 1 vùng: phủ khói dày cả vùng bán kính 300 trong 11 giây.', p => { const c = p.pickTarget ? p.pickTarget.a : { x: p.x, y: p.y }; blanketSmoke(p, c.x, c.y); }, 2000);
+defS('uavScan', '📡', 'Trinh Sát UAV', 22, 'engage', 'Mở bảng chiến thuật, chọn 1 vùng: UAV bay vòng 6 giây, làm lộ mọi địch trong bán kính 420.', p => { const c = p.pickTarget ? p.pickTarget.a : autoPoint(p); uavScan(p, c.x, c.y); }, 2000);
+defS('airSupply', '📦', 'Thả Dù Tiếp Tế', 30, 'escape', 'Mở bảng chiến thuật, chọn 1 điểm: sau 2 giây một hộp hỗ trợ được thả dù xuống (có Lính Liên Lạc thì thả 2 hộp).', p => { const c = p.pickTarget ? p.pickTarget.a : { x: p.x + Math.cos(p.angle) * 80, y: p.y + Math.sin(p.angle) * 80 }; airSupply(p, c.x, c.y); }, 2000);
+CARDS.smokeCut.picker = 'smokeCut'; CARDS.blanketSmoke.picker = 'blanket'; CARDS.uavScan.picker = 'uav'; CARDS.airSupply.picker = 'supply';
+FIRE_SKILLS.push('smokeCut', 'blanketSmoke', 'uavScan', 'airSupply');
+[
+    { id: 'smokeHunt', a: 'uavScan', b: 'blanketSmoke', name: 'Săn Trong Khói', desc: 'Địch đứng trong khói của bạn bị lộ vị trí.' },
+    { id: 'smokeRun', a: 'smokeCut', b: 'tacSmoke', name: 'Hành Lang Khói', desc: 'Khói Cắt và Khói Chiến Thuật hồi nhanh hơn 5 giây.' }
+].forEach(c => { COMBOS.push(c); (COMBOS_OF[c.a] = COMBOS_OF[c.a] || []).push(c); (COMBOS_OF[c.b] = COMBOS_OF[c.b] || []).push(c); });
+const _skillCd17 = skillCooldown;
+skillCooldown = function (p, id) { let cd = _skillCd17(p, id); if ((id === 'smokeCut' || id === 'tacSmoke') && combo(p, 'smokeRun')) cd -= 5; return Math.max(1, cd); };
+const _upe17 = updatePartyExtras;
+updatePartyExtras = function (dt) {
+    _upe17(dt);
+    if (gameState !== 'PLAYING') return;
+    players.forEach(o => { if (o.hp > 0 && combo(o, 'smokeHunt')) enemiesOf(o).forEach(e => { if (zones.some(z => z.type === 'smoke' && z.owner === o.id && dist(e.x, e.y, z.x, z.y) < z.r)) spotFor(e, o.id, 0.5); }); });
+};
+
+/* ============================== VŨ KHÍ GỌI HOẢ LỰC: dùng bảng chiến thuật ============================== */
+PICKER_WEAPONS.AIRCALL = 'airstrike';
+WEAPONS.SMOKETAB = { id: 'SMOKETAB', name: 'Bộ Đàm Khói Cắt', icon: '🛩️', type: 'GUN', mode: 'tap', aim: 'line', color: '#94a3b8', damage: 0, fireRate: 50, speed: 1, spread: 0, range: 600, magSize: 2, mag: 2, reserve: 0, noReload: true, moveScale: 1, width: 5, len: 12, tier: 3, desc: 'Bắn = mở bảng chiến thuật, chọn A→B để máy bay xả khói (2 lần)' };
+WEAPONS.ORBITAB = { id: 'ORBITAB', name: 'Bộ Định Vị Vệ Tinh', icon: '☄️', type: 'GUN', mode: 'tap', aim: 'line', color: '#8b5cf6', damage: 0, fireRate: 50, speed: 1, spread: 0, range: 600, magSize: 1, mag: 1, reserve: 0, noReload: true, moveScale: 1, width: 5, len: 12, tier: 3, desc: 'Bắn = mở bảng chiến thuật, chọn vùng gọi Quỹ Đạo Huỷ Diệt (1 lần)' };
+PICKER_WEAPONS.SMOKETAB = 'smokeCut'; PICKER_WEAPONS.ORBITAB = 'orbital';
+Object.assign(BASE_WEIGHTS, { SMOKETAB: 2, ORBITAB: 1 });
+WEAPONS.AIRCALL.desc = 'Bắn = mở bảng chiến thuật: chạm mục tiêu rồi hướng bay để gọi không kích (2 lần)';
+WEAPONS.BOMBTAB.desc = 'Bắn = mở bảng chiến thuật, chọn A rồi B để thả bom (1 lần)';
+WEAPONS.LASERDES.desc = 'Bắn = mở bảng chiến thuật, chọn A rồi B để gọi laser vệ tinh (1 lần)';
+const _useStrikeWeapon17 = useStrikeWeapon;
+useStrikeWeapon = function (p, w, a, b) {
+    if (!['AIRCALL', 'SMOKETAB', 'ORBITAB'].includes(w.id)) return _useStrikeWeapon17(p, w, a, b);
+    if (!world.infiniteAmmo) w.mag--;
+    if (w.id === 'AIRCALL') {
+        if (a) planeStrike(p, Math.atan2(b.y - a.y, b.x - a.x) || 0, a.x, a.y, { from: -300, to: 300 });
+        else { const c = autoPoint(p); planeStrike(p, Math.atan2(c.y - p.y, c.x - p.x), c.x, c.y, { from: -300, to: 300 }); }
+    } else if (w.id === 'SMOKETAB') { const t = a ? { a, b } : autoLine(p); smokeCutStrike(p, t.a, t.b); }
+    else { const c = a || autoPoint(p); orbitalStrike(p, c.x, c.y); }
+    if (w.mag <= 0) { const i = p.inventory.indexOf(w); if (i >= 0) p.inventory[i] = { ...WEAPONS.NONE }; }
+};
+const _fireWeapon17 = fireWeapon;
+fireWeapon = function (p, w, ang, charge, enemy) {
+    if (w && (w.id === 'SMOKETAB' || w.id === 'ORBITAB')) { p.cooldown = w.fireRate; p.lastFireT = world.time; if (w.mag > 0) useStrikeWeapon(p, w, null, null); return; }
+    return _fireWeapon17(p, w, ang, charge, enemy);
 };
