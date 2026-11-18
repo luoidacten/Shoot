@@ -149,7 +149,7 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
   - Napalm: chọn đầu và cuối vệt lửa.
   - Pháo Kích, Quỹ Đạo, Bom Cháy, Bom Chùm: chọn 1 vùng.
   - Khói Chiến Thuật: chọn tối đa 3 điểm.
-- **HUD riêng "📟 Bảng Chiến Thuật"** ở bên trái màn hình, hiện các đòn gọi hoả lực bạn có và thời gian hồi chiêu.
+- Bấm kỹ năng như bình thường, bảng chiến thuật hiện ra toàn màn hình (không có khung phụ nào trên HUD).
 - **Sát thương rất lớn:** bom máy bay 100 mỗi quả, Thả Bom 95, pháo 75, laser ~180/giây, Quỹ Đạo ~260/giây.
 - **4 đòn mới:**
   - ☄️ Quỹ Đạo Huỷ Diệt: cột năng lượng bán kính 190, kéo dài 2.6 giây.
@@ -157,6 +157,13 @@ Mọi người đấu sinh tồn: người cuối cùng còn sống thắng hi�
   - 💥 Bom Chùm: 14 quả bom nhỏ.
   - 🌫️ Khói Chiến Thuật: 3 điểm khói.
   - Thêm 3 phối hợp: Ngày Tận Thế, Bão Lửa, Màn Khói Thần Tốc.
+- **4 kỹ năng chiến thuật mới** (cũng chọn trên bảng):
+  - 🛩️ Khói Cắt: chọn A→B (tối đa 1000), máy bay bay xuyên bản đồ xả một dải khói dọc đường bay.
+  - ☁️ Khói Mù Bao Phủ: phủ khói dày cả vùng bán kính 300 trong 11 giây.
+  - 📡 Trinh Sát UAV: làm lộ địch trong bán kính 420 trong 6 giây.
+  - 📦 Thả Dù Tiếp Tế: thả hộp hỗ trợ xuống điểm chọn.
+  - Thêm 2 phối hợp: Săn Trong Khói, Hành Lang Khói.
+- **Vũ khí gọi hoả lực cũng dùng bảng chiến thuật**: Bộ Đàm Không Kích, Máy Tính Bảng Thả Bom, Bộ Chỉ Điểm Laser. Thêm 2 vũ khí mới: 🛩️ Bộ Đàm Khói Cắt và ☄️ Bộ Định Vị Vệ Tinh.
 - **Bản đồ chọn điểm** không dừng trận. Bình thường chỉ hiện vị trí của bạn; có lợi thế Bản Đồ Nhỏ thì hiện thêm tường, bụi, vòng bo, địch, tiếng động.
 - **5 phép:** Không Kích Nhẹ, Pháo Sáng, Rải Mìn, Màn Khói, Tiếp Tế Khẩn (+3 phối hợp phép).
 - **5 vật phẩm:** Súng Pháo Sáng, Bộ Đàm Mini, Mìn Cá Nhân, Tiêm Adrenaline, Bộ Vá Giáp.
