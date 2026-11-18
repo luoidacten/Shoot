@@ -109,7 +109,14 @@ updatePartyExtras = function (dt) {
     });
 };
 const enemyOwned = (me, id) => id !== me.id && !sameSide(me, id);
-const FAINT_R = 150; // người thường: đứng rất gần mới thấy dấu hiệu mờ
+const FAINT_R = 150;
+/** Chớp loé theo khoảng cách: xa → hiếm, chậm, mờ · gần → dày, nhanh, rõ. Trả về độ đậm (0 = đang tắt) */
+function blinkAlpha(d, R, seed, now) {
+    const k = Math.max(0, Math.min(1, 1 - d / R)); if (k <= 0) return 0;
+    const hz = 0.8 + 11 * k * k, ph = (now * hz + seed) % 1, on = 0.08 + 0.3 * k;
+    if (ph > on) return 0;
+    return (0.12 + 0.6 * k) * (1 - ph / on * 0.5);
+} // người thường: đứng rất gần mới thấy dấu hiệu mờ
 const _drawMines19 = drawMines;
 drawMines = function (now) {
     _drawMines19(now);
@@ -121,7 +128,11 @@ drawMines = function (now) {
         const tw = ctx.measureText(label).width + 10; ctx.fillStyle = 'rgba(15,10,20,0.8)'; rrect(ctx, x - tw / 2, y - r - 17, tw, 14, 6); ctx.fill();
         ctx.fillStyle = col; ctx.fillText(label, x, y - r - 10); ctx.restore();
     };
-    const faint = (x, y, r, col) => { ctx.save(); ctx.globalAlpha = 0.14 + Math.max(0, Math.sin(now * 3 + x)) * 0.14; ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.setLineDash([2, 5]); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); };
+    // người thường: KHÔNG có viền — chỉ chớp loé; càng lại gần càng chớp nhiều, nhanh và rõ
+    const faint = (x, y, r, col, shape) => { const a = blinkAlpha(dist(me.x, me.y, x, y), FAINT_R + (shape === 'crate' ? 30 : 0), x * 0.013 + y * 0.007, now); if (a <= 0) return; ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 2;
+        if (shape === 'crate') { ctx.globalCompositeOperation = 'lighter'; ctx.fillRect(x - r, y - r, r * 2, r * 2); }
+        else { for (let k = 0; k < 6; k++) { const t = k * Math.PI / 3; ctx.beginPath(); ctx.moveTo(x + Math.cos(t) * 4, y + Math.sin(t) * 4); ctx.lineTo(x + Math.cos(t) * r, y + Math.sin(t) * r); ctx.stroke(); } ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill(); }
+        ctx.restore(); };
     mines.forEach(m => {
         if (!enemyOwned(me, m.owner)) return;
         if (detects(me, m.x, m.y, true)) {
@@ -129,13 +140,13 @@ drawMines = function (now) {
             ctx.beginPath(); ctx.arc(m.x, m.y, 12, 0, Math.PI * 2); ctx.stroke();
             for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + now; ctx.beginPath(); ctx.moveTo(m.x + Math.cos(a) * 6, m.y + Math.sin(a) * 6); ctx.lineTo(m.x + Math.cos(a) * 14, m.y + Math.sin(a) * 14); ctx.stroke(); }
             ctx.restore(); tag(m.x, m.y, 20, '⚠ BẪY', '#f87171');
-        } else if (dist(me.x, me.y, m.x, m.y) < FAINT_R && canSee(m.x, m.y, 4)) faint(m.x, m.y, 11, '#fca5a5'); // chỉ thấy mờ mờ
+        } else if (dist(me.x, me.y, m.x, m.y) < FAINT_R && canSee(m.x, m.y, 4)) faint(m.x, m.y, 12, '#fecaca', 'mine'); // chỉ thấy mờ mờ
     });
     crates.forEach(c => {
         const bad = c.type === 'TRAP' || (c.type === 'FAKE' && enemyOwned(me, c.owner)); if (!bad) return;
         const r = (c.size || 28) * 0.8;
         if (detects(me, c.x, c.y, true)) tag(c.x, c.y, r, c.type === 'TRAP' ? '💣 HÒM BẪY' : '🎭 THÙNG GIẢ', c.type === 'TRAP' ? '#fb923c' : '#f472b6');
-        else if (dist(me.x, me.y, c.x, c.y) < FAINT_R + 30 && canSee(c.x, c.y, 4)) faint(c.x, c.y, r, '#fca5a5');
+        else if (dist(me.x, me.y, c.x, c.y) < FAINT_R + 30 && canSee(c.x, c.y, 4)) faint(c.x, c.y, r * 0.75, 'rgba(255,80,80,0.55)', 'crate');
     });
     // vùng nhìn của Ưng Trạm / drone / pháo sáng: viền mảnh để biết chỗ nào đang được soi rõ
     visionSources(me).forEach(s => { if (s.kind === 'self' || s.kind === 'radar') return; ctx.save(); ctx.globalAlpha = 0.18; ctx.strokeStyle = '#7dd3fc'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); });
@@ -148,7 +159,7 @@ drawPlayer = function (p, now) {
     if (!me || p === me || p.hp <= 0 || !(p.st && p.st.invis > 0) || sameTeam(me, p)) return;
     ctx.save();
     if (detects(me, p.x, p.y)) { ctx.strokeStyle = `rgba(244,114,182,${0.6 + Math.sin(now * 8) * 0.3})`; ctx.lineWidth = 2; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.arc(p.x, p.y, p.radius + 7, 0, Math.PI * 2); ctx.stroke(); }
-    else if (dist(me.x, me.y, p.x, p.y) < FAINT_R + 50 && canSee(p.x, p.y, p.radius)) { ctx.globalAlpha = 0.12 + Math.max(0, Math.sin(now * 5)) * 0.12; ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1.5; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(p.x + Math.sin(now * 7 + i) * 2, p.y + Math.cos(now * 6 + i) * 2, p.radius - 2 + i * 3, 0, Math.PI * 2); ctx.stroke(); } }
+    else if (dist(me.x, me.y, p.x, p.y) < FAINT_R + 50 && canSee(p.x, p.y, p.radius)) { const a = blinkAlpha(dist(me.x, me.y, p.x, p.y), FAINT_R + 50, p.id * 1.7, now); if (a > 0) { ctx.globalAlpha = a * 0.8; ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius + 4); g.addColorStop(0, 'rgba(226,232,240,0.55)'); g.addColorStop(1, 'rgba(226,232,240,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius + 4, 0, Math.PI * 2); ctx.fill(); } }
     ctx.restore();
 };
 const VISION_NOTE = '<br><b>Phát hiện:</b> lộ bẫy, hòm bẫy, thùng giả và địch tàng hình trong bán kính ';
@@ -259,13 +270,14 @@ drawFogOfWar = function (zoom) {
 
 /* ============================== KHÓI: ai đứng trong khói (kể cả bạn) chỉ nhìn thấy sát bên mình ============================== */
 const SMOKE_SIGHT = 115;
+function smokeSight(v) { return combo(v, 'smokeHunter') ? 260 : combo(v, 'fogEyes') ? 220 : SMOKE_SIGHT; }
 const inMySmoke = v => !!(v && v.x !== undefined && inSmoke(v.x, v.y) && !(v.st && v.st.radarT > 0));
 const _visionAt20 = visionAt;
-visionAt = function (v, ang) { const r = _visionAt20(v, ang); return inMySmoke(v) ? Math.min(r, SMOKE_SIGHT) : r; };
+visionAt = function (v, ang) { const r = _visionAt20(v, ang); return inMySmoke(v) ? Math.min(r, smokeSight(v)) : r; };
 const _nearRadius20 = nearRadius;
-nearRadius = function (v) { const r = _nearRadius20(v); return inMySmoke(v) ? Math.min(r, SMOKE_SIGHT) : r; };
+nearRadius = function (v) { const r = _nearRadius20(v); return inMySmoke(v) ? Math.min(r, smokeSight(v)) : r; };
 const _visionRange20 = visionRange;
-visionRange = function (viewer) { const v = viewer || localPlayer(), r = _visionRange20(viewer); return inMySmoke(v) ? Math.min(r, SMOKE_SIGHT) : r; };
+visionRange = function (viewer) { const v = viewer || localPlayer(), r = _visionRange20(viewer); return inMySmoke(v) ? Math.min(r, smokeSight(v)) : r; };
 
 /* ============================== THẺ: KHÓI CÁCH ÂM ============================== */
 defP('silentSmoke', '🔇', 'Khói Cách Âm', 'Khi đứng trong khói (bất kỳ khói nào), bạn không phát ra âm thanh: không tiếng bước chân, tiếng súng, tiếng chém, không dấu chân — địch không nghe/thấy gợn âm.', p => {});
@@ -292,3 +304,64 @@ AudioSys.playAt = function (type, x, y, vol, range) {
     if (src && !(me && sameTeam(me, src))) return;
     return _playAt20(type, x, y, vol, range);
 };
+
+
+/* ============================== THẺ: BẢN ĐỒ MINI (như lợi thế Bản Đồ Nhỏ) ============================== */
+defP('miniMapCard', '🗺️', 'Bản Đồ Mini', 'Giống lợi thế Bản Đồ Nhỏ: có minimap ở góc màn hình (tường, bụi, vòng bo, địch đang thấy, tiếng động), nghe tiếng chân xa hơn 60%, bảng chiến thuật hiện đầy đủ.', p => { p.minimap = true; });
+const hasMap = v => !!v && (v.adv === 'minimap' || has(v, 'miniMapCard'));
+const _drawHUD20 = drawHUD;
+drawHUD = function (W, H, now) {
+    _drawHUD20(W, H, now);
+    const me = localPlayer();
+    if (me && me.adv !== 'minimap' && has(me, 'miniMapCard') && ['PLAYING', 'KO', 'COUNTDOWN', 'ROUND_OVER'].includes(gameState)) drawMinimap(me, W, H, now);
+};
+const _drawPicker20 = drawPicker;
+drawPicker = function (me, W, H, now) { const adv = me.adv; if (has(me, 'miniMapCard')) me.adv = 'minimap'; try { return _drawPicker20(me, W, H, now); } finally { me.adv = adv; } };
+// nghe tiếng chân xa: Bản Đồ Mini 1300, Tai Vách Mạch Rừng 1800
+const _onHeard20 = onHeard;
+onHeard = function (type, x, y) {
+    const me = localPlayer();
+    if (type === 'step' && me && fowActive() && !canSee(x, y, 10) && (has(me, 'miniMapCard') || combo(me, 'bigEar'))) {
+        const d = dist(me.x, me.y, x, y), R = combo(me, 'bigEar') ? 1800 : 1300;
+        if (d > 800 && d < R) { pings.push({ x: x + (Math.random() - 0.5) * 30, y: y + (Math.random() - 0.5) * 30, kind: 'step', life: 0.7, maxLife: 0.7 }); return; }
+    }
+    return _onHeard20(type, x, y);
+};
+
+/* ============================== 13 PHỐI HỢP MỚI ============================== */
+[
+    { id: 'cartographer', a: 'miniMapCard', b: 'satLink', name: 'Nhà Bản Đồ', desc: 'Kỹ năng dùng bảng chiến thuật hồi nhanh thêm 10%.' },
+    { id: 'bigEar', a: 'miniMapCard', b: 'eavesdrop', name: 'Tai Vách Mạch Rừng', desc: 'Nghe tiếng bước chân xa tới 1800.' },
+    { id: 'sonarMap', a: 'miniMapCard', b: 'sonar', name: 'Bản Đồ Sóng Âm', desc: 'Sóng Âm phát mỗi 5 giây.' },
+    { id: 'smokeHunter', a: 'thermal', b: 'silentSmoke', name: 'Thợ Săn Trong Khói', desc: 'Đứng trong khói vẫn nhìn được 260 (thay vì 115).' },
+    { id: 'fogEyes', a: 'nightVision', b: 'blanketSmoke', name: 'Mắt Sương', desc: 'Đứng trong khói vẫn nhìn được 220.' },
+    { id: 'deadSilence', a: 'silentSmoke', b: 'blanketSmoke', name: 'Tĩnh Lặng Chết Chóc', desc: 'Khói Mù Bao Phủ kéo dài thêm 4 giây.' },
+    { id: 'quietWing', a: 'silentSmoke', b: 'smokeCut', name: 'Cánh Bay Câm Lặng', desc: 'Khói Cắt hồi nhanh hơn 5 giây.' },
+    { id: 'bunkerWall', a: 'structWall', b: 'bunker', name: 'Lô Cốt', desc: 'Tường Cấu Trúc Hoá tồn tại 30 giây.' },
+    { id: 'paraCmd', a: 'paraSquad', b: 'commander', name: 'Chỉ Huy Dù', desc: 'Lính dù sống thêm 4 giây và +15 máu.' },
+    { id: 'twinDoom', a: 'sweepStrike', b: 'orbitalStrike', name: 'Tận Thế Kép', desc: 'Đợt Càn hồi nhanh hơn 8 giây.' },
+    { id: 'airborne', a: 'uavScan', b: 'paraSquad', name: 'Không Vận', desc: 'Lính Nhảy Dù hồi nhanh hơn 6 giây.' },
+    { id: 'techLink', a: 'hightech', b: 'quickLink', name: 'Kỹ Thuật Số', desc: 'Kỹ Thuật Cao hồi chiêu nhanh hơn 25%.' },
+    { id: 'satStrike', a: 'orbitalStrike', b: 'satLink', name: 'Hoả Lực Vệ Tinh', desc: 'Quỹ Đạo Huỷ Diệt hồi nhanh hơn 10 giây.' }
+].forEach(c => { COMBOS.push(c); (COMBOS_OF[c.a] = COMBOS_OF[c.a] || []).push(c); (COMBOS_OF[c.b] = COMBOS_OF[c.b] || []).push(c); });
+const _skillCd21 = skillCooldown;
+skillCooldown = function (p, id) {
+    let cd = _skillCd21(p, id);
+    if (!p || p.adv === 'whim') return cd;
+    if (combo(p, 'cartographer') && CARDS[id] && CARDS[id].picker) cd *= 0.9;
+    if (id === 'smokeCut' && combo(p, 'quietWing')) cd -= 5;
+    if (id === 'sweepStrike' && combo(p, 'twinDoom')) cd -= 8;
+    if (id === 'paraSquad' && combo(p, 'airborne')) cd -= 6;
+    if (id === 'hightech' && combo(p, 'techLink')) cd *= 0.75;
+    if (id === 'orbitalStrike' && combo(p, 'satStrike')) cd -= 10;
+    return Math.max(1, cd);
+};
+const _upe21 = updatePartyExtras;
+updatePartyExtras = function (dt) {
+    _upe21(dt);
+    players.forEach(p => { if (combo(p, 'sonarMap') && p.sonarT > 5) p.sonarT = 5; });
+    zones.forEach(z => { if (z.type === 'smoke' && z.src === 'blanketSmoke' && !z.dsDone) { z.dsDone = true; const o = players.find(q => q.id === z.owner); if (o && combo(o, 'deadSilence')) { z.t += 4; z.maxT = z.t; } } });
+    decoys.forEach(d => { if (d.sk === 'para' && !d.cmdDone) { d.cmdDone = true; const o = players.find(q => q.id === d.owner); if (o && combo(o, 'paraCmd')) { d.t += 4; d.hp += 15; d.maxHp += 15; } } });
+};
+const _landWall21 = landWall;
+landWall = function (s) { _landWall21(s); const o = players.find(q => q.id === s.owner); if (o && combo(o, 'bunkerWall')) obstacles[obstacles.length - 1].temp = 30; };
