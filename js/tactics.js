@@ -38,7 +38,18 @@ const SPELL_COMBOS = [
     { id: 'deathMark', a: 'radar', b: 'execute', name: 'Án Tử', desc: 'Trừng Phạt với tới 600 nếu địch đang bị lộ.' },
     { id: 'frostStun', a: 'stunS', b: 'iceWall', name: 'Băng Giá', desc: 'Ngất Ngư làm chậm thêm 2 giây sau khi choáng.' },
     { id: 'shadowRun', a: 'blind', b: 'sprint', name: 'Bóng Ma', desc: 'Gia Tốc khi đứng trong khói → tàng hình 2 giây.' },
-    { id: 'holyLight', a: 'cleanse', b: 'heal', name: 'Thánh Quang', desc: 'Thanh Tẩy hồi 15% máu; Hồi Máu cũng gỡ hiệu ứng xấu.' }
+    { id: 'holyLight', a: 'cleanse', b: 'heal', name: 'Thánh Quang', desc: 'Thanh Tẩy hồi 15% máu; Hồi Máu cũng gỡ hiệu ứng xấu.' },
+    { id: 'thunderBlink', a: 'flash', b: 'stunS', name: 'Chớp Choáng', desc: 'Tốc Biến tới nơi làm choáng 0.4 giây địch trong bán kính 90.' },
+    { id: 'quickMend', a: 'flash', b: 'heal', name: 'Hồi Phục Tức Thì', desc: 'Tốc Biến hồi 10% máu tối đa.' },
+    { id: 'iceSkate', a: 'sprint', b: 'iceWall', name: 'Trượt Băng', desc: 'Dựng Tường Băng xong được tăng tốc 1.5 giây.' },
+    { id: 'killShot', a: 'execute', b: 'missile', name: 'Kết Liễu', desc: 'Tên lửa gây thêm 15% lượng máu địch đã mất.' },
+    { id: 'escapeArt', a: 'cleanse', b: 'sprint', name: 'Thoát Thân', desc: 'Thanh Tẩy tăng tốc 2 giây.' },
+    { id: 'smokeEye', a: 'radar', b: 'blind', name: 'Mắt Trong Khói', desc: 'Địch dính Bom Mù bị lộ vị trí với bạn 5 giây.' },
+    { id: 'iceArmor', a: 'heal', b: 'iceWall', name: 'Giáp Băng', desc: 'Dựng Tường Băng cho bạn khiên 30 trong 3 giây.' },
+    { id: 'finisher', a: 'stunS', b: 'execute', name: 'Đòn Kết Thúc', desc: 'Trừng Phạt gây gấp đôi sát thương lên địch đang choáng.' },
+    { id: 'clearMind', a: 'cleanse', b: 'radar', name: 'Tâm Tĩnh', desc: 'Thanh Tẩy phát sóng làm lộ địch trong bán kính 400 (2 giây).' },
+    { id: 'dazzle', a: 'stunS', b: 'blind', name: 'Choáng Mù', desc: 'Ngất Ngư làm địch bị MÙ thêm 2 giây.' },
+    { id: 'runHeal', a: 'heal', b: 'sprint', name: 'Chạy Hồi Sức', desc: 'Gia Tốc hồi 4 máu/giây trong 3 giây.' }
 ];
 function sCombo(p, id) { const c = SPELL_COMBOS.find(x => x.id === id); return !!c && hasSpell(p, c.a) && hasSpell(p, c.b); }
 
@@ -55,7 +66,7 @@ const missiles = [];
 function fireMissile(p) {
     const a = spellAim(p), m = muzzle(p, getCurrentWeapon(p), a);
     const b = spawnBullet(p, m.x, m.y, a, { speed: 14, damage: 22, range: 950, color: '#fb7185', size: 6, knock: 280, bounces: 0, trail: 50 });
-    b.sx = p.x; b.sy = p.y; b.ramp = 260; b.rampMax = 3.2; b.missile = true; b.critC = 0; b.wid = 'MISSILE';
+    b.sx = p.x; b.sy = p.y; b.ramp = 260; b.rampMax = 3.2; b.missile = true; b.critC = 0; b.wid = 'MISSILE'; b.exec = sCombo(p, 'killShot');
     missiles.push({ b, owner: p.id, guided: sCombo(p, 'guided') });
     AudioSys.playAt('shoot_heavy', p.x, p.y, 0.5); addShake(4);
     p.kx -= Math.cos(a) * 160; p.ky -= Math.sin(a) * 160;
@@ -77,6 +88,7 @@ function blindArea(x, y, r, ownerId) {
         if (e.hp <= 0 || e.id === ownerId || (owner && sameTeam(owner, e)) || dist(x, y, e.x, e.y) > r + e.radius) return;
         if (has(e, 'nightVision') || (e.st.cleanseT > 0)) return;
         e.st.blind = Math.max(e.st.blind || 0, 3); floatText(e.x, e.y - 34, 'MÙ!', '#cbd5e1', 14);
+        if (owner && sCombo(owner, 'smokeEye')) spotFor(e, owner.id, 5);
     });
 }
 const _landSkill3 = landSkillItem;
@@ -104,8 +116,33 @@ landSkillItem = function (it) {
         const e = enemiesOf(p).filter(q => targetable(p, q) && dist(p.x, p.y, q.x, q.y) < (far && (isSpotted(q, p.id) || q.st.reveal > 0) ? 600 : 300)).sort((a, b) => a.hp - b.hp)[0];
         if (!e) { if (!p.isBot) floatText(p.x, p.y - 30, 'Không có mục tiêu', '#94a3b8', 12); return false; }
         beams.push({ x1: p.x, y1: p.y, x2: e.x, y2: e.y, life: 0.25, maxLife: 0.25, color: '#f87171' });
-        dealDamage(e, 30 + 0.2 * (e.maxHp - e.hp), p.id, { raw: true, angle: Math.atan2(e.y - p.y, e.x - p.x), knock: 150 });
+        const fin = sCombo(p, 'finisher') && e.stun > 0; if (fin) floatText(e.x, e.y - 52, 'KẾT THÚC!', '#fca5a5', 14);
+        dealDamage(e, (30 + 0.2 * (e.maxHp - e.hp)) * (fin ? 2 : 1), p.id, { raw: true, angle: Math.atan2(e.y - p.y, e.x - p.x), knock: 150 });
         floatText(e.x, e.y - 36, 'TRỪNG PHẠT!', '#f87171', 15);
+    };
+})();
+// thêm 11 phối hợp phép
+(function () {
+    const fl = SPELLS.flash.cast, st = SPELLS.stunS.cast, sp = SPELLS.sprint.cast, cl = SPELLS.cleanse.cast, iw = SPELLS.iceWall.cast;
+    SPELLS.flash.cast = p => {
+        fl(p);
+        if (sCombo(p, 'thunderBlink')) { ring(p.x, p.y, 8, 90, '#facc15', 0.35, 5); enemiesOf(p).forEach(e => { if (!(e.air > 0) && !(e.st.cleanseT > 0) && dist(p.x, p.y, e.x, e.y) < 90 + e.radius) { e.stun = Math.max(e.stun, 0.4); floatText(e.x, e.y - 30, 'CHOÁNG!', '#facc15', 13); } }); }
+        if (sCombo(p, 'quickMend')) { p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.1); spark(p.x, p.y, '#4ade80', 8, 100); }
+    };
+    SPELLS.stunS.cast = p => {
+        st(p);
+        if (sCombo(p, 'dazzle')) enemiesOf(p).forEach(e => { if (e.stun > 0 && dist(p.x, p.y, e.x, e.y) < 150 + e.radius && !has(e, 'nightVision')) { e.st.blind = Math.max(e.st.blind || 0, 2); floatText(e.x, e.y - 46, 'MÙ!', '#cbd5e1', 13); } });
+    };
+    SPELLS.sprint.cast = p => { sp(p); if (sCombo(p, 'runHeal')) { p.st.heal = Math.max(p.st.heal || 0, 3); p.st.healRate = Math.max(p.st.healRate || 0, 4); } };
+    SPELLS.cleanse.cast = p => {
+        cl(p);
+        if (sCombo(p, 'escapeArt')) p.st.haste = Math.max(p.st.haste, 2);
+        if (sCombo(p, 'clearMind')) { ring(p.x, p.y, 15, 400, '#e0f2fe', 0.6, 2); enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 400) spotFor(e, p.id, 2); }); }
+    };
+    SPELLS.iceWall.cast = p => {
+        if (iw(p) === false) return false;
+        if (sCombo(p, 'iceSkate')) p.st.haste = Math.max(p.st.haste, 1.5);
+        if (sCombo(p, 'iceArmor')) { p.st.shield = Math.max(p.st.shield, 30); p.st.shieldT = Math.max(p.st.shieldT, 3); }
     };
 })();
 
@@ -194,6 +231,7 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
         if (head) floatText(target.x, target.y - 48, crit ? '🎯 HEADSHOT CHÍ MẠNG!' : '🎯 HEADSHOT!', '#fca5a5', crit ? 16 : 13);
         else if (crit) floatText(target.x, target.y - 48, 'CHÍ MẠNG!', '#fde047', 14);
         if (crit) onCrit(atk, target);
+        if (b && b.exec) dmg += 0.15 * Math.max(0, target.maxHp - target.hp);
         if (b && b.markShot) { st.mark = Math.max(st.mark || 0, 5); spotFor(target, atk.id, 5); floatText(target.x, target.y - 34, '📍 ĐÁNH DẤU', '#f472b6', 13); }
     }
     if (atk && atk !== target && has(atk, 'controlEye') && !opts.zone) spotFor(target, atk.id, 2);
@@ -437,7 +475,7 @@ function spellPhase(reason) {
         who: p => (p.spells || []).length < spellCount(p),
         choices: p => SPELL_IDS.filter(id => !hasSpell(p, id)),
         ctx: p => ({ spells: (p.spells || []).map(s => s.id) }),
-        bot: (p, ids) => { const pref = ['flash', 'heal', 'cleanse', 'missile', 'radar', 'execute']; const i = ids.findIndex(id => pref.includes(id) && Math.random() < 0.5); return i >= 0 ? i : Math.floor(Math.random() * ids.length); },
+        bot: (p, ids) => { const mine = (p.spells || []).map(s => s.id), cb = ids.findIndex(id => SPELL_COMBOS.some(c => (c.a === id && mine.includes(c.b)) || (c.b === id && mine.includes(c.a)))); if (cb >= 0 && Math.random() < 0.75) return cb; const pref = ['flash', 'heal', 'cleanse', 'missile', 'radar', 'execute']; const i = ids.findIndex(id => pref.includes(id) && Math.random() < 0.5); return i >= 0 ? i : Math.floor(Math.random() * ids.length); },
         onPick: (p, id) => { (p.spells = p.spells || []).push({ id, cd: 0 }); } };
 }
 function build2Phase() {
