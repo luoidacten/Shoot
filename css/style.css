@@ -284,3 +284,6 @@ html, body { height: 100dvh; }
     .pick-detail .aug-icon { font-size: 1.3rem; }
     .pick-detail .aug-name { font-size: 0.85rem; }
 }
+/* các màn giao diện (chọn thẻ, menu, sảnh…) phải vuốt lên xuống được trên điện thoại; canvas trong trận vẫn chặn cuộn */
+.screen, .screen * { touch-action: pan-y; }
+.aug-side, .menu-card, .pick-detail { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
