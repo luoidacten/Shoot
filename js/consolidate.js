@@ -4,7 +4,7 @@
  *  19 thẻ gọi hoả lực bằng bảng → chỉ giữ 5 thẻ ĐẶC TRƯNG trong bộ bài.
  *  14 thẻ còn lại thành THẺ PHỐI HỢP: không bốc ngẫu nhiên được, chỉ hiện ra khi bạn
  *  đã có thẻ chính + đúng thẻ ghép; chọn thẻ phối hợp sẽ THAY thẻ chính (giữ thẻ ghép).
- *  Nạp sau cells.js. Dùng lại hệ thống .evo (tiến hoá) có sẵn trong tactics.js.
+ *  Nạp sau cells.js (trước icons.js). Thay bản gộp cũ (ghép với thẻ không liên quan, tự đổi kỹ năng, khoá cả nội tại hỗ trợ). Dùng lại hệ thống .evo (tiến hoá) có sẵn trong tactics.js.
  * ===================================================================== */
 const TAC_MAIN = ['airstrike', 'tacSmoke', 'paraSquad', 'structWall', 'markCells'];
 const FUSE = {

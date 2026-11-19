@@ -49,18 +49,20 @@ function drawMyPanel(p, x, y, now) {
     if (p.aimshot) { ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(bx, 30, bw, 2); ctx.fillStyle = '#fde047'; ctx.fillRect(bx, 30, bw * Math.min(1, (p.superCharge || 0) / (p.superNeed || 5)), 2); }
     // nội tại + phối hợp + vũ khí
     ctx.textAlign = 'left'; ctx.font = `12px ${FONT}`; ctx.fillStyle = '#fff';
-    const pas = (p.build || []).filter(id => CARDS[id] && CARDS[id].kind === 'P').map(id => CARDS[id].icon).join('');
+    const pasIds = (p.build || []).filter(id => CARDS[id] && CARDS[id].kind === 'P');
+    const pas = pasIds.filter(id => !hasIcon(id)).map(id => CARDS[id].icon).join('');
     let tx = bx;
     if (!isTouch) {
         (p.skills || []).forEach((s, i) => {
             const c = CARDS[s.id]; if (!c) return;
-            ctx.globalAlpha = s.cd > 0 ? 0.45 : 1; ctx.fillText(c.icon, tx, 44); ctx.globalAlpha = 1;
+            if (hasIcon(s.id)) drawGIcon(ctx, s.id, tx + 9, 40, 20, s.cd > 0 ? 0.45 : 1); else { ctx.globalAlpha = s.cd > 0 ? 0.45 : 1; ctx.fillText(c.icon, tx, 44); ctx.globalAlpha = 1; }
             if (s.cd > 0) { ctx.font = `700 9px ${FONT}`; ctx.fillStyle = '#fde68a'; ctx.fillText(Math.ceil(s.cd), tx + 14, 47); ctx.font = `12px ${FONT}`; ctx.fillStyle = '#fff'; }
             tx += 26;
         });
         const cw = getCurrentWeapon(p);
         ctx.fillText(`${cw.icon || '✊'} ${ammoText(cw)}`, w - 70, 44);
     }
+    pasIds.filter(id => hasIcon(id)).forEach(id => { drawGIcon(ctx, id, tx + 9, 40, 20); tx += 21; });
     ctx.fillText(pas + ((p.combos || []).length ? '  ⚡' + p.combos.length : ''), tx, 44);
     ctx.restore();
 }
@@ -142,7 +144,7 @@ function drawTouchControls(p) {
         const s = p.skills && p.skills[i], c = s && CARDS[s.id];
         if (!c) { ctx.save(); ctx.globalAlpha = 0.25; ctx.strokeStyle = '#94a3b8'; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(b.x, b.y, b.r * 0.8, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); return; }
         const k = 's' + (i + 1), cd = s.cd > 0 ? s.cd / Math.max(0.1, skillCooldown(p, s.id)) : 0;
-        lqButton(b, inp[k], c.icon, s.cd > 0 ? Math.ceil(s.cd) : '', cd, '#22d3ee');
+        lqButton(b, inp[k], ic('card', s.id, c.icon), s.cd > 0 ? Math.ceil(s.cd) : '', cd, '#22d3ee');
         const st = skillStick[k];
         if (st && inp[k]) {
             const dx = st.x - st.sx, dy = st.y - st.sy, d = Math.min(b.r * 1.3, Math.hypot(dx, dy)), a = Math.atan2(dy, dx);

@@ -61,7 +61,7 @@ initRound = function () {
     _initRound();
 };
 function removeTempBots() { for (let i = players.length - 1; i >= 0; i--) if (players[i].temp) players.splice(i, 1); }
-function randomBuild() { const ids = Object.keys(CARDS); const out = []; while (out.length < Math.min(3, pickCount)) { const id = ids[Math.floor(Math.random() * ids.length)]; if (!out.includes(id) && !(CARDS[id].kind === 'S' && out.filter(x => CARDS[x].kind === 'S').length >= 2)) out.push(id); } return out; }
+function randomBuild() { const ids = Object.keys(CARDS).filter(id => !CARDS[id].comboOnly && !CARDS[id].evo && !CARDS[id].masterOnly); const out = []; while (out.length < Math.min(3, pickCount)) { const id = ids[Math.floor(Math.random() * ids.length)]; if (!out.includes(id) && !(CARDS[id].kind === 'S' && out.filter(x => CARDS[x].kind === 'S').length >= 2)) out.push(id); } return out; }
 const _openAug = openAugmentScreen;
 openAugmentScreen = function () { removeTempBots(); world.team = false; return _openAug(); };
 const _showGameOver = showGameOver;
@@ -432,7 +432,7 @@ drawTouchControls = function (p) {
     const L = touchLayout(), inp = touchInputs.p1;
     const s = p.skills && p.skills[2], c = s && CARDS[s.id];
     if (c) {
-        lqButton(L.S3, inp.s3, c.icon, s.cd > 0 ? Math.ceil(s.cd) : '', s.cd > 0 ? s.cd / Math.max(0.1, skillCooldown(p, s.id)) : 0, '#22d3ee');
+        lqButton(L.S3, inp.s3, ic('card', s.id, c.icon), s.cd > 0 ? Math.ceil(s.cd) : '', s.cd > 0 ? s.cd / Math.max(0.1, skillCooldown(p, s.id)) : 0, '#22d3ee');
         const st = skillStick.s3;
         if (st && inp.s3) { const dx = st.x - st.sx, dy = st.y - st.sy, d = Math.min(L.S3.r * 1.3, Math.hypot(dx, dy)), a = Math.atan2(dy, dx); ctx.fillStyle = st.cancel ? 'rgba(248,113,113,0.85)' : 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.arc(L.S3.x + Math.cos(a) * d, L.S3.y + Math.sin(a) * d, L.S3.r * 0.35, 0, Math.PI * 2); ctx.fill(); }
     }
@@ -443,11 +443,11 @@ function drawSpellRow(p, row, inp) {
         if (b.k[0] === 's') {
             const sp = p.spells && p.spells[+b.k[2] - 1]; if (!sp) return;
             const def = SPELLS[sp.id], cd = sp.cd > 0 ? sp.cd / spellCd(p, sp.id) : 0;
-            lqButton(b, inp && inp[b.k], def.icon, sp.cd > 0 ? Math.ceil(sp.cd) : '', cd, '#facc15');
+            lqButton(b, inp && inp[b.k], ic('spell', sp.id, def.icon), sp.cd > 0 ? Math.ceil(sp.cd) : '', cd, '#facc15');
         } else {
             const i = +b.k[2] - 1; if (i >= itemSlots(p)) return;
             const it = p.items && p.items[i];
-            if (it) { lqButton(b, inp && inp[b.k], ITEMS[it.id].icon, it.uses > 1 ? 'x' + it.uses : '', 0, '#a78bfa'); }
+            if (it) { lqButton(b, inp && inp[b.k], ic('item', it.id, ITEMS[it.id].icon), it.uses > 1 ? 'x' + it.uses : '', 0, '#a78bfa'); }
             else { ctx.save(); ctx.globalAlpha = 0.35; ctx.strokeStyle = '#a78bfa'; ctx.setLineDash([3, 4]); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(b.x, b.y, b.r * 0.85, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
         }
     });
@@ -459,9 +459,9 @@ drawHUD = function (W, H, now) {
     const me = localPlayer() || (settings.mode === 'pvp' ? players[0] : null);
     if (!isTouch && me) {
         const slots = [];
-        (me.skills || []).forEach((s, i) => slots.push({ icon: CARDS[s.id].icon, key: ['R', 'T', 'E'][i], cd: s.cd, max: skillCooldown(me, s.id), col: '#22d3ee' }));
-        (me.spells || []).forEach((s, i) => slots.push({ icon: SPELLS[s.id].icon, key: ['Z', 'X', 'V'][i], cd: s.cd, max: spellCd(me, s.id), col: '#facc15' }));
-        for (let i = 0; i < itemSlots(me); i++) { const it = me.items && me.items[i]; slots.push({ icon: it ? ITEMS[it.id].icon : '', key: ['C', 'B'][i], cd: 0, max: 1, col: '#a78bfa', empty: !it }); }
+        (me.skills || []).forEach((s, i) => slots.push({ icon: ic('card', s.id, CARDS[s.id].icon), key: ['R', 'T', 'E'][i], cd: s.cd, max: skillCooldown(me, s.id), col: '#22d3ee' }));
+        (me.spells || []).forEach((s, i) => slots.push({ icon: ic('spell', s.id, SPELLS[s.id].icon), key: ['Z', 'X', 'V'][i], cd: s.cd, max: spellCd(me, s.id), col: '#facc15' }));
+        for (let i = 0; i < itemSlots(me); i++) { const it = me.items && me.items[i]; slots.push({ icon: it ? ic('item', it.id, ITEMS[it.id].icon) : '', key: ['C', 'B'][i], cd: 0, max: 1, col: '#a78bfa', empty: !it }); }
         const r = 20, gap = 50, x0 = W / 2 - (slots.length - 1) * gap / 2, y = H - 30;
         slots.forEach((s, i) => {
             const b = { x: x0 + i * gap, y, r };

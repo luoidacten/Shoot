@@ -485,7 +485,7 @@ function cardsForPick(p, kind, n) {
     }
     const owned = new Set(p.build);
     const skillsFull = p.build.filter(id => CARDS[id].kind === 'S').length >= (p.build.includes('altChoice') ? 3 : 2);
-    let pool = Object.keys(CARDS).filter(id => !owned.has(id) && !(skillsFull && CARDS[id].kind === 'S'));
+    let pool = Object.keys(CARDS).filter(id => !owned.has(id) && !CARDS[id].comboOnly && !(skillsFull && CARDS[id].kind === 'S'));
     const makesCombo = id => (COMBOS_OF[id] || []).some(c => owned.has(c.a === id ? c.b : c.a));
     const weight = id => (makesCombo(id) ? 4 : 1) * (CARDS[id].kind === 'S' && p.build.length === 0 ? 1.5 : 1);
     const out = [];

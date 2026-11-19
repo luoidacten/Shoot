@@ -378,7 +378,7 @@ cardsForPick = function (p, kind, n) {
     const many = p.adv === 'manyChoices'; if (many) n += 1;
     const owned = new Set(p.build), rnd = a => a[Math.floor(Math.random() * a.length)];
     const skillsFull = p.build.filter(id => CARDS[id] && CARDS[id].kind === 'S').length >= (owned.has('altChoice') ? 3 : 2);
-    let pool = Object.keys(CARDS).filter(id => !owned.has(id) && !CARDS[id].evo && !CARDS[id].masterOnly && !(skillsFull && CARDS[id].kind === 'S'));
+    let pool = Object.keys(CARDS).filter(id => !owned.has(id) && !CARDS[id].evo && !CARDS[id].masterOnly && !CARDS[id].comboOnly && !(skillsFull && CARDS[id].kind === 'S'));
     const out = [], take = id => { out.push(id); pool = pool.filter(x => x !== id); };
     const fits = id => (COMBOS_OF[id] || []).some(c => owned.has(c.a === id ? c.b : c.a));
     // 1 ô "hợp với bạn": hên xui
