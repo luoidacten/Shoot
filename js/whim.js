@@ -6,7 +6,7 @@
 ADVANTAGES.whim = { icon: '🎰', name: 'Tùy Hứng', desc: 'Luôn có 3 ô kỹ năng NGẪU NHIÊN (có thể ra bản tiến hoá). Dùng xong một kỹ năng, ô đó tự quay gacha ra kỹ năng mới. Hồi chiêu cố định 12 giây, mỗi hòm bạn nhặt giảm 0.25 giây. Bù lại: mất lần nâng cấp đầu và không được chọn thẻ kỹ năng khi nâng cấp.' };
 ADV_IDS.push('whim');
 const WHIM_BAN = ['meleeTech', 'gunMod']; // cần đúng loại vũ khí → dễ ra ô chết
-function whimPool() { return Object.keys(CARDS).filter(id => CARDS[id].kind === 'S' && !CARDS[id].evo && !CARDS[id].masterOnly && !WHIM_BAN.includes(id)); }
+function whimPool() { return Object.keys(CARDS).filter(id => CARDS[id].kind === 'S' && !CARDS[id].evo && !CARDS[id].masterOnly && !CARDS[id].comboOnly && !WHIM_BAN.includes(id)); }
 function whimEvoPool() { return Object.keys(CARDS).filter(id => CARDS[id].kind === 'S' && CARDS[id].evo); }
 function whimRoll(p, avoid) {
     const evo = whimEvoPool(), useEvo = evo.length && Math.random() < 0.2; // 20%: ra bản đã nâng cấp (tiến hoá)
@@ -20,7 +20,7 @@ const _cardsForPick19 = cardsForPick;
 cardsForPick = function (p, kind, n) {
     if (kind !== 'build' || !p || p.adv !== 'whim') return _cardsForPick19(p, kind, n);
     let out = _cardsForPick19(p, kind, n + 4).filter(id => CARDS[id] && CARDS[id].kind !== 'S');
-    if (out.length < n) { const own = new Set(p.build.concat(out)), rest = Object.keys(CARDS).filter(id => CARDS[id].kind === 'P' && !own.has(id) && !CARDS[id].evo && !CARDS[id].masterOnly); while (out.length < n && rest.length) out.push(rest.splice(Math.floor(Math.random() * rest.length), 1)[0]); }
+    if (out.length < n) { const own = new Set(p.build.concat(out)), rest = Object.keys(CARDS).filter(id => CARDS[id].kind === 'P' && !own.has(id) && !CARDS[id].evo && !CARDS[id].masterOnly && !CARDS[id].comboOnly); while (out.length < n && rest.length) out.push(rest.splice(Math.floor(Math.random() * rest.length), 1)[0]); }
     return out.slice(0, n);
 };
 const _applyBuild19 = applyBuild;
