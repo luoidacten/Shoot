@@ -335,3 +335,16 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 | 🪂 Lính Nhảy Dù | 🧲 Kẻ Nhặt Rác / 🎖️ Chỉ Huy | 📦 Thả Dù Tiếp Tế / 🌊 Đợt Càn |
 | 🧱 Cấu Trúc Hoá | 🧰 Thợ Bẫy | 🔒 Lồng Nhốt |
 | 🎯 Đánh Dấu Ô | 🛖 Hầm Trú Ẩn / 📻 Liên Lạc Nhanh / 🛰️ Liên Kết Vệ Tinh / 🔥 Hỏa Thần | 🌀 Trọng Lực / 🎯 Pháo Kích / ☄️ Quỹ Đạo Huỷ Diệt / 🔥 Bom Cháy |
+
+## Hiệu ứng chớp, khói chặn tầm nhìn, ngắm phóng xa, tự bắn, ném nhặt lại (js/sight.js)
+
+- **Hiệu ứng chớp & rung khi nổ** (menu): ĐẦY ĐỦ / GIẢM (mặc định) / TẮT. Ở mức GIẢM: chớp màn hình yếu và thưa, rung nhẹ, nhiều bom liên tục không còn khựng hình, vụ nổ không làm sáng cả vùng sương mù.
+- **Khói = bức tường của tầm nhìn**: không nhìn xuyên qua khói (sương mù đổ bóng sau khói, không nhắm được địch phía sau), nhưng vẫn đi xuyên và bắn xuyên được.
+- **Ngắm phóng xa**: Sniper (rất xa), Railgun, Cung (ít) → màn hình thu nhỏ và dời về hướng ngắm, nhìn xa hơn một chút; bắn xong trở lại bình thường.
+- **Tự bắn**: súng lục, AR, SAR, shotgun, súng năng lượng, Nỏ Nổ — kéo giữ hướng là tự bắn theo nhịp (không cần thả tay).
+- **Thẻ phối hợp mới**: 💡 Khai Sáng (Khói Chiến Thuật + Đèn Pin Góc Rộng) · 👁️ Tầm Nhìn Bá Chủ (Đánh Dấu Ô + Ống Nhòm, lộ ô đó và 8 ô quanh).
+- **Thẻ mới**: 💨 Khói Tốc Hành (khói tăng tốc cho bạn & đồng đội) · 🌑 Tắt Đèn (cả bản đồ tối 7 giây: địch nhìn 45%, bạn nhìn xa hơn 35%).
+- **Ném vũ khí**: trúng người/tường thì bật lại nhẹ, nằm trên đất 2 giây — ai cũng nhặt lại được (có ô trống thì nhặt ngay, đủ 2 tay thì đứng lên 0.6 giây để đổi).
+  - 🫴 Tay Bắt Dính (P): vũ khí ném tự bay về tay sau khi trúng, bắt lại được +20% sát thương 3 giây.
+  - 🧲 Gọi Vũ Khí (S): gọi mọi vũ khí trên đất trong 700 bay về tay, xuyên qua địch gây sát thương. Phối hợp **Búa Thần Sấm**.
+  - Lợi thế **Ném Đồ** mạnh hơn: ×2 sát thương, vũ khí nằm lại 3.5 giây, nhặt lại đồ của mình được nạp đầy.
