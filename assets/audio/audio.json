@@ -1,0 +1,100 @@
+{
+ "music": {
+  "menu": "m_menu.mp3",
+  "pick": "m_pick.mp3",
+  "battle1": "m_battle1.mp3",
+  "battle2": "m_battle2.mp3",
+  "final": "m_final.mp3"
+ },
+ "sfx": {
+  "shoot": [
+   "s_shoot_0.mp3",
+   "s_shoot_1.mp3",
+   "s_shoot_2.mp3"
+  ],
+  "smg": [
+   "s_smg_0.mp3",
+   "s_smg_1.mp3"
+  ],
+  "shoot_heavy": [
+   "s_shoot_heavy_0.mp3",
+   "s_shoot_heavy_1.mp3",
+   "s_shoot_heavy_2.mp3"
+  ],
+  "shotgun": [
+   "s_shotgun_0.mp3"
+  ],
+  "rail": [
+   "s_rail_0.mp3",
+   "s_rail_1.mp3"
+  ],
+  "explosion": [
+   "s_explosion_0.mp3",
+   "s_explosion_1.mp3",
+   "s_explosion_2.mp3"
+  ],
+  "slam": [
+   "s_slam_0.mp3",
+   "s_slam_1.mp3"
+  ],
+  "hit": [
+   "s_hit_0.mp3",
+   "s_hit_1.mp3",
+   "s_hit_2.mp3"
+  ],
+  "crit": [
+   "s_crit_0.mp3",
+   "s_crit_1.mp3"
+  ],
+  "block": [
+   "s_block_0.mp3",
+   "s_block_1.mp3",
+   "s_block_2.mp3"
+  ],
+  "trick": [
+   "s_trick_0.mp3",
+   "s_trick_1.mp3"
+  ],
+  "pickup": [
+   "s_pickup_0.mp3"
+  ],
+  "legend": [
+   "s_legend_0.mp3"
+  ],
+  "select": [
+   "s_select_0.mp3",
+   "s_select_1.mp3"
+  ],
+  "ui": [
+   "s_ui_0.mp3",
+   "s_ui_1.mp3"
+  ],
+  "reload": [
+   "s_reload_0.mp3"
+  ],
+  "count": [
+   "s_count_0.mp3"
+  ],
+  "go": [
+   "s_go_0.mp3"
+  ],
+  "destiny": [
+   "s_destiny_0.mp3"
+  ],
+  "confirm": [
+   "s_confirm_0.mp3"
+  ],
+  "glitch": [
+   "s_glitch_0.mp3",
+   "s_glitch_1.mp3",
+   "s_glitch_2.mp3"
+  ]
+ },
+ "crowd": {
+  "ambience": "c_ambience.mp3",
+  "cheer_small": "c_cheer_small.mp3",
+  "cheer_big": "c_cheer_big.mp3",
+  "cheer_win": "c_cheer_win.mp3",
+  "chatter": "c_chatter.mp3"
+ }
+}

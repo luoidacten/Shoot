@@ -1,4 +1,6 @@
-# Đấu Trường Kỳ Ngộ
+# Dự Án Nhân Bản (PC · Project Clone)
+
+> Thế giới phản địa đàng: các nhân bản bị đưa vào đấu trường ảo ảnh (giả lập) để đánh nhau mua vui và thử nghiệm vũ khí chiến tranh.
 
 Game bắn súng đối kháng 1v1 góc nhìn từ trên xuống, chơi trên trình duyệt và tối ưu cho điện thoại.
 

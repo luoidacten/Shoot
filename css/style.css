@@ -293,3 +293,5 @@ html, body { height: 100dvh; }
 .aug-icon .gicon { width: 1.6em; height: 1.6em; }
 .own .gicon { width: 1.35em; height: 1.35em; }
 .tile-icon .gicon { width: 1.5em; height: 1.5em; }
+
+.logo-pc { display: block; font-family: var(--display); font-size: 0.72rem; letter-spacing: 0.6em; color: #67e8f9; text-shadow: 0 0 12px rgba(34,211,238,0.7); margin-top: 2px; }
