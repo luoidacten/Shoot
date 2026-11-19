@@ -322,3 +322,16 @@ python -m http.server 8123
 Rồi mở http://localhost:8123.
 
 Muốn chơi trên điện thoại, hãy bật **GitHub Pages** (Settings → Pages → Branch `main`) rồi mở link trên cả hai máy.
+
+## Gọn lại thẻ bảng chiến thuật: 5 thẻ chính + 14 thẻ phối hợp
+
+Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không Kích · 🌫️ Khói Chiến Thuật · 🪂 Lính Nhảy Dù · 🧱 Cấu Trúc Hoá Chiến Thuật · 🎯 Đánh Dấu Ô.
+14 thẻ còn lại là **THẺ PHỐI HỢP**: chỉ hiện ra khi bạn có thẻ chính + đúng thẻ ghép; chọn sẽ thay thẻ chính (giữ thẻ ghép).
+
+| Thẻ chính | + Thẻ ghép | = Thẻ phối hợp |
+|---|---|---|
+| ✈️ Không Kích | 💥 Tải Trọng Lớn / 🌋 Chân Lửa / ☄️ Đạn Nổ / 🔴 Chỉ Điểm Mục Tiêu | 💣 Thả Bom / 🔥 Bom Napalm / 💥 Bom Chùm / 🛰️ Laser Vệ Tinh |
+| 🌫️ Khói Chiến Thuật | 📡 Lính Liên Lạc / 🔇 Khói Cách Âm / 👁️ Mắt Kiểm Soát | 🛩️ Khói Cắt / ☁️ Khói Mù Bao Phủ / 📡 Trinh Sát UAV |
+| 🪂 Lính Nhảy Dù | 🧲 Kẻ Nhặt Rác / 🎖️ Chỉ Huy | 📦 Thả Dù Tiếp Tế / 🌊 Đợt Càn |
+| 🧱 Cấu Trúc Hoá | 🧰 Thợ Bẫy | 🔒 Lồng Nhốt |
+| 🎯 Đánh Dấu Ô | 🛖 Hầm Trú Ẩn / 📻 Liên Lạc Nhanh / 🛰️ Liên Kết Vệ Tinh / 🔥 Hỏa Thần | 🌀 Trọng Lực / 🎯 Pháo Kích / ☄️ Quỹ Đạo Huỷ Diệt / 🔥 Bom Cháy |
