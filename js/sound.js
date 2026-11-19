@@ -40,36 +40,83 @@ AudioSys.play = function (t, v = 0.25, pan = 0) {
     src.start();
 };
 
-/* ---------- Nhạc nền: đổi bài theo diễn biến, chuyển mượt 1.5 giây ---------- */
-function musicPlay(key) {
+/* ---------- Nhạc nền ----------
+ *  - Ít đổi bài: menu ↔ trận. Cả trận giữ 1 bài; chỉ đổi 1 lần sang "System Overload" khi có người tới hiệp quyết định.
+ *  - Màn chọn thẻ / vận mệnh / tạm dừng / K.O.: nhạc trận nhỏ lại và "đục" đi (lọc âm cao) thay vì đổi bài.
+ *  - Đổi bài: hoà trộn kiểu equal-power 3 giây; bài cũ được giữ vị trí, quay lại thì phát tiếp chứ không từ đầu.
+ *  - Mỗi bài có 2 đầu phát tự nối vòng lặp bằng hoà trộn 4 giây → không hụt tiếng khi lặp.
+ */
+const MUS = { tracks: {}, key: null, matchTrack: null, duck: null, lp: null, last: 0 };
+function musBus() {
     const c = AudioSys.ctx;
-    if (!c || !SND.man || !SND.man.music[key] || SND.music.key === key) return;
-    SND.music.key = key;
-    const el = new Audio('assets/audio/' + SND.man.music[key] + '?v=1'); el.loop = true;
-    const g = c.createGain(); g.gain.value = 0;
-    try { c.createMediaElementSource(el).connect(g); } catch (e) { return; }
-    g.connect(AudioSys.music);
-    el.play().catch(() => {});
-    g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(1, c.currentTime + 1.5);
-    const old = SND.music.cur;
-    if (old) {
-        old.g.gain.cancelScheduledValues(c.currentTime); old.g.gain.setValueAtTime(old.g.gain.value, c.currentTime);
-        old.g.gain.linearRampToValueAtTime(0, c.currentTime + 1.5);
-        setTimeout(() => { old.el.pause(); old.el.removeAttribute('src'); old.el.load(); }, 1700);
+    if (!MUS.duck) {
+        MUS.lp = c.createBiquadFilter(); MUS.lp.type = 'lowpass'; MUS.lp.frequency.value = 20000; MUS.lp.Q.value = 0.5;
+        MUS.duck = c.createGain(); MUS.duck.gain.value = 1;
+        MUS.lp.connect(MUS.duck); MUS.duck.connect(AudioSys.music);
     }
-    SND.music.cur = { el, g };
+    return MUS.lp;
 }
-function wantedMusic() {
-    if (!AudioSys.musicOn) return SND.music.key;
+function musTrack(key) {
+    if (MUS.tracks[key]) return MUS.tracks[key];
+    const c = AudioSys.ctx, url = 'assets/audio/' + SND.man.music[key] + '?v=2';
+    const head = () => { const el = new Audio(url); el.preload = 'auto'; const g = c.createGain(); g.gain.value = 0; c.createMediaElementSource(el).connect(g); g.connect(musBus()); return { el, g }; };
+    const t = (MUS.tracks[key] = { key, heads: [head(), head()], cur: 0, vol: 0, target: 0, looping: false, loopT: 0 });
+    // chính file nhạc báo sắp hết bài (không phụ thuộc bộ đếm giờ) → bắt đầu nối vòng lặp
+    t.heads.forEach((hd, i) => {
+        hd.el.addEventListener('timeupdate', () => musLoopStart(t, i));
+        hd.el.addEventListener('ended', () => { if (t.cur === i && !t.looping) { musLoopStart(t, i, true); } });
+    });
+    return t;
+}
+function musLoopStart(t, i, force) {
+    const h = t.heads[i], o = t.heads[1 - i];
+    if (t.cur !== i || t.looping || t.vol <= 0.001) return;
+    if (!force && !(h.el.duration && h.el.currentTime > h.el.duration - 4)) return;
+    t.looping = true; t.loopT = force ? 4 : 0; o.el.currentTime = 0; o.el.play().catch(() => {});
+}
+function musWanted() {
+    const s = gameState, inMatch = players.length && ['AUGMENT', 'AUG_DONE', 'DESTINY', 'COUNTDOWN', 'PLAYING', 'KO', 'ROUND_OVER', 'GAMEOVER'].includes(s);
+    if (!inMatch) { MUS.matchTrack = null; return 'menu'; }
+    if (currentRound === 1 && !MUS.matchTrack && ['AUGMENT', 'AUG_DONE', 'DESTINY'].includes(s)) return 'pick'; // chọn thẻ đầu trận
+    if (!MUS.matchTrack) MUS.matchTrack = Math.random() < 0.5 ? 'battle1' : 'battle2';
+    if (s !== 'GAMEOVER' && players.some(p => p.score >= settings.maxWins - 1)) MUS.matchTrack = 'final';
+    return MUS.matchTrack;
+}
+function musDuck() {
     const s = gameState;
-    if (['AUGMENT', 'AUG_DONE', 'DESTINY'].includes(s)) return 'pick';
-    if (['COUNTDOWN', 'PLAYING', 'KO', 'ROUND_OVER'].includes(s)) {
-        const decider = players.some(p => p.score >= settings.maxWins - 1);
-        const alive = players.filter(p => p.hp > 0).length;
-        if (decider || (world && world.zonePhase === 2) || (players.length > 2 && alive === 2 && s === 'PLAYING')) return 'final';
-        return currentRound % 2 ? 'battle1' : 'battle2';
+    if (paused || s === 'GAMEOVER' || (['AUGMENT', 'AUG_DONE', 'DESTINY'].includes(s) && MUS.key !== 'pick')) return [0.5, 900];
+    if (s === 'KO') return [0.65, 1400];
+    if (s === 'ROUND_OVER') return [0.75, 2600];
+    if (s === 'COUNTDOWN') return [0.85, 5000];
+    return [1, 20000];
+}
+function musTick(dt) {
+    const c = AudioSys.ctx; if (!c || !SND.man) return;
+    const want = musWanted();
+    if (want !== MUS.key && SND.man.music[want]) {
+        if (MUS.key) musTrack(MUS.key).target = 0;
+        musTrack(want).target = 1; MUS.key = want;
     }
-    return 'menu';
+    const [dg, df] = musDuck();
+    musBus(); MUS.duck.gain.setTargetAtTime(dg, c.currentTime, 0.35); MUS.lp.frequency.setTargetAtTime(df, c.currentTime, 0.35);
+    for (const t of Object.values(MUS.tracks)) {
+        t.vol += Math.sign(t.target - t.vol) * Math.min(Math.abs(t.target - t.vol), dt / 3);
+        let h = t.heads[t.cur], o = t.heads[1 - t.cur];
+        if (t.vol > 0.001) {
+            if (h.el.paused && !h.el.ended) h.el.play().catch(() => {});
+            const d = h.el.duration;
+            if (d && !t.looping && h.el.currentTime > d - 4) musLoopStart(t, t.cur);
+        }
+        let mix = 0;
+        if (t.looping) {
+            t.loopT += dt; mix = Math.min(1, t.loopT / 4);
+            if (mix >= 1) { h.el.pause(); t.cur = 1 - t.cur; t.looping = false; mix = 0; h = t.heads[t.cur]; o = t.heads[1 - t.cur]; }
+        }
+        const L = Math.sin(Math.max(0, t.vol) * Math.PI / 2);
+        h.g.gain.setTargetAtTime(L * Math.cos(mix * Math.PI / 2), c.currentTime, 0.04);
+        o.g.gain.setTargetAtTime(L * Math.sin(mix * Math.PI / 2), c.currentTime, 0.04);
+        if (t.vol <= 0.001 && t.target === 0) t.heads.forEach(x => { if (!x.el.paused) x.el.pause(); }); // giữ vị trí để lần sau phát tiếp
+    }
 }
 // tắt bộ phát nhạc tổng hợp cũ khi đã có nhạc thật
 const _sndStartMusic = AudioSys.startMusic.bind(AudioSys);
@@ -77,9 +124,10 @@ AudioSys.startMusic = function () { if (!SND.man) _sndStartMusic(); };
 setInterval(() => {
     if (!AudioSys.ctx || !SND.man) return;
     if (AudioSys.seq && AudioSys.seq.on) AudioSys.stopMusic();
-    const k = wantedMusic(); if (k && k !== SND.music.key) musicPlay(k);
+    const now = performance.now(), dt = Math.min(0.2, (now - (MUS.last || now)) / 1000); MUS.last = now;
+    try { musTick(dt); } catch (e) {}
     crowdAmbience(['PLAYING', 'KO'].includes(gameState));
-}, 300);
+}, 50);
 
 /* ---------- Khán giả: tiếng rì rầm nền trong trận ---------- */
 function crowdAmbience(on) {
