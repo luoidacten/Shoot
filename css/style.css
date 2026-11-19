@@ -289,7 +289,7 @@ html, body { height: 100dvh; }
 .aug-side, .menu-card, .pick-detail { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 
 /* ============ ICON GEMINI ============ */
-.gicon { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: middle; background-image: url('../assets/icons.webp?v=2'); background-size: var(--gicon-size, 1600% 1400%); background-repeat: no-repeat; filter: drop-shadow(0 0 6px rgba(120, 200, 255, 0.35)); }
+.gicon { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: middle; background-image: url('../assets/icons.webp?v=3'); background-size: var(--gicon-size, 1600% 1400%); background-repeat: no-repeat; filter: drop-shadow(0 0 6px rgba(120, 200, 255, 0.35)); }
 .aug-icon .gicon { width: 1.6em; height: 1.6em; }
 .own .gicon { width: 1.35em; height: 1.35em; }
 .tile-icon .gicon { width: 1.5em; height: 1.5em; }
