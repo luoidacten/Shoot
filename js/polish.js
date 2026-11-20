@@ -24,7 +24,7 @@ function skillProfile(p, id) {
         switch (w) {
             case 'KATANA': return (p.katN || 0) % 3 === 2 ? { aim: 'dir', R: 380, shape: 'line', w: 68, col: '125,211,252', tag: '⚔ TUYỆT KỸ' } : { aim: 'dir', R: 230, shape: 'line', w: 52, col: '224,242,254' };
             case 'LIGHTSABER': return { aim: 'dir', R: 160, shape: 'line', w: 44 };
-            case 'RAPIER': return (p.rapN || 0) % 5 === 4 ? { aim: 'dir', R: 120, shape: 'point', aoe: 120, col: '224,242,254', tag: '⭐ TINH KIẾM' } : { aim: 'dir', R: 480, shape: 'line', w: 16, col: '224,242,254' };
+            case 'RAPIER': return (p.rapN || 0) % 2 === 1 ? { aim: 'dir', R: 120, shape: 'point', aoe: 120, col: '224,242,254', tag: '⭐ TINH KIẾM' } : { aim: 'dir', R: 480, shape: 'line', w: 16, col: '224,242,254' };
             case 'SPEAR': return { aim: 'point', R: 300, shape: 'point', aoe: 90, arc: true, col: '253,230,138' };
             case 'GREATSWORD': {
                 if (p.gsParry && p.gsParry.t > world.time) return { aim: 'dir', R: 185, shape: 'cone', half: 1.2, col: '251,113,133', tag: '💢 PHẢN KÍCH' };

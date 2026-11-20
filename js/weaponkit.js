@@ -133,7 +133,7 @@ meleeTechCast = function (p) {
             return;
         case 'RAPIER': {
             p.rapN = (p.rapN || 0) + 1;
-            if (p.rapN % 5 === 0) { // lần 5: lướt vẽ ngôi sao
+            if (p.rapN % 2 === 0) { // lần 2: lướt vẽ ngôi sao
                 const cx = p.x + Math.cos(a) * 120, cy = p.y + Math.sin(a) * 120, R = 110, pts = [];
                 for (let i = 0; i < 5; i++) { const t = -Math.PI / 2 + i * Math.PI * 2 / 5; pts.push({ x: cx + Math.cos(t) * R, y: cy + Math.sin(t) * R }); }
                 p.star = { seq: [0, 2, 4, 1, 3, 0].map(i => pts[i]), i: 0, t: 0, cx, cy };
@@ -142,7 +142,7 @@ meleeTechCast = function (p) {
             } else {
                 const m0 = muzzle(p, w, a);
                 const qi = spawnBullet(p, m0.x, m0.y, a, { speed: 28, damage: 50 * m, range: 480, color: '#e0f2fe', size: 6, pierce: true, trail: 60, bounces: 0 }); qi.fxQi = true;
-                floatText(p.x, p.y - 36, `🗡 KIẾM KHÍ ${p.rapN % 5}/5`, '#e0f2fe', 14); AudioSys.playAt('whoosh', p.x, p.y, 0.4);
+                floatText(p.x, p.y - 36, `🗡 KIẾM KHÍ ${p.rapN % 2}/2`, '#e0f2fe', 14); AudioSys.playAt('whoosh', p.x, p.y, 0.4);
             }
             return;
         }
@@ -461,7 +461,7 @@ Object.assign(MELEE_P, {
 CARDS.meleeTech.desc = '<b>Dùng được khi cầm vũ khí cận chiến hoặc tay không.</b> Nội tại & kỹ năng đổi theo vũ khí:<br>'
     + '<b>Katana</b>: P chém vỡ đạn 25% · S lướt chém, lần 3 lướt xa bất tử đánh dấu mọi kẻ trên đường, 2 giây sau nổ sát thương (đủ kết liễu thì choáng trong lúc chờ).<br>'
     + '<b>Kiếm Ánh Sáng</b>: S lướt + khiên, 6 giây cường hoá: 3 đòn mạnh & dài, đòn 3 chém tròn, chém bay mọi đạn, chạy nhanh, mỗi đòn có hư ảnh chém thêm.<br>'
-    + '<b>Kiếm Liễu</b>: S kiếm khí bay thẳng; lần 5 lướt vẽ ngôi sao rồi kết liễu.<br>'
+    + '<b>Kiếm Liễu</b>: S kiếm khí bay thẳng; lần thứ 2 lướt vẽ ngôi sao rồi kết liễu.<br>'
     + '<b>Giáo</b>: S nhảy lên đâm xuống điểm chọn. <b>Rìu</b>: S Song Rìu 5 giây (đánh nhanh, gây cháy).<br>'
     + '<b>Đại Đao</b>: P hút máu & giảm sát thương · S chạm = thế đỡ 3 giây (chặn cả nổ, phản đạn, choáng kẻ chém), chạm lại = chém đáp trả theo lượng đã đỡ · giữ = kéo lê kiếm (nhanh, giảm sát thương), thả = nhảy chém hất tung.<br>'
     + '<b>Cưa Máy</b>: S Cuồng Cưa (cuồng nộ, tăng tốc, giảm sát thương, miễn khống). <b>Khiên Tròn</b>: S ném khiên, mỗi mục tiêu trúng hồi máu +25 giáp + tăng tốc.<br>'
