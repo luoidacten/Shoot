@@ -2,13 +2,13 @@
  *  Thẻ (S/P), phép bổ trợ (sp:id), vật phẩm (it:id). Chưa có icon thì vẫn dùng emoji cũ.
  */
 const GICON = { img: new Image(), map: null, cell: 96, cols: 16, rows: 1, ready: false };
-fetch('assets/icons.json?v=3', { cache: 'no-cache' }).then(r => r.json()).then(j => {
+fetch('assets/icons.json?v=4', { cache: 'no-cache' }).then(r => r.json()).then(j => {
     GICON.map = j.ids; GICON.cell = j.cell; GICON.cols = j.cols;
     GICON.img.onload = () => {
         GICON.rows = Math.round(GICON.img.height / GICON.cell); GICON.ready = true;
         document.documentElement.style.setProperty('--gicon-size', `${GICON.cols * 100}% ${GICON.rows * 100}%`);
     };
-    GICON.img.src = 'assets/icons.webp?v=3';
+    GICON.img.src = 'assets/icons.webp?v=4';
 }).catch(() => {});
 function iconKey(kind, id) { return kind === 'spell' ? 'sp:' + id : kind === 'item' ? 'it:' + id : id; }
 function hasIcon(key) { return GICON.ready && GICON.map && GICON.map[key] !== undefined; }
