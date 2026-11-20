@@ -195,10 +195,11 @@ function umbAttack(p, w, a, charge, mult, isSuper) {
         hitDecoysObs(p, p.x + Math.cos(a) * (reach - p.radius), p.y + Math.sin(a) * (reach - p.radius), 14, dmg);
     } else if (f === 1) { // súng
         const m = muzzle(p, w, a);
-        const n = pw ? 3 : 1;
-        for (let i = 0; i < n; i++) spawnBullet(p, m.x, m.y, a + (n > 1 ? (i - 1) * 0.12 : 0) + (Math.random() - 0.5) * 0.06, { speed: 22, damage: dmg * 0.8, range: 430, color: pw ? '#fde68a' : '#7dd3fc', size: pw ? 3.6 : 3, trail: pw ? 40 : 30, slow: pw ? 0.8 : 0 });
+        const n = pw ? 3 : 1, boom = p.umbBoom > 0;
+        if (boom) { p.umbBoom--; floatText(p.x, p.y - 30, `💥 ĐẠN NỔ ${3 - p.umbBoom}/3`, '#fb923c', 12); }
+        for (let i = 0; i < n; i++) spawnBullet(p, m.x, m.y, a + (n > 1 ? (i - 1) * 0.12 : 0) + (Math.random() - 0.5) * 0.06, { speed: 22, damage: dmg * 0.8, range: 430, color: boom ? '#fb923c' : pw ? '#fde68a' : '#7dd3fc', size: boom ? 6.5 : pw ? 3.6 : 3, trail: boom ? 46 : pw ? 40 : 30, slow: pw ? 0.8 : 0, explosive: boom && i === 0, blastSmall: boom && i === 0 });
         AudioSys.playAt(pw ? 'shotgun' : 'shoot', p.x, p.y, 0.25); p.muzzle = 0.05; p.recoil = 1; addShake(pw ? 2 : 1);
-        p.cooldown *= 0.75;
+        p.cooldown *= p.umbRapidT > world.time ? 0.45 : 0.75;
         if (Math.random() < 0.25) reduceDurability(p, w, 1);
     } else { // kiếm
         const reach = w.range * (pw ? 1.2 : 1);
@@ -243,7 +244,10 @@ function umbTransition(p, w, a) {
     w.form = next;
     spark(p.x, p.y, UMB_FORMS[next].col, 8, 180);
     floatText(p.x, p.y - 54, `${UMB_FORMS[next].icon} ${UMB_FORMS[next].name.toUpperCase()}`, UMB_FORMS[next].col, 13);
-    // buff riêng của dạng mới + 3 đòn cường hoá
+    umbEnterForm(p, next);
+}
+function umbEnterForm(p, next) {
+    const w = getCurrentWeapon(p); if (w && w.id === 'UMBRELLA') w.form = next;
     const UB = UMB_BUFF[next];
     p.umbBuff = { f: next, n: 3, t: world.time + 8 };
     if (next === 0) p.st.haste = Math.max(p.st.haste || 0, 3);
@@ -426,6 +430,7 @@ Object.assign(GUN_P, { ICEGUN: 'Đóng băng sau 1.4 giây thay vì 2.', MUSKET:
 const _meleeTechCastW2 = meleeTechCast;
 meleeTechCast = function (p) {
     const w = getCurrentWeapon(p), a = aimDir(p);
+    if (w.id === 'UMBRELLA' && (w.form || 0) !== 1) return umbMT(p, w, a);
     if (w.id === 'WHIP') { // Lốc Xích: 1s báo trước (ngôi sao) rồi xoay quất mọi hướng, hồi 20% máu
         W2FX.push({ kind: 'star', owner: p.id, t: 1, maxT: 1, col: '#fde68a' });
         floatText(p.x, p.y - 40, '⭐ LỐC XÍCH...', '#fde68a', 14); AudioSys.playAt('ui', p.x, p.y, 0.3);
@@ -498,12 +503,7 @@ gunModCast = function (p) {
         } });
         return;
     }
-    if (w.id === 'UMBRELLA') { // Mưa Kim: mở ô bắn quạt 10 kim
-        w.form = 1; const m = muzzle(p, w, a);
-        for (let i = 0; i < 10; i++) p.shotQueue.push({ t: i * 0.03, fn: () => { if (p.hp <= 0) return; spawnBullet(p, m.x, m.y, a + (i - 4.5) * 0.08, { speed: 22, damage: 10 * (p.dmgMult || 1), range: 440, color: '#7dd3fc', size: 3, trail: 28 }); } });
-        AudioSys.playAt('smg', p.x, p.y, 0.4); floatText(p.x, p.y - 40, '☂️ MƯA KIM!', '#7dd3fc', 15);
-        return;
-    }
+    if (w.id === 'UMBRELLA') return umbGM(p, w, a);
     return _gunModCastW2(p);
 };
 // Trang Bị Phụ dùng được với Huyền Cơ (ô cũng là súng)
@@ -571,7 +571,7 @@ Object.assign(HT, {
         p.st.haste = Math.max(p.st.haste || 0, 3); p.reaperPass = world.time + 2; p.reaperNext = world.time + 6;
         ring(tx, ty, 6, 70, '#a78bfa', 0.4, 4); floatText(tx, ty - 40, '☠ TỬ THẦN LƯỚT!', '#c4b5fd', 15); AudioSys.playAt('trick', tx, ty, 0.5);
     }],
-    UMBRELLA: ['Ô CHE TRỜI', p => { p.umbDome = world.time + 2.5; p.st.invuln = Math.max(p.st.invuln || 0, 0.3); ring(p.x, p.y, 10, 95, '#f472b6', 0.5, 5); floatText(p.x, p.y - 40, '☂️ Ô CHE TRỜI!', '#f472b6', 15); AudioSys.playAt('block', p.x, p.y, 0.5); }],
+    UMBRELLA: ['HUYỀN CƠ BIẾN', p => umbHT(p)],
     ICEGUN: ['TƯỢNG BĂNG', p => {
         const e = enemiesOf(p).filter(q => dist(p.x, p.y, q.x, q.y) < 480 && targetable(p, q)).sort((u, v) => dist(p.x, p.y, u.x, u.y) - dist(p.x, p.y, v.x, v.y))[0];
         if (!e) { floatText(p.x, p.y - 34, 'Không có mục tiêu', '#94a3b8', 12); return; }
@@ -785,3 +785,180 @@ function drawUmbUI(p, w, now, mine) {
 }
 const _drawZoneW2 = drawZone;
 drawZone = function (now) { try { drawW2Fx(now); } catch (e) {} return _drawZoneW2(now); };
+
+/* ============================== HUYỀN CƠ: KỸ NĂNG THEO DẠNG ============================== */
+function umbFreeSpot(p, x, y) { // điểm đáp không nằm trong vật cản (lùi dần về phía người chơi)
+    const a = Math.atan2(y - p.y, x - p.x), D = dist(p.x, p.y, x, y);
+    for (let d = D; d >= 0; d -= 12) { const px = p.x + Math.cos(a) * d, py = p.y + Math.sin(a) * d; if (px > p.radius && py > p.radius && px < MAP_W - p.radius && py < MAP_H - p.radius && !pointInObstacle(px, py, p.radius + 2)) return { x: px, y: py }; }
+    return { x: p.x, y: p.y };
+}
+function umbRing(p, x, y, n, dmg, off, col, spd = 18, range = 320) {
+    for (let i = 0; i < n; i++) spawnBullet(p, x, y, off + i * Math.PI * 2 / n, { speed: spd, damage: dmg * (p.meleeMult || 1), range: range + dist(p.x, p.y, x, y), color: col, size: 3.4, trail: 26, knock: 90, bounces: 0 });
+}
+function umbJump(p, x, y, T, h, fn) { const L = umbFreeSpot(p, x, y); startTravel(p, L.x, L.y, T, 'umbLand', { fn }, h); }
+const _landEffectW2 = landEffect;
+landEffect = function (p, kind, o) { if (kind === 'umbLand') { try { o && o.fn && o.fn(p); } catch (e) {} return; } return _landEffectW2(p, kind, o); };
+
+// Kỹ Thuật Cận Chiến
+function umbMT(p, w, a) {
+    const f = w.form || 0;
+    if (f === 0) { // Đâm ô xoáy: ô xoay trước mặt, gây sát thương + chặn & phản đạn; kết thúc kéo địch lại + choáng
+        W2FX.push({ kind: 'umbDrill', owner: p.id, a, t: 1.3, maxT: 1.3, tick: 0 });
+        floatText(p.x, p.y - 40, '🌀 Ô XOÁY PHÁ!', '#f472b6', 16); AudioSys.playAt('whoosh', p.x, p.y, 0.6); castFx(p, '#f472b6', false);
+        return;
+    }
+    // dạng Huyền Cơ: lướt nhẹ rồi chém tròn 360°
+    p.dashTime = 0.16; p.dashAngle = a; p.st.invuln = Math.max(p.st.invuln || 0, 0.16);
+    smoke(p.x, p.y, 4, 'rgba(192,132,252,0.35)', 12);
+    p.shotQueue.push({ t: 0.17, fn: () => {
+        if (p.hp <= 0) return;
+        const R = 135;
+        [0, Math.PI].forEach(o => slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: a + o, range: R, color: '#f0abfc', width: 15, life: 0.32, maxLife: 0.32, swing: 1, line: false, arc: Math.PI / 2 }));
+        ring(p.x, p.y, p.radius, R, '#c084fc', 0.4, 7); addShake(6); AudioSys.playAt('swing', p.x, p.y, 0.8);
+        let n = 0;
+        enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(p.x, p.y, e.x, e.y) < R + e.radius) { dealDamage(e, 28 * (p.meleeMult || 1), p.id, { melee: true, knock: 320, angle: Math.atan2(e.y - p.y, e.x - p.x) }); n++; p.stats.hits++; } });
+        p.st.haste = Math.max(p.st.haste || 0, 2.5);
+        if (n) {
+            const heal = p.maxHp * 0.08 * Math.min(3, n); p.hp = Math.min(p.maxHp, p.hp + heal);
+            p.st.shield = Math.min(90, (p.st.shield || 0) + 25 + 10 * n); p.st.shieldT = Math.max(p.st.shieldT || 0, 4);
+            floatText(p.x, p.y - 30, `+${Math.round(heal)} · 🛡 KHIÊN`, '#f0abfc', 13); hitStop(0.06);
+        }
+        floatText(p.x, p.y - 48, '⚔️ HUYỀN CƠ TOÀN TRẢM!', '#d8b4fe', 16);
+    } });
+}
+function updateUmbDrill(f, dt) {
+    const o = players.find(q => q.id === f.owner); if (!o || o.hp <= 0) { f.t = 0; return; }
+    f.a = o.angle; // ô xoay theo hướng nhìn
+    const D = o.radius + 46, x = o.x + Math.cos(f.a) * D, y = o.y + Math.sin(f.a) * D; f.x = x; f.y = y;
+    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner === o.id || dist(b.x, b.y, x, y) > 62) continue; if (b.explosive) { bullets.splice(i, 1); continue; } b.owner = o.id; b.angle = Math.atan2(b.y - o.y, b.x - o.x) + (Math.random() - 0.5) * 0.3; b.life = Math.max(b.life, 0.8); b.color = '#f9a8d4'; spark(b.x, b.y, '#f9a8d4', 3, 140); }
+    f.tick += dt;
+    if (f.tick >= 0.15) { f.tick = 0; enemiesOf(o).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, x, y) < e.radius + 44) { dealDamage(e, 5 * (o.meleeMult || 1), o.id, { melee: true, knock: 60, angle: f.a }); spark(e.x, e.y, '#f9a8d4', 3, 160); } }); if (Math.random() < 0.5) AudioSys.playAt('swing', x, y, 0.15); }
+    if (f.t - dt <= 0) { // kết thúc: kéo địch trong vùng rộng về trước ô + choáng
+        const R = 240;
+        enemiesOf(o).forEach(e => {
+            if (e.air > 0 || dist(e.x, e.y, x, y) > R + e.radius || !lineOfSight(x, y, e.x, e.y)) return;
+            const ea = Math.atan2(y - e.y, x - e.x), d = Math.max(0, dist(e.x, e.y, x, y) - 30);
+            const nx = e.x + Math.cos(ea) * d * 0.85, ny = e.y + Math.sin(ea) * d * 0.85;
+            if (!pointInObstacle(nx, ny, e.radius)) { beams.push({ x1: e.x, y1: e.y, x2: nx, y2: ny, life: 0.2, maxLife: 0.2, color: '#f472b6' }); e.x = nx; e.y = ny; }
+            e.stun = Math.max(e.stun, 0.9); dealDamage(e, 12 * (o.meleeMult || 1), o.id, { melee: true, knock: 1 });
+            floatText(e.x, e.y - 44, '🌀 BỊ KÉO!', '#f472b6', 14);
+        });
+        ring(x, y, 10, R, '#f472b6', 0.5, 6); addShake(7); AudioSys.playAt('slam', x, y, 0.5);
+    }
+}
+// Trang Bị Phụ (dạng Mở): quạt kim + tốc chạy + tốc bắn + 3 phát tiếp theo là đạn nổ
+function umbGM(p, w, a) {
+    if ((w.form || 0) !== 1) { w.form = 1; floatText(p.x, p.y - 56, '☂️ MỞ', '#38bdf8', 13); }
+    const m = muzzle(p, w, a);
+    for (let i = 0; i < 10; i++) p.shotQueue.push({ t: i * 0.03, fn: () => { if (p.hp <= 0) return; spawnBullet(p, m.x, m.y, a + (i - 4.5) * 0.08, { speed: 22, damage: 10 * (p.dmgMult || 1), range: 440, color: '#7dd3fc', size: 3, trail: 28 }); } });
+    p.st.haste = Math.max(p.st.haste || 0, 3); p.umbRapidT = world.time + 4; p.umbBoom = 3;
+    AudioSys.playAt('smg', p.x, p.y, 0.4); floatText(p.x, p.y - 40, '☂️ MƯA KIM · TỐC BẮN · 3 ĐẠN NỔ', '#7dd3fc', 14);
+    ring(p.x, p.y, 8, 60, '#38bdf8', 0.4, 4);
+}
+// Kỹ Thuật Cao: chuỗi chiêu theo dạng, kết thúc chuyển dạng tiếp theo
+function umbHT(p) {
+    const w = getCurrentWeapon(p); if (!w || w.id !== 'UMBRELLA') return;
+    const f = w.form || 0, a = aimDir(p);
+    const pt = R => { const d = Math.max(80, Math.min(R, p.skillDist || R * 0.8)); return { x: p.x + Math.cos(a) * d, y: p.y + Math.sin(a) * d }; };
+    if (f === 0) { // nhảy lên → cắm ô xuống điểm đáp: choáng → vòng đạn → chuyển Mở
+        const T = pt(320);
+        floatText(p.x, p.y - 40, '🌂 CẮM Ô!', '#f472b6', 16); AudioSys.playAt('whoosh', p.x, p.y, 0.5);
+        umbJump(p, T.x, T.y, 0.5, 95, q => {
+            W2FX.push({ kind: 'umbPlant', owner: q.id, x: q.x, y: q.y, t: 1.1, maxT: 1.1 });
+            ring(q.x, q.y, 10, 120, '#f472b6', 0.5, 7); addShake(10); AudioSys.playAt('slam', q.x, q.y, 0.6);
+            enemiesOf(q).forEach(e => { if (!(e.air > 0) && dist(q.x, q.y, e.x, e.y) < 120 + e.radius) { dealDamage(e, 20 * (q.meleeMult || 1), q.id, { melee: true, knock: 260, angle: Math.atan2(e.y - q.y, e.x - q.x) }); e.stun = Math.max(e.stun, 1.1); } });
+            const cx = q.x, cy = q.y;
+            q.shotQueue.push({ t: 0.3, fn: () => { umbRing(q, cx, cy, 18, 9, Math.random(), '#fbcfe8'); AudioSys.playAt('shotgun', cx, cy, 0.5); } });
+            q.shotQueue.push({ t: 0.45, fn: () => { if (q.hp > 0) umbEnterForm(q, 1); floatText(q.x, q.y - 56, '☂️ MỞ', '#38bdf8', 13); } });
+        });
+        return;
+    }
+    if (f === 1) { // ném ô lên trời: 3 đợt đạn tròn loạn xạ → nhảy bay tới điểm đáp → chuyển Huyền Cơ
+        const T = pt(380), sx = p.x, sy = p.y;
+        W2FX.push({ kind: 'umbSky', owner: p.id, x: sx, y: sy, t: 1.25, maxT: 1.25 });
+        floatText(p.x, p.y - 40, '☂️ Ô THIÊN VŨ!', '#38bdf8', 16); AudioSys.playAt('whoosh', p.x, p.y, 0.6);
+        for (let k = 0; k < 3; k++) p.shotQueue.push({ t: 0.3 + k * 0.3, fn: () => {
+            if (p.hp <= 0) return;
+            for (let i = 0; i < 14; i++) { const ang = Math.random() * Math.PI * 2; spawnBullet(p, sx, sy, ang, { speed: 14 + Math.random() * 9, damage: 8 * (p.meleeMult || 1), range: 260 + Math.random() * 120 + dist(p.x, p.y, sx, sy), color: '#bae6fd', size: 3.2, trail: 22, knock: 80, bounces: 0 }); }
+            AudioSys.playAt('smg', sx, sy, 0.4); ring(sx, sy, 6, 50, '#7dd3fc', 0.3, 3);
+        } });
+        p.shotQueue.push({ t: 1.05, fn: () => {
+            if (p.hp <= 0) return;
+            umbJump(p, T.x, T.y, 0.7, 130, q => { ring(q.x, q.y, 8, 90, '#c084fc', 0.45, 5); addShake(5); umbEnterForm(q, 2); floatText(q.x, q.y - 56, '⚔️ HUYỀN CƠ', '#c084fc', 13); });
+        } });
+        return;
+    }
+    // dạng Huyền Cơ: chém 1 vòng → ném khiên ra trước → nhảy tới chỗ khiên, đáp xuống chém choáng → chuyển Gập
+    const R = 120;
+    [0, Math.PI].forEach(o => slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: a + o, range: R, color: '#d8b4fe', width: 13, life: 0.3, maxLife: 0.3, swing: 1, line: false, arc: Math.PI / 2 }));
+    enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(p.x, p.y, e.x, e.y) < R + e.radius) dealDamage(e, 20 * (p.meleeMult || 1), p.id, { melee: true, knock: 240, angle: Math.atan2(e.y - p.y, e.x - p.x) }); });
+    AudioSys.playAt('swing', p.x, p.y, 0.7);
+    const D = Math.max(60, rayFree(p.x, p.y, a, Math.max(120, Math.min(340, p.skillDist || 300))).d), tx = p.x + Math.cos(a) * D, ty = p.y + Math.sin(a) * D;
+    W2FX.push({ kind: 'umbFly', owner: p.id, x0: p.x, y0: p.y, x: tx, y: ty, a, t: 0.35, maxT: 0.35, shield: true });
+    floatText(p.x, p.y - 40, '⚔️ TRẢM THIÊN!', '#d8b4fe', 16);
+    p.shotQueue.push({ t: 0.38, fn: () => {
+        if (p.hp <= 0) return;
+        umbJump(p, tx, ty, 0.42, 90, q => {
+            const RR = 105;
+            [0, Math.PI].forEach(o => slashes.push({ x: q.x, y: q.y, ownerId: q.id, angle: a + o, range: RR, color: '#f0abfc', width: 16, life: 0.3, maxLife: 0.3, swing: -1, line: false, arc: Math.PI / 2 }));
+            enemiesOf(q).forEach(e => { if (!(e.air > 0) && dist(q.x, q.y, e.x, e.y) < RR + e.radius) { dealDamage(e, 30 * (q.meleeMult || 1), q.id, { melee: true, knock: 280, angle: Math.atan2(e.y - q.y, e.x - q.x) }); e.stun = Math.max(e.stun, 1); floatText(e.x, e.y - 44, '💫 CHOÁNG!', '#f0abfc', 13); } });
+            ring(q.x, q.y, 10, RR, '#f0abfc', 0.45, 7); addShake(9); hitStop(0.06); AudioSys.playAt('slam', q.x, q.y, 0.5);
+            umbEnterForm(q, 0); floatText(q.x, q.y - 56, '🌂 GẬP', '#f472b6', 13);
+        });
+    } });
+}
+// cập nhật / vẽ hiệu ứng mới
+const _upeW2u = updatePartyExtras;
+updatePartyExtras = function (dt) {
+    W2FX.forEach(f => { if (f.kind === 'umbDrill' && f.t > 0) updateUmbDrill(f, dt); });
+    W2FX.forEach(f => { if (f.kind === 'umbFly' && f.shield) { const o = players.find(q => q.id === f.owner); if (!o) return; const k = 1 - Math.max(0, f.t) / f.maxT, cx = f.x0 + (f.x - f.x0) * k, cy = f.y0 + (f.y - f.y0) * k; enemiesOf(o).forEach(e => { if (dist(e.x, e.y, cx, cy) < e.radius + 22 && !(f.hitSet || (f.hitSet = new Set())).has(e.id)) { f.hitSet.add(e.id); dealDamage(e, 12 * (o.meleeMult || 1), o.id, { melee: true, knock: 200, angle: f.a }); } }); } });
+    return _upeW2u(dt);
+};
+const _drawW2FxU = drawW2Fx;
+drawW2Fx = function (now) {
+    _drawW2FxU(now);
+    ctx.save();
+    W2FX.forEach(f => {
+        const pr = 1 - Math.max(0, f.t) / f.maxT;
+        if (f.kind === 'umbDrill' && f.x !== undefined) {
+            ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(now * 22);
+            ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(244,114,182,0.18)'; ctx.beginPath(); ctx.arc(0, 0, 60, 0, Math.PI * 2); ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            for (let i = 0; i < 8; i++) { ctx.fillStyle = i % 2 ? '#f472b6' : '#fbcfe8'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 26, i * Math.PI / 4, (i + 1) * Math.PI / 4); ctx.closePath(); ctx.fill(); }
+            ctx.strokeStyle = 'rgba(15,23,42,0.6)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+            const o = players.find(q => q.id === f.owner);
+            if (o && f.t < 0.5) { ctx.strokeStyle = `rgba(244,114,182,${0.25 + (0.5 - f.t)})`; ctx.lineWidth = 2; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.arc(f.x, f.y, 240 * (1 - f.t), 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
+        } else if (f.kind === 'umbPlant') {
+            const k = Math.max(0, f.t / f.maxT);
+            ctx.save(); ctx.globalAlpha = Math.min(1, k * 2); ctx.translate(f.x, f.y);
+            ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -34); ctx.stroke();
+            ctx.fillStyle = '#f472b6'; ctx.beginPath(); ctx.arc(0, -34, 22, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(15,23,42,0.55)'; ctx.lineWidth = 1.2; ctx.stroke();
+            ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(0, 0, 26 * (1 + pr), 8 * (1 + pr), 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+        } else if (f.kind === 'umbSky') {
+            const up = Math.sin(Math.min(1, pr * 1.6) * Math.PI / 2) * 120, k = Math.max(0, f.t / f.maxT);
+            ctx.save(); ctx.globalAlpha = Math.min(1, k * 3); ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(f.x, f.y, 22, 8, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.translate(f.x, f.y - up); ctx.rotate(now * 9); ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = 'rgba(15,23,42,0.5)'; ctx.lineWidth = 1; for (let i = 0; i < 8; i++) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(i * Math.PI / 4) * 24, Math.sin(i * Math.PI / 4) * 24); ctx.stroke(); }
+            ctx.restore();
+        } else if (f.kind === 'umbFly' && f.shield) {
+            const kk = Math.min(1, pr), cx = f.x0 + (f.x - f.x0) * kk, cy = f.y0 + (f.y - f.y0) * kk;
+            ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = 'rgba(192,132,252,0.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(cx, cy, 20, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+            ctx.strokeStyle = 'rgba(192,132,252,0.35)'; ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(f.x, f.y, 26, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        }
+    });
+    ctx.restore();
+};
+// vùng ngắm theo dạng
+const _skillProfileW2u = skillProfile;
+skillProfile = function (p, id) {
+    const w = getCurrentWeapon(p);
+    if (w && w.id === 'UMBRELLA') {
+        const f = w.form || 0;
+        if (id === 'meleeTech') return f === 0 ? { aim: 'dir', R: 240, shape: 'cone', half: 0.9, col: '244,114,182', tag: '🌀 Ô XOÁY' } : f === 2 ? { aim: 'dir', R: 115, shape: 'point', aoe: 135, col: '192,132,252', tag: '⚔️ TOÀN TRẢM' } : { aim: null, shape: 'selfaoe', aoe: 120, col: '244,114,182' };
+        if (id === 'gunMod') return { aim: 'dir', R: 440, shape: 'cone', half: 0.4, col: '125,211,252', tag: '💥 3 ĐẠN NỔ' };
+        if (id === 'hightech') return f === 0 ? { aim: 'point', R: 320, shape: 'point', aoe: 120, arc: true, col: '244,114,182', tag: '🌂 CẮM Ô → MỞ' } : f === 1 ? { aim: 'point', R: 380, shape: 'point', aoe: 70, arc: true, col: '56,189,248', tag: '☂️ THIÊN VŨ → HUYỀN CƠ' } : { aim: 'point', R: 340, shape: 'point', aoe: 105, arc: true, col: '192,132,252', tag: '⚔️ TRẢM THIÊN → GẬP' };
+    }
+    return _skillProfileW2u(p, id);
+};
+CARDS.meleeTech.desc += '<br><b>Huyền Cơ</b> theo dạng: Gập = Ô Xoáy Phá (ô xoay trước mặt, phản đạn, kết thúc kéo địch + choáng) · Mở = Ô Xoay · Huyền Cơ = Toàn Trảm (lướt + chém 360°, tốc chạy, trúng thì hồi máu + khiên).';
+CARDS.gunMod.desc += '<br><b>Huyền Cơ</b>: Mưa Kim + tốc chạy + tốc bắn; 3 phát tiếp theo là đạn nổ.';
