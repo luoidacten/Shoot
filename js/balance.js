@@ -92,3 +92,26 @@ castSpell = function (p, i) {
     }
     return r;
 };
+
+/* ============================== BUFF THÊM: Khởi Đầu Gấp Đôi · Song Phép · Nhiều Lựa Chọn ============================== */
+ADVANTAGES.doubleUp.desc = 'HAI lần nâng cấp đầu tiên, mỗi lần được chọn 2 thẻ (tổng cộng thêm 2 thẻ). +25 máu tối đa.';
+ADVANTAGES.twoSpells.desc = 'Được 2 phép bổ trợ thay vì 1 (có thêm Túi Phép thì 3). Phép hồi chiêu nhanh hơn 25%; dùng 1 phép thì các phép còn lại hồi ngay 4 giây.';
+ADVANTAGES.manyChoices.desc = 'Mỗi lần nâng cấp có thêm 1 lá, luôn có 1 lá hợp với bạn (may mắn thì 2). Mỗi lần nâng cấp đã qua: +10 máu tối đa và +4% sát thương (tối đa 5 lần: +50 máu, +20%).';
+const _spellCd38 = spellCd;
+spellCd = function (p, id) { return _spellCd38(p, id) * (p && p.adv === 'twoSpells' ? 0.75 : 1); };
+const _castSpell38 = castSpell;
+castSpell = function (p, i) {
+    const s = p && p.spells && p.spells[i], ready = s && s.cd <= 0;
+    const r = _castSpell38(p, i);
+    if (ready && s.cd > 0 && p.adv === 'twoSpells') p.spells.forEach((q, k) => { if (k !== i && q.cd > 0) q.cd = Math.max(0, q.cd - 4); });
+    return r;
+};
+const manyN = () => Math.min(5, typeof pickCount === 'number' ? pickCount : 0);
+const _applyBuild38 = applyBuild;
+applyBuild = function (p) { _applyBuild38(p); if (p.adv === 'manyChoices') { const n = manyN(); p.maxHp += 10 * n; p.hp = Math.min(p.maxHp, p.hp + 10 * n); } };
+const _dealDamage38 = dealDamage;
+dealDamage = function (target, dmg, attackerId, opts = {}) {
+    const a = attackerId >= 0 && players.find(q => q.id === attackerId);
+    if (a && a.adv === 'manyChoices' && a !== target) dmg *= 1 + 0.04 * manyN();
+    return _dealDamage38(target, dmg, attackerId, opts);
+};
