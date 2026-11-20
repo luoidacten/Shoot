@@ -301,21 +301,8 @@ function drawPlayer(p, now) {
     // vũ khí (mỗi loại một kiểu)
     drawWeaponArt(ctx, w, p.radius, now, p);
     if (p.muzzle > 0 && w.type === 'GUN' && w.id !== 'TESLA') drawMuzzleFlash(ctx, w, p);
-    // tay
-    if (w.type !== 'SHIELD') {
-        ctx.fillStyle = shade(p.color, -0.2);
-        const punch = w.id === 'NONE' && p.cooldown > w.fireRate * p.fireRateMult * 0.6 ? 8 : 0;
-        ctx.beginPath(); ctx.arc(p.radius * 0.75 + punch, p.radius * 0.6, 4.5, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(p.radius * 0.75, -p.radius * 0.6, 4.5, 0, Math.PI * 2); ctx.fill();
-    }
-    // thân
-    const bg = ctx.createRadialGradient(-p.radius * 0.35, -p.radius * 0.35, p.radius * 0.1, 0, 0, p.radius);
-    bg.addColorStop(0, shade(p.color, 0.45)); bg.addColorStop(0.6, p.color); bg.addColorStop(1, shade(p.color, -0.35));
-    ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(0, 0, p.radius, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 2; ctx.stroke();
-    // kính mắt
-    ctx.fillStyle = 'rgba(10,14,30,0.85)'; rrect(ctx, p.radius * 0.15, -p.radius * 0.5, p.radius * 0.7, p.radius, p.radius * 0.3); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(p.radius * 0.45, -p.radius * 0.3, p.radius * 0.18, p.radius * 0.18);
+    // thân, đầu, tay (artpass.js)
+    drawCharacter(p, w, now);
     if (p.thorns) {
         ctx.fillStyle = '#facc15';
         for (let a = 0; a < Math.PI * 2; a += Math.PI / 5) { ctx.save(); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(p.radius - 1, -3); ctx.lineTo(p.radius + 6, 0); ctx.lineTo(p.radius - 1, 3); ctx.fill(); ctx.restore(); }
