@@ -373,3 +373,9 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - **24 vũ khí vẽ lại** (súng lục, giảm thanh, ổ quay, song súng, SMG, AR, shotgun, bắn tỉa, minigun, railgun, bazooka, súng phóng lựu, phun lửa, dao, song dao, katana, giáo, búa, đại kiếm, rìu, cung…): kim loại có đổ bóng, viền, chi tiết ống ngắm / băng đạn / báng gỗ.
 - **VFX**: chớp nòng đúng đầu nòng nhiều lớp, đạn có quầng sáng & vệt thon, vụ nổ có sóng xung kích + than hồng + khói đen, tia lửa văng khi trúng đòn, bụi chân khi chạy (tôn trọng mức "Hiệu ứng chớp & rung").
 - **Sửa lỗi ném khiên mất hình cả bản đồ**: khiên đang bay vẽ cung bán kính âm làm hỏng cả khung hình — giờ khiên bay/nằm đất vẽ thành đĩa xoay.
+
+## Mép khói, ánh ống ngắm Sniper, Trường Kiếm mới (js/edge.js)
+
+- **Đứng mép khói nhìn ra ngoài được**: tầm nhìn trong khói tính theo từng tia (xuyên > ~110 khói mới bị chặn) — đứng mép nhìn ra rõ, đứng giữa khói vẫn chỉ thấy sát bên; người ngoài vẫn không thấy bạn. Bụi: đứng trong bụi vẫn nhìn ra ngoài, người ngoài không thấy bạn.
+- **Sniper lộ ánh ống ngắm**: khi đang ngắm, ống ngắm lóe sáng (xuyên sương mù, có ở mép màn hình) với người bị chĩa vào — càng tụ lực càng sáng. Bot bị chĩa vào cũng nhận ra hướng tay bắn tỉa.
+- **Trường Kiếm**: trúng liên tiếp tích **Kiếm Ý** (tối đa 5, +6% sát thương/tầng, chấm sáng quanh người); đòn chém **chặn đạn**; đòn đâm phóng **Kiếm Khí** lưỡi liềm màu hành (bay 380, xuyên địch, mang hiệu ứng ngũ hành); đủ 5 tầng → **Vạn Kiếm** 5 đạo hình quạt.
