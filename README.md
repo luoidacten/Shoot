@@ -389,3 +389,10 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - **Bụi cây**: nhiều lớp lá đổ bóng, điểm sáng lá, lay nhẹ; bụi cháy ửng cam.
 - **Khói**: mây nhiều cụm cuộn chậm, bung dần khi mới thả; khói tốc hành ánh xanh.
 - **Viền tối màn hình** giúp tập trung vào giữa.
+
+## Bảng chiến thuật mới (js/tabletui.js)
+
+- Vỏ máy gồ ghề (ốc vít, gờ bám, đèn trạng thái, vạch sóng, đồng hồ trận), chip tên kỹ năng + chip hướng dẫn bước, nút bấm phát sáng.
+- Màn hình: lưới phụ + lưới ô phát sáng, tên ô trong từng ô, la bàn, thước tỉ lệ, vạch quét màn hình, lóa kính; bản đồ nét sáng (tường viền sáng, bụi gạch chéo, hòm hình thoi, ngoài vòng bo tô tím, địch tam giác / đồng đội tròn); điểm của bạn là mũi tên có vòng tỏa.
+- **Mỗi nhóm bảng một giao diện riêng**: Không kích (hổ phách, sọc cảnh báo) · Khói (xám, mây trôi) · Trinh sát (xanh lá, radar xoay) · Bộ binh & hậu cần (olive, vỏ rằn ri) · Công binh (bản vẽ kỹ thuật xanh trắng) · Lưới ô (tím, số nhị phân chạy) · Quan sát (vàng, radar xoay).
+- **Hiển thị tác dụng rõ hơn**: vùng ảnh hưởng có lõi đậm + vòng đứt quãng xoay + nhãn bán kính, ghim đánh dấu đánh số, hành lang có mũi tên chạy theo hướng (đường bay / đường A→B kèm độ dài), máy bay vẽ vector, tâm ngắm 4 ngoặc góc + toạ độ ô đang trỏ, đếm số điểm đã chọn.
