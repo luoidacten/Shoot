@@ -396,3 +396,13 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - Màn hình: lưới phụ + lưới ô phát sáng, tên ô trong từng ô, la bàn, thước tỉ lệ, vạch quét màn hình, lóa kính; bản đồ nét sáng (tường viền sáng, bụi gạch chéo, hòm hình thoi, ngoài vòng bo tô tím, địch tam giác / đồng đội tròn); điểm của bạn là mũi tên có vòng tỏa.
 - **Mỗi nhóm bảng một giao diện riêng**: Không kích (hổ phách, sọc cảnh báo) · Khói (xám, mây trôi) · Trinh sát (xanh lá, radar xoay) · Bộ binh & hậu cần (olive, vỏ rằn ri) · Công binh (bản vẽ kỹ thuật xanh trắng) · Lưới ô (tím, số nhị phân chạy) · Quan sát (vàng, radar xoay).
 - **Hiển thị tác dụng rõ hơn**: vùng ảnh hưởng có lõi đậm + vòng đứt quãng xoay + nhãn bán kính, ghim đánh dấu đánh số, hành lang có mũi tên chạy theo hướng (đường bay / đường A→B kèm độ dài), máy bay vẽ vector, tâm ngắm 4 ngoặc góc + toạ độ ô đang trỏ, đếm số điểm đã chọn.
+
+## Kỹ Thuật Cao mạnh hơn, 3 loại tàng hình (js/htplus.js)
+
+- **Hiệu ứng khi dùng kỹ năng**: vòng sáng + tia lửa bung ra (Kỹ Thuật Cao: lớn hơn, nảy camera nhẹ).
+- **Kỹ Thuật Cao làm lại**: Liên Hoàn Thiết Quyền (3 cú, cú cuối choáng) · Mưa Phi Đao (2 đợt × 12) · Thương Long Xuất Hải (lao tới + 3 giáo xuyên) · Sóng Kiếm Sáng (3 sóng) · Thành Trì (tường + đẩy văng choáng) · **Lốc Rìu** (3 rìu xoay nở rộng quanh người) · Bắn Quạt Nảy (8 viên nảy) · Vũ Điệu Song Súng (đạn xoắn ốc 2 chiều) · Loạt Lựu Gắn Nòng (3 quả, nạp đầy) · Bóng Ma (tàng hình chập chờn, tăng tốc) · Ám Sát (ngụy trang, phát kế ×2.5) · Tên Lửa Chùm (6 quả) · Xung Điện Từ (sát thương + câm lặng 2 giây) · **Quả Cầu Plasma** (cầu điện bay chậm, đốt dọc đường, chậm lại khi chạm địch, nổ cuối) · Quá Nhiệt (vòng lửa đẩy lùi).
+- **3 loại tàng hình**:
+  - 🦎 **Ngụy Trang** (thẻ mới): người khác vẫn thấy bóng mờ lay động (đứng yên gần như không thấy), không nhắm được.
+  - 🫥 **Vô Hình** (thẻ cũ): hoàn toàn không thấy, không bóng mờ.
+  - 👤 **Bóng Ma** (thẻ mới): lúc ẩn lúc hiện — chớp hiện 0.3 giây mỗi 1.3 giây (lúc hiện bị nhắm được), lúc ẩn nhận ít hơn 50% sát thương, luôn tăng tốc, tấn công không làm hiện hình.
+  - Phối hợp **Nhẫn Thuật Bóng Tối** (Ngụy Trang + Bóng Ma): +2 giây, hết tàng hình thì đòn kế +60%.
