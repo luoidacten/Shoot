@@ -252,7 +252,7 @@ function drawSlashFx(s, so) {
         ctx.beginPath(); ctx.moveTo(ext - 8 * k, 0); ctx.lineTo(ext + 10 * k, 0); ctx.moveTo(ext, -8 * k); ctx.lineTo(ext, 8 * k); ctx.stroke();
     } else {
         // CHÉM: lưỡi trăng khuyết quét qua, dày ở đầu lưỡi, mảnh dần về đuôi
-        const sw = s.swing || 1, span = 2.4, prog = Math.min(1, t * 2.4 + 0.25);
+        const sw = s.swing || 1, span = s.arc ? Math.min(3.4, s.arc * 2) : 2.4, prog = Math.min(1, t * 2.4 + 0.25);
         const a0 = -span / 2 * sw, aE = a0 + span * sw * prog, R = s.range, th = (s.width * 1.5 + 5) * (0.5 + 0.5 * k);
         const N = 16;
         ctx.beginPath();

@@ -427,3 +427,10 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - **Buff thêm**: Khởi Đầu Gấp Đôi (2 lần nâng cấp đầu, mỗi lần chọn 2 thẻ) · Song Phép (phép hồi nhanh hơn 25%, dùng 1 phép thì phép còn lại hồi ngay 4 giây) · Nhiều Lựa Chọn (mỗi lần nâng cấp đã qua +10 máu và +4% sát thương, tối đa 5 lần).
 - **Bậc Thầy Vũ Khí (làm lại)**: có sẵn đủ 3 kỹ năng — Kỹ Thuật Cận Chiến + Trang Bị Phụ + Kỹ Thuật Cao — cùng nội tại đổi vũ khí (Đòn Rút Vũ Khí) và dùng được chiêu của vũ khí tay kia; bù lại KHÔNG BAO GIỜ được chọn nâng cấp.
 - **Vũ khí quá mạnh chỉ rơi từ thính**: Pháo, Kiếm Ánh Sáng, Bộ Chỉ Điểm Laser, Bộ Định Vị Vệ Tinh (cùng Minigun, Railgun, Đại Kiếm vốn đã vậy) — không còn trong hòm vũ khí thường và Túi Quân Dụng.
+
+## Sửa vùng trúng & hiệu ứng cận chiến
+
+- **Đòn lướt** (Katana, Giáo lao, Kiếm Liễu lướt): trước đây chỉ tính trúng ở vị trí lúc bắt đầu chém nên lướt xuyên qua địch mà trượt — giờ tính dọc cả quãng lướt, có vệt chém dài đúng quãng lướt.
+- **Đòn đâm**: bề rộng đường đâm 18 (Giáo 24) thay vì 10 — lệch tay một chút vẫn trúng.
+- **Đứng sát người** (kể cả hơi lệch góc): luôn trúng.
+- **Hình nhát chém** quét đúng góc của vùng trúng thật.
