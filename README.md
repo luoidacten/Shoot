@@ -350,3 +350,16 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
   - 🫴 Tay Bắt Dính (P): vũ khí ném tự bay về tay sau khi trúng, bắt lại được +20% sát thương 3 giây.
   - 🧲 Gọi Vũ Khí (S): gọi mọi vũ khí trên đất trong 700 bay về tay, xuyên qua địch gây sát thương. Phối hợp **Búa Thần Sấm**.
   - Lợi thế **Ném Đồ** mạnh hơn: ×2 sát thương, vũ khí nằm lại 3.5 giây, nhặt lại đồ của mình được nạp đầy.
+
+## Bot giống người, bot học người chơi, nghe chỉ biết hướng (js/botmind.js)
+
+- **Nhận thức như người**: kể cả khi tắt sương mù bot cũng chỉ thấy trong ~760 và không nhìn xuyên tường/khói/bụi; phản xạ 0.2–0.4s (tuỳ độ khó) mới phản ứng; nhớ vị trí cuối 3–6 giây; xoay tâm có tốc độ tối đa (nghe tiếng sau lưng phải quay đầu).
+- **Ngắm không hoàn hảo**: phát đầu lệch rồi kéo dần; súng liên thanh bắn theo loạt ở tầm xa; bị bắn lén thì hoảng 1.5 giây (run tay, phản ứng chậm).
+- **Đoán & bắn thăm dò**: bắn đè vào chỗ vừa mất dấu, ném lựu vào chỗ nấp, bắn thăm dò bụi/khói nơi nghe thấy tiếng.
+- **Hit & run**: lao vào bắn một loạt rồi rút sau vật cản, vừa rút vừa nạp đạn, rồi quay lại.
+- **Bị truy đuổi**: chạy lắt léo tìm vật cản che, thả khói/tường/bom chặn đường, phục kích ngược sau góc tường, chỉ quay lại bắn khi địch quá sát; cắt đuôi > 3 giây thì hồi máu tại chỗ nấp.
+- **Tính cách** (hiện ở bảng tổng kết): 8 cũ + Nhát Gan, Cựu Binh, Ma Mãnh, Lính Canh, Thợ Săn Đầu Người, Liều Mạng; và 5 tính cách **cực đoan** (hiếm): 👹 Cuồng Chiến (không bao giờ lùi), 🐍 Rắn Nằm Im (không rời chỗ nấp), 🤡 Kẻ Điên (bắn bừa, quyết định thất thường), 🐔 Hèn Nhát Cực Độ (chỉ đánh khi bị dồn sát), 🦴 Kền Kền (chờ người khác đánh rồi vào ăn). Mỗi tính cách có "nét hành vi" riêng + nhiễu quyết định.
+- **Bot học người chơi** (lưu trên máy, tổng kết hiện điều bot đã học): khắc chế (bạn hay núp bụi → bot bắn thăm dò bụi; đánh gần → bot giữ khoảng cách; bắn xa → bot áp sát; hay đuổi → bot phục kích) và bắt chước (ném vũ khí, bắn thăm dò, đánh rồi rút, dùng khói).
+- **Nghe chỉ biết hướng**: tiếng động hiện thành cung quanh nhân vật (càng gần càng đậm). Bản đồ nhỏ / bảng vẫn hiện rõ tiếng ở gần (≤ 520).
+  - 📳 Thẻ **Cảm Quan Địa Chấn** (P): nghe rõ vị trí như cũ.
+  - 👂 Lợi thế **Giác Quan Nhạy Bén**: nghe rõ vị trí + nhìn xa hơn 12%.
