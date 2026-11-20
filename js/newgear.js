@@ -33,7 +33,8 @@ const elemK = p => has(p, 'meleeTech') ? 1.5 : 1; // nội tại Bậc Thầy: h
 function swingHits(p, ang, reach, arc, stab) {
     return enemiesOf(p).filter(e => {
         if (e.air > 0) return false;
-        if (stab) { const ex = p.x + Math.cos(ang) * (p.radius + reach), ey = p.y + Math.sin(ang) * (p.radius + reach); return segDist(e.x, e.y, p.x, p.y, ex, ey) < e.radius + 12; }
+        if (stab) { const ex = p.x + Math.cos(ang) * (p.radius + reach), ey = p.y + Math.sin(ang) * (p.radius + reach); return segDist(e.x, e.y, p.x, p.y, ex, ey) < e.radius + 18; }
+        if (dist(p.x, p.y, e.x, e.y) < p.radius + e.radius + 14 && Math.abs(angleDiff(Math.atan2(e.y - p.y, e.x - p.x), ang)) < 1.7) return true;
         return dist(p.x, p.y, e.x, e.y) < p.radius + e.radius + reach && Math.abs(angleDiff(Math.atan2(e.y - p.y, e.x - p.x), ang)) < arc;
     });
 }

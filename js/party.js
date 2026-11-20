@@ -321,7 +321,7 @@ function fireMelee(p, w, ang, charge, mult, isSuper) {
     }
     if (kind === 'stab' && w.id !== 'SPEAR' && w.id !== 'RAPIER' && w.id !== 'LIGHTSABER') reach *= 1.15;
     const col = w.id === 'LIGHTSABER' ? saberColor(p) : w.id === 'KATANA' ? '#7dd3fc' : w.id === 'CHAINSAW' ? '#fb923c' : w.id === 'SPEAR' ? '#fde68a' : w.id === 'GREATSWORD' ? '#fb7185' : w.id === 'RAPIER' ? '#e0f2fe' : '#f1f5f9';
-    slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: ang, range: reach + p.radius, color: col, width, life: kind === 'stab' ? 0.15 : w.id === 'GREATSWORD' ? 0.26 : 0.2, maxLife: kind === 'stab' ? 0.15 : w.id === 'GREATSWORD' ? 0.26 : 0.2, swing: p.swingDir = -(p.swingDir || 1), line: kind === 'stab' });
+    slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: ang, range: reach + p.radius, color: col, width, arc, life: kind === 'stab' ? 0.15 : w.id === 'GREATSWORD' ? 0.26 : 0.2, maxLife: kind === 'stab' ? 0.15 : w.id === 'GREATSWORD' ? 0.26 : 0.2, swing: p.swingDir = -(p.swingDir || 1), line: kind === 'stab' });
     if (isSuper) { p.superCharge = 0; ring(p.x, p.y, 10, reach + p.radius, '#fde047', 0.3, 6); floatText(p.x, p.y - 36, 'SIÊU ĐÒN!', '#fde047', 18); }
     if (w.id === 'CHAINSAW') reduceDurability(p, w, 1);
 
@@ -330,14 +330,18 @@ function fireMelee(p, w, ang, charge, mult, isSuper) {
     const o = pointInObstacle(hx, hy, 10); if (o) damageObstacle(o, dmg * (combo(p, 'wrecking') ? 5 : 1), p);
 
     let any = false;
+    // vùng trúng: đòn lướt (Katana, Giáo lao, Kiếm Liễu lướt) tính dọc cả quãng lướt; đòn đâm có bề rộng hợp lý; đứng sát luôn trúng
+    const dashLen = p.dashTime > 0 && Math.abs(angleDiff(p.dashAngle, ang)) < 0.2 ? p.dashTime * 720 : 0;
+    const stabW = w.id === 'SPEAR' ? 24 : 18;
+    const capsule = (e, len, wd) => { const ex = p.x + Math.cos(ang) * len, ey = p.y + Math.sin(ang) * len, dx = ex - p.x, dy = ey - p.y, t = Math.max(0, Math.min(1, ((e.x - p.x) * dx + (e.y - p.y) * dy) / (dx * dx + dy * dy || 1))); return dist(e.x, e.y, p.x + dx * t, p.y + dy * t) < e.radius + wd; };
+    if (dashLen > 0) slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: ang, range: p.radius + dashLen + reach, color: col, width: width + 4, life: 0.22, maxLife: 0.22, swing: 1, line: true });
     for (const e of enemiesOf(p)) {
         if (e.air > 0) continue; // đang bay → né được cận chiến
         let hit;
-        if (kind === 'stab') {
-            const ex = p.x + Math.cos(ang) * (p.radius + reach), ey = p.y + Math.sin(ang) * (p.radius + reach);
-            const dx = ex - p.x, dy = ey - p.y, t = Math.max(0, Math.min(1, ((e.x - p.x) * dx + (e.y - p.y) * dy) / (dx * dx + dy * dy)));
-            hit = dist(e.x, e.y, p.x + dx * t, p.y + dy * t) < e.radius + 10;
-        } else hit = dist(p.x, p.y, e.x, e.y) < p.radius + e.radius + reach && Math.abs(angleDiff(Math.atan2(e.y - p.y, e.x - p.x), ang)) < arc;
+        const d0 = dist(p.x, p.y, e.x, e.y), da = Math.abs(angleDiff(Math.atan2(e.y - p.y, e.x - p.x), ang));
+        if (d0 < p.radius + e.radius + 14 && da < 1.7) hit = true; // sát người
+        else if (kind === 'stab') hit = capsule(e, p.radius + reach + dashLen, stabW);
+        else hit = (d0 < p.radius + e.radius + reach && da < arc) || (dashLen > 0 && capsule(e, p.radius + dashLen + reach * 0.6, Math.max(26, reach * 0.45)));
         if (!hit) continue;
         const hitAng = Math.atan2(e.y - p.y, e.x - p.x);
         let dd = dmg;
