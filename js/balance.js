@@ -115,3 +115,14 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
     if (a && a.adv === 'manyChoices' && a !== target) dmg *= 1 + 0.04 * manyN();
     return _dealDamage38(target, dmg, attackerId, opts);
 };
+
+/* ============================== BẬC THẦY VŨ KHÍ: đủ 3 kỹ năng, không chọn nâng cấp nữa ============================== */
+const WM_CARDS = ['meleeTech', 'gunMod', 'hightech'];
+ADVANTAGES.weaponMaster.desc = 'Có sẵn đủ 3 KỸ NĂNG: Kỹ Thuật Cận Chiến + Trang Bị Phụ + Kỹ Thuật Cao (3 ô kỹ năng). Kỹ năng Bậc Thầy của vũ khí ở TAY KIA vẫn dùng được (tự rút ra dùng rồi cất lại). Nội tại ĐỔI VŨ KHÍ: mỗi lần đổi vũ khí tung Đòn Rút Vũ Khí (cận chiến chém vòng cung tốn 3 độ bền · súng bắn nhanh 2 phát tốn 2 viên). Dùng được mọi vũ khí, +10% tốc chạy, +15% sát thương. Bù lại: KHÔNG BAO GIỜ được chọn nâng cấp.';
+const _applyBuild39 = applyBuild;
+applyBuild = function (p) {
+    if (p && p.adv === 'weaponMaster') { p.build = (p.build || []).filter(id => WM_CARDS.includes(id) || (CARDS[id] && CARDS[id].kind !== 'S')); WM_CARDS.forEach(c => { if (!p.build.includes(c)) p.build.push(c); }); }
+    return _applyBuild39(p);
+};
+const _skipsPick39 = skipsPick;
+skipsPick = function (p) { return (!!p && p.adv === 'weaponMaster') || _skipsPick39(p); };
