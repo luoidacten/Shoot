@@ -118,7 +118,7 @@ updateStrikes = function (dt) { const n = strikes.length; _upStr16b(dt); for (le
 /* ============================== BẢNG CHIẾN THUẬT: mở · chọn · xác nhận ============================== */
 openPicker = function (src, slot, kind) { picker = { src, slot, kind, pts: [], hover: null, t0: world.time }; AudioSys.play('select', 0.4); };
 pickerRect = function () {
-    const W = SCREEN_W, H = SCREEN_H, padX = 22, head = 44, foot = 46;
+    const W = SCREEN_W, H = SCREEN_H, padX = 24, head = 58, foot = 46;
     const k = Math.min((W * 0.94 - padX * 2) / MAP_W, (H * 0.92 - head - foot - 16) / MAP_H), w = MAP_W * k, h = MAP_H * k;
     const fw = w + padX * 2, fh = h + head + foot + 16, fx = (W - fw) / 2, fy = (H - fh) / 2;
     const x = fx + padX, y = fy + head;
@@ -169,76 +169,12 @@ drawPicker = function (me, W, H, now) {
     const open = Math.min(1, (world.time - (picker.t0 || 0)) / 0.18);
     ctx.save();
     ctx.globalAlpha = open;
-    ctx.fillStyle = 'rgba(2,6,14,0.55)'; ctx.fillRect(0, 0, W, H);
-    // vỏ máy tính bảng
-    ctx.translate(0, (1 - open) * 40);
-    const bez = ctx.createLinearGradient(0, R.fy, 0, R.fy + R.fh); bez.addColorStop(0, '#1f2937'); bez.addColorStop(1, '#0b1220');
-    ctx.fillStyle = bez; rrect(ctx, R.fx, R.fy, R.fw, R.fh, 18); ctx.fill();
-    ctx.strokeStyle = '#475569'; ctx.lineWidth = 3; ctx.stroke();
-    ctx.strokeStyle = hexA(T.col, 0.7); ctx.lineWidth = 1.5; rrect(ctx, R.fx + 6, R.fy + 6, R.fw - 12, R.fh - 12, 14); ctx.stroke();
-    // tiêu đề
-    ctx.fillStyle = '#94a3b8'; ctx.font = `700 10px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.fillText('◉ BẢNG CHIẾN THUẬT · TRỰC TUYẾN', R.fx + 22, R.fy + 15);
-    ctx.fillStyle = T.col; ctx.font = `700 15px ${FONT}`; ctx.fillText(T.name, R.fx + 22, R.fy + 32);
-    ctx.fillStyle = '#e2e8f0'; ctx.font = `700 12px ${FONT}`; ctx.textAlign = 'right';
-    ctx.fillText(`▸ ${T.steps[Math.min(T.steps.length - 1, picker.pts.length)]}`, R.fx + R.fw - 22, R.fy + 32);
-    // nền bản đồ + lưới toạ độ
-    ctx.fillStyle = '#0f1b2b'; ctx.fillRect(R.x, R.y, R.w, R.h);
-    const cell = 400, cols = Math.ceil(MAP_W / cell), rows = Math.ceil(MAP_H / cell);
-    ctx.strokeStyle = 'rgba(56,189,248,0.12)'; ctx.lineWidth = 1;
-    for (let i = 0; i <= cols; i++) { ctx.beginPath(); ctx.moveTo(X(i * cell), R.y); ctx.lineTo(X(i * cell), R.y + R.h); ctx.stroke(); }
-    for (let j = 0; j <= rows; j++) { ctx.beginPath(); ctx.moveTo(R.x, Y(j * cell)); ctx.lineTo(R.x + R.w, Y(j * cell)); ctx.stroke(); }
-    ctx.fillStyle = 'rgba(125,211,252,0.55)'; ctx.font = `700 9px ${FONT}`; ctx.textAlign = 'center';
-    for (let i = 0; i < cols; i++) ctx.fillText(String.fromCharCode(65 + i), X(i * cell + cell / 2), R.y - 6);
-    ctx.textAlign = 'right'; for (let j = 0; j < rows; j++) ctx.fillText(String(j + 1), R.x - 5, Y(j * cell + cell / 2));
-    ctx.save(); ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-    if (full) { // có lợi thế Bản Đồ Nhỏ: hiện thêm thông tin
-        ctx.fillStyle = 'rgba(34,197,94,0.32)'; bushes.forEach(b => { ctx.beginPath(); ctx.arc(X(b.x), Y(b.y), Math.max(2, b.r * R.k), 0, Math.PI * 2); ctx.fill(); });
-        obstacles.forEach(o => { ctx.fillStyle = o.wood ? 'rgba(180,120,70,0.85)' : 'rgba(148,163,184,0.85)'; ctx.fillRect(X(o.x), Y(o.y), Math.max(1, o.w * R.k), Math.max(1, o.h * R.k)); });
-        const z = world.zone; if (z && z.r) { ctx.strokeStyle = 'rgba(96,165,250,0.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(X(z.x), Y(z.y), z.r * R.k, 0, Math.PI * 2); ctx.stroke(); }
-        players.forEach(q => { if (q.hp > 0 && q !== me && (sameTeam(me, q) || targetable(me, q) || isSpotted(q, me.id))) { ctx.fillStyle = q.color; ctx.beginPath(); ctx.arc(X(q.x), Y(q.y), 5, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#0b1220'; ctx.lineWidth = 1.5; ctx.stroke(); } });
-        pings.forEach(pg => { ctx.strokeStyle = 'rgba(248,113,113,0.7)'; ctx.beginPath(); ctx.arc(X(pg.x), Y(pg.y), 6, 0, Math.PI * 2); ctx.stroke(); });
-    }
-    // tia quét radar
-    const sweep = (now * 0.6) % 1, sx = R.x + R.w * sweep;
-    const sg = ctx.createLinearGradient(sx - 60, 0, sx, 0); sg.addColorStop(0, 'rgba(56,189,248,0)'); sg.addColorStop(1, 'rgba(56,189,248,0.16)');
-    ctx.fillStyle = sg; ctx.fillRect(sx - 60, R.y, 60, R.h);
-    // bạn
-    ctx.fillStyle = hexA(me.color, 0.25); ctx.beginPath(); ctx.moveTo(X(me.x), Y(me.y)); ctx.arc(X(me.x), Y(me.y), 26, me.angle - 0.5, me.angle + 0.5); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = me.color; ctx.beginPath(); ctx.arc(X(me.x), Y(me.y), 6, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    tabletChrome(me, R, T, W, H, now, open, full);
     // xem trước mục tiêu
     const pts = picker.pts, h = picker.hover, col = T.col;
-    const circle = (q, r, a) => { ctx.fillStyle = hexA(col, a); ctx.beginPath(); ctx.arc(X(q.x), Y(q.y), r * R.k, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke(); };
-    const marker = (q, label) => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(X(q.x), Y(q.y), 8, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#0b1020'; ctx.font = `700 9px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, X(q.x), Y(q.y) + 0.5); };
-    if (T.r) {
-        pts.forEach((q, i) => { circle(q, T.r, 0.22); marker(q, String(i + 1)); });
-        if (h && pts.length < T.need) { circle(h, T.r, 0.1 + 0.06 * Math.sin(now * 8)); }
-    } else if (T.dir) {
-        if (pts[0]) {
-            const a0 = pts[0], dir = h ? Math.atan2(h.y - a0.y, h.x - a0.x) : 0, L = Math.hypot(MAP_W, MAP_H);
-            ctx.strokeStyle = hexA(col, 0.5); ctx.lineWidth = 2; ctx.setLineDash([8, 6]);
-            ctx.beginPath(); ctx.moveTo(X(a0.x - Math.cos(dir) * L), Y(a0.y - Math.sin(dir) * L)); ctx.lineTo(X(a0.x + Math.cos(dir) * L), Y(a0.y + Math.sin(dir) * L)); ctx.stroke(); ctx.setLineDash([]);
-            ctx.strokeStyle = hexA(col, 0.9); ctx.lineWidth = Math.max(6, 105 * 2 * R.k); ctx.globalAlpha = open * 0.35;
-            ctx.beginPath(); ctx.moveTo(X(a0.x - Math.cos(dir) * 300), Y(a0.y - Math.sin(dir) * 300)); ctx.lineTo(X(a0.x + Math.cos(dir) * 300), Y(a0.y + Math.sin(dir) * 300)); ctx.stroke(); ctx.globalAlpha = open;
-            marker(a0, '✕');
-            if (h) { const px = X(a0.x + Math.cos(dir) * 300), py = Y(a0.y + Math.sin(dir) * 300); ctx.save(); ctx.translate(px, py); ctx.rotate(dir); ctx.fillStyle = col; ctx.font = `16px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('✈', 0, 0); ctx.restore(); }
-        } else if (h) circle(h, 30, 0.12);
-    } else if (T.line) {
-        if (pts[0]) {
-            const b = h ? clampLen(pts[0], h, T.line) : null;
-            if (b) { ctx.strokeStyle = hexA(col, 0.4); ctx.lineWidth = Math.max(6, 90 * R.k); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(X(pts[0].x), Y(pts[0].y)); ctx.lineTo(X(b.x), Y(b.y)); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(X(pts[0].x), Y(pts[0].y)); ctx.lineTo(X(b.x), Y(b.y)); ctx.stroke(); ctx.setLineDash([]); marker(b, 'B'); ctx.fillStyle = '#e2e8f0'; ctx.font = `700 10px ${FONT}`; ctx.textAlign = 'left'; ctx.fillText(`${Math.round(dist(pts[0].x, pts[0].y, b.x, b.y))}/${T.line}`, X(b.x) + 12, Y(b.y)); }
-            marker(pts[0], 'A');
-        } else if (h) circle(h, 30, 0.12);
-    }
-    // tâm ngắm theo tay
-    if (h) { ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 1.5; const hx = X(h.x), hy = Y(h.y); ctx.beginPath(); ctx.moveTo(hx - 12, hy); ctx.lineTo(hx - 4, hy); ctx.moveTo(hx + 4, hy); ctx.lineTo(hx + 12, hy); ctx.moveTo(hx, hy - 12); ctx.lineTo(hx, hy - 4); ctx.moveTo(hx, hy + 4); ctx.lineTo(hx, hy + 12); ctx.stroke(); ctx.fillStyle = 'rgba(148,163,184,0.85)'; ctx.font = `700 9px ${FONT}`; ctx.textAlign = 'left'; ctx.fillText(`${String.fromCharCode(65 + Math.floor(h.x / cell))}${Math.floor(h.y / cell) + 1}`, hx + 14, hy - 10); }
+    tabPreview(R, T, pts, h, col, now, open);
     ctx.restore();
-    // nút dưới
-    const btn = (b, label, bg, fg) => { ctx.fillStyle = bg; rrect(ctx, b.x, b.y, b.w, b.h, 9); ctx.fill(); ctx.fillStyle = fg; ctx.font = `700 12px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, b.x + b.w / 2, b.y + b.h / 2 + 1); };
-    btn(R.cancel, '✖ HUỶ', '#7f1d1d', '#fecaca');
-    if (T.multi) btn(R.ok, `✔ XÁC NHẬN (${pts.length}/${T.need})`, pts.length ? '#166534' : '#334155', '#dcfce7');
-    ctx.fillStyle = 'rgba(148,163,184,0.75)'; ctx.font = `600 10px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.fillText(full ? '🗺 Bản Đồ Nhỏ: hiện tường, bụi, vòng bo, địch, tiếng động' : 'Bản đồ tĩnh: chỉ thấy vị trí của bạn (lợi thế Bản Đồ Nhỏ hiện thêm)', R.fx + 22, R.fy + R.fh - 23);
+    tabletFooter(R, T, picker.pts, full, now);
     ctx.restore();
 };
 
