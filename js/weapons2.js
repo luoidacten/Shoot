@@ -6,7 +6,7 @@ Object.assign(WEAPONS, {
     WHIP:     { id: 'WHIP', name: 'Roi Xích', icon: '🪝', type: 'MELEE', mode: 'charge', chargeTime: 0.9, aim: 'line', color: '#a8a29e', damage: 16, fireRate: 30, range: 180, durability: 30, maxDurability: 30, moveScale: 1.0, width: 3, len: 30, tier: 2, desc: 'Chạm: quất xa 180 (đầu roi ×2, quá gần yếu). Giữ rồi thả: quất kéo địch về / kéo mình tới vật cản. Trúng 2 lần liên tiếp làm chậm.' },
     EWHIP:    { id: 'EWHIP', name: 'Roi Điện', icon: '⚡', type: 'MELEE', mode: 'charge', chargeTime: 0.9, aim: 'line', color: '#67e8f9', damage: 20, fireRate: 30, range: 190, durability: 30, maxDurability: 30, moveScale: 1.0, width: 3, len: 30, tier: 3, desc: 'Như Roi Xích nhưng mỗi đòn trúng phóng sét lan sang 2 địch gần; đầu roi làm tê liệt.' },
     SCYTHE:   { id: 'SCYTHE', name: 'Lưỡi Hái', icon: '🌙', type: 'MELEE', mode: 'charge', chargeTime: 1.0, aim: 'arc', color: '#a78bfa', damage: 34, fireRate: 52, range: 112, durability: 28, maxDurability: 28, moveScale: 0.92, width: 5, len: 42, tier: 3, desc: 'Chém rộng 180° rất chậm. Giữ rồi thả: xoay 360°. Mỗi địch trúng hồi 10% máu (tràn thành khiên). Hạ gục: ngụy trang, hồi đầy độ bền, tăng tốc, lộ kẻ yếu nhất.' },
-    UMBRELLA: { id: 'UMBRELLA', name: 'Huyền Cơ', icon: '☂️', type: 'MELEE', mode: 'charge', chargeTime: 0.8, aim: 'line', color: '#f472b6', damage: 12, fireRate: 22, range: 110, durability: 40, maxDurability: 40, moveScale: 1.0, width: 4, len: 34, tier: 2, desc: 'Ô 3 dạng. Gập: đâm như giáo · Mở: súng + chắn đạn phía trước · Huyền Cơ: kiếm + khiên trước mặt khi không đánh. Giữ rồi thả để chuyển dạng (mỗi lần chuyển là 1 chiêu).' },
+    UMBRELLA: { id: 'UMBRELLA', name: 'Huyền Cơ', icon: '☂️', type: 'MELEE', mode: 'charge', chargeTime: 0.8, aim: 'line', color: '#f472b6', damage: 12, fireRate: 22, range: 110, durability: 40, maxDurability: 40, moveScale: 1.0, width: 4, len: 34, tier: 2, desc: 'Ô 3 dạng. Gập: đâm như giáo · Mở: súng + chắn đạn phía trước · Huyền Cơ: kiếm + khiên trước mặt khi không đánh. Giữ rồi thả để chuyển dạng (mỗi lần chuyển là 1 chiêu). Sau khi chuyển: buff riêng của dạng mới (Gập: +50% tốc chạy · Mở: -30% sát thương nhận · Huyền Cơ: +30% tốc đánh) và 3 đòn đầu được cường hoá.' },
     ICEGUN:   { id: 'ICEGUN', name: 'Súng Băng', icon: '🧊', type: 'GUN', mode: 'auto', aim: 'line', color: '#7dd3fc', damage: 2.6, fireRate: 6, speed: 0, spread: 0, range: 300, magSize: 90, mag: 90, reserve: 90, reloadTime: 2.0, moveScale: 0.95, width: 7, len: 22, tier: 2, desc: 'Giữ để phun tia băng. Làm chậm dần, trúng liên tục 2 giây thì đóng băng 1 giây. Bắn xuống đất tạo vệt băng trơn. Khắc chế lửa, nhưng lửa làm tan băng.' },
     MUSKET:   { id: 'MUSKET', name: 'Súng Hỏa Mai', icon: '🧨', type: 'GUN', mode: 'charge', chargeTime: 1.0, narrow: [0.5, 0.015], aim: 'line', color: '#b45309', damage: 100, fireRate: 30, speed: 34, spread: 0.3, range: 900, magSize: 1, mag: 1, reserve: 8, reloadTime: 2.2, moveScale: 0.9, width: 5, len: 40, tier: 3, desc: 'Giữ để ngắm. Một viên, gần như một phát chết. Tiếng nổ cực lớn (nghe rất xa). Mỗi phát phải nạp lại.' }
 });
@@ -163,32 +163,56 @@ const UMB_FORMS = [
     { name: 'Huyền Cơ', icon: '⚔️', col: '#c084fc', tr: 'Ném ô · lướt tới · +giáp' }
 ];
 const UMB_TR = [{ dir: Math.PI, D: 130 }, { dir: 0, D: 230 }, { dir: 0, D: 230 }];
+/* Sau mỗi lần chuyển dạng: buff riêng của dạng mới (4 giây) + 3 đòn đầu được cường hoá */
+const UMB_BUFF = [
+    { name: 'PHI Ô', desc: '+50% tốc chạy 3s', pow: 'Đâm xuyên: +70% sát thương, +35% tầm, làm chậm & chảy máu' },
+    { name: 'TÁN CHE', desc: '-30% sát thương nhận 4s', pow: 'Đạn chùm: mỗi phát 3 viên, +30% sát thương, làm chậm' },
+    { name: 'SÁT Ý', desc: '+30% tốc đánh 4s', pow: 'Kiếm Ý: +70% sát thương, chém rộng, choáng 0.35s, hút máu' }
+];
+function umbPower(p, f) {
+    const B = p.umbBuff;
+    if (!B || B.f !== f || B.n <= 0 || B.t < world.time) return false;
+    B.n--; return true;
+}
 function umbAttack(p, w, a, charge, mult, isSuper) {
     const f = w.form || 0;
     if (charge >= 0.9) return umbTransition(p, w, a);
-    const dmg = w.damage * (p.meleeMult || 1) * mult * (isSuper ? 2.5 : 1);
+    const pw = umbPower(p, f), left = pw ? p.umbBuff.n : 0;
+    const dmg = w.damage * (p.meleeMult || 1) * mult * (isSuper ? 2.5 : 1) * (pw ? (f === 1 ? 1.3 : 1.7) : 1);
     p.stats.shots++;
+    if (pw) { floatText(p.x, p.y - 44, `✦ ${3 - left}/3`, UMB_FORMS[f].col, 13); spark(p.x + Math.cos(a) * 24, p.y + Math.sin(a) * 24, UMB_FORMS[f].col, 6, 220); }
     if (f === 0) { // đâm như giáo
-        AudioSys.playAt('swing', p.x, p.y, 0.4);
-        slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: a, range: w.range + p.radius, color: '#f9a8d4', width: 6, life: 0.16, maxLife: 0.16, swing: 1, line: true });
-        const hit = lineFoes(p, a, w.range + p.radius, 18);
-        hit.forEach(e => { dealDamage(e, dmg * 1.25, p.id, { angle: Math.atan2(e.y - p.y, e.x - p.x), knock: 260, melee: true }); p.stats.hits++; });
-        if (hit.length) { reduceDurability(p, w, 1); hitStop(0.04); addShake(3); }
-        hitDecoysObs(p, p.x + Math.cos(a) * w.range, p.y + Math.sin(a) * w.range, 14, dmg);
+        const reach = w.range * (pw ? 1.35 : 1) + p.radius;
+        AudioSys.playAt('swing', p.x, p.y, pw ? 0.6 : 0.4);
+        slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: a, range: reach, color: pw ? '#fde68a' : '#f9a8d4', width: pw ? 10 : 6, life: 0.16, maxLife: 0.16, swing: 1, line: true });
+        if (pw) beams.push({ x1: p.x, y1: p.y, x2: p.x + Math.cos(a) * reach, y2: p.y + Math.sin(a) * reach, life: 0.14, maxLife: 0.14, color: '#f472b6' });
+        const hit = lineFoes(p, a, reach, pw ? 22 : 18);
+        hit.forEach(e => {
+            dealDamage(e, dmg * 1.25, p.id, { angle: Math.atan2(e.y - p.y, e.x - p.x), knock: pw ? 420 : 260, melee: true }); p.stats.hits++;
+            if (pw) { e.st.slow = Math.max(e.st.slow || 0, 1.2); if (!e.pyro) { e.st.burn = Math.max(e.st.burn || 0, 2); e.st.burnBy = p.id; } floatText(e.x, e.y - 40, '🩸 XUYÊN!', '#f9a8d4', 13); }
+        });
+        if (hit.length) { reduceDurability(p, w, 1); hitStop(pw ? 0.07 : 0.04); addShake(pw ? 5 : 3); }
+        hitDecoysObs(p, p.x + Math.cos(a) * (reach - p.radius), p.y + Math.sin(a) * (reach - p.radius), 14, dmg);
     } else if (f === 1) { // súng
         const m = muzzle(p, w, a);
-        spawnBullet(p, m.x, m.y, a + (Math.random() - 0.5) * 0.06, { speed: 22, damage: dmg * 0.8, range: 430, color: '#7dd3fc', size: 3, trail: 30 });
-        AudioSys.playAt('shoot', p.x, p.y, 0.25); p.muzzle = 0.05; p.recoil = 1; addShake(1);
+        const n = pw ? 3 : 1;
+        for (let i = 0; i < n; i++) spawnBullet(p, m.x, m.y, a + (n > 1 ? (i - 1) * 0.12 : 0) + (Math.random() - 0.5) * 0.06, { speed: 22, damage: dmg * 0.8, range: 430, color: pw ? '#fde68a' : '#7dd3fc', size: pw ? 3.6 : 3, trail: pw ? 40 : 30, slow: pw ? 0.8 : 0 });
+        AudioSys.playAt(pw ? 'shotgun' : 'shoot', p.x, p.y, 0.25); p.muzzle = 0.05; p.recoil = 1; addShake(pw ? 2 : 1);
         p.cooldown *= 0.75;
         if (Math.random() < 0.25) reduceDurability(p, w, 1);
     } else { // kiếm
-        AudioSys.playAt('swing', p.x, p.y, 0.5);
-        slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: a, range: w.range + p.radius, color: '#d8b4fe', width: 9, life: 0.2, maxLife: 0.2, swing: (p.strikeN = (p.strikeN || 0) + 1) % 2 ? 1 : -1, line: false });
-        const hit = arcFoes(p, a, w.range, Math.PI / 2.2);
-        hit.forEach(e => { dealDamage(e, dmg * 1.15, p.id, { angle: Math.atan2(e.y - p.y, e.x - p.x), knock: 180, melee: true }); p.stats.hits++; });
-        if (hit.length) { reduceDurability(p, w, 1); hitStop(0.04); addShake(3); }
+        const reach = w.range * (pw ? 1.2 : 1);
+        AudioSys.playAt('swing', p.x, p.y, pw ? 0.7 : 0.5);
+        slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: a, range: reach + p.radius, color: pw ? '#f0abfc' : '#d8b4fe', width: pw ? 14 : 9, life: 0.22, maxLife: 0.22, swing: (p.strikeN = (p.strikeN || 0) + 1) % 2 ? 1 : -1, line: false, arc: pw ? Math.PI / 1.6 : undefined });
+        const hit = arcFoes(p, a, reach, pw ? Math.PI / 1.7 : Math.PI / 2.2);
+        hit.forEach(e => {
+            dealDamage(e, dmg * 1.15, p.id, { angle: Math.atan2(e.y - p.y, e.x - p.x), knock: 180, melee: true }); p.stats.hits++;
+            if (pw) { e.stun = Math.max(e.stun, 0.35); p.hp = Math.min(p.maxHp, p.hp + 6); ring(e.x, e.y, 4, 34, '#f0abfc', 0.3, 3); }
+        });
+        if (hit.length) { reduceDurability(p, w, 1); hitStop(pw ? 0.07 : 0.04); addShake(pw ? 5 : 3); }
         hitDecoysObs(p, p.x + Math.cos(a) * 60, p.y + Math.sin(a) * 60, 40, dmg);
     }
+    if (p.umbFuryT > world.time) p.cooldown *= 0.7; // Sát Ý: +30% tốc đánh
 }
 function umbTransition(p, w, a) {
     const f = w.form || 0, next = (f + 1) % 3;
@@ -219,6 +243,15 @@ function umbTransition(p, w, a) {
     w.form = next;
     spark(p.x, p.y, UMB_FORMS[next].col, 8, 180);
     floatText(p.x, p.y - 54, `${UMB_FORMS[next].icon} ${UMB_FORMS[next].name.toUpperCase()}`, UMB_FORMS[next].col, 13);
+    // buff riêng của dạng mới + 3 đòn cường hoá
+    const UB = UMB_BUFF[next];
+    p.umbBuff = { f: next, n: 3, t: world.time + 8 };
+    if (next === 0) p.st.haste = Math.max(p.st.haste || 0, 3);
+    if (next === 1) p.umbGuardT = world.time + 4;
+    if (next === 2) p.umbFuryT = world.time + 4;
+    p.umbAuraT = world.time + (next === 0 ? 3 : 4);
+    floatText(p.x, p.y - 72, `✦ ${UB.name}: ${UB.desc}`, UMB_FORMS[next].col, 12);
+    ring(p.x, p.y, 8, 70, UMB_FORMS[next].col, 0.45, 4);
 }
 function updateUmbrella(p, w, dt) {
     const f = w.form || 0;
@@ -556,6 +589,7 @@ Object.assign(HT, {
 const _dealDamageW2 = dealDamage;
 dealDamage = function (target, dmg, attackerId, opts = {}) {
     if (target && target.reaperPass > world.time && !opts.melee && !opts.zone) return 0;
+    if (target && target.umbGuardT > world.time) dmg *= 0.7; // Huyền Cơ · Tán Che
     const atk = attackerId !== -1 && players.find(q => q.id === attackerId);
     if (atk && atk !== target && atk.reaperNext > world.time && !opts.zone && getCurrentWeapon(atk).id !== 'SCYTHE') {
         atk.reaperNext = 0; dmg *= target.hp < target.maxHp * 0.5 ? 4 : 2;
@@ -723,6 +757,13 @@ function drawUmbUI(p, w, now, mine) {
     const shield = f === 1 || (f === 2 && world.time - (p.lastFireT || -9) > 0.45);
     if (shield && !p.umbPush) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = hexA(col, 0.5); ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius + (f === 1 ? 30 : 26), p.angle - (f === 1 ? 0.85 : 0.8), p.angle + (f === 1 ? 0.85 : 0.8)); ctx.stroke(); ctx.restore(); }
     if (!mine) return;
+    // hào quang buff & số đòn cường hoá còn lại
+    const B = p.umbBuff;
+    if (p.umbAuraT > world.time) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = hexA(UMB_FORMS[f].col, 0.35 + Math.sin(now * 8) * 0.15); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius + 9, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+    if (B && B.f === f && B.n > 0 && B.t > world.time) {
+        const yy = p.y - p.radius - 42;
+        for (let i = 0; i < 3; i++) { ctx.save(); ctx.translate(p.x + (i - 1) * 11, yy); ctx.rotate(Math.PI / 4); ctx.fillStyle = i < B.n ? UMB_FORMS[f].col : 'rgba(100,116,139,0.45)'; ctx.fillRect(-3.5, -3.5, 7, 7); if (i < B.n) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.strokeRect(-3.5, -3.5, 7, 7); } ctx.restore(); }
+    }
     // 3 chấm dạng trên đầu
     const y = p.y - p.radius - 30;
     for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(p.x + (i - 1) * 12, y, i === f ? 4.5 : 3, 0, Math.PI * 2); ctx.fillStyle = i === f ? UMB_FORMS[i].col : 'rgba(148,163,184,0.5)'; ctx.fill(); if (i === f) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke(); } }
@@ -737,7 +778,7 @@ function drawUmbUI(p, w, now, mine) {
         ctx.fillStyle = hexA(nc, ready ? 0.95 : 0.45); ctx.beginPath(); ctx.moveTo(ex + Math.cos(a) * 10, ey + Math.sin(a) * 10); ctx.lineTo(ex + Math.cos(a + 2.5) * 10, ey + Math.sin(a + 2.5) * 10); ctx.lineTo(ex + Math.cos(a - 2.5) * 10, ey + Math.sin(a - 2.5) * 10); ctx.closePath(); ctx.fill();
         ctx.beginPath(); ctx.arc(ex, ey, p.radius, 0, Math.PI * 2); ctx.strokeStyle = hexA(nc, 0.35); ctx.lineWidth = 1.5; ctx.stroke();
         ctx.font = `700 12px ${FONT}`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-        const label = (ready ? '▶ ' : '') + `${UMB_FORMS[(f + 1) % 3].icon} ${UMB_FORMS[f].tr}`;
+        const label = (ready ? '▶ ' : '') + `${UMB_FORMS[(f + 1) % 3].icon} ${UMB_FORMS[f].tr} · ✦ ${UMB_BUFF[(f + 1) % 3].name}`;
         ctx.strokeText(label, p.x, y - 12); ctx.fillStyle = ready ? nc : '#cbd5e1'; ctx.fillText(label, p.x, y - 12);
         ctx.restore();
     }
