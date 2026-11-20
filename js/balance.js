@@ -5,7 +5,7 @@
  * ===================================================================== */
 
 /* ============================== LỢI THẾ ============================== */
-const GOOD_GUNS = () => Object.keys(WEAPONS).filter(id => { const w = WEAPONS[id]; return w.type === 'GUN' && (w.tier || 1) >= 2 && !PICKER_WEAPONS[id] && !TAC_WEAPONS.includes(id) && !['AIRCALL', 'BOMBTAB', 'LASERDES', 'NET'].includes(id) && !w.legendary; });
+const GOOD_GUNS = () => Object.keys(WEAPONS).filter(id => { const w = WEAPONS[id]; return w.type === 'GUN' && (w.tier || 1) >= 2 && !PICKER_WEAPONS[id] && !TAC_WEAPONS.includes(id) && !['AIRCALL', 'BOMBTAB', 'LASERDES', 'NET'].includes(id) && !w.legendary && !LEGEND_POOL.includes(id); });
 ADVANTAGES.militaryBag.desc = 'Mỗi hiệp khởi đầu với 1 SÚNG TỐT ngẫu nhiên (bậc 2 trở lên) + dao, +40 giáp, mọi súng thêm 2 băng dự trữ.';
 ADVANTAGES.stealth.desc = 'Tiếng chân nhỏ, ít dấu chân, người nhỏ hơn. MỚI: chạy nhanh hơn 8%; đầu hiệp được Ngụy Trang 3 giây; đứng yên 1 giây là tự Ngụy Trang (tới khi di chuyển hoặc tấn công).';
 ADVANTAGES.doubleUp.desc = 'Lần nâng cấp đầu tiên được chọn 2 thẻ. MỚI: +25 máu tối đa.';
@@ -126,3 +126,9 @@ applyBuild = function (p) {
 };
 const _skipsPick39 = skipsPick;
 skipsPick = function (p) { return (!!p && p.adv === 'weaponMaster') || _skipsPick39(p); };
+
+/* ============================== VŨ KHÍ QUÁ MẠNH: CHỈ RƠI TỪ THÍNH ============================== */
+// Pháo, Kiếm Ánh Sáng, Bộ Chỉ Điểm Laser, Bộ Định Vị Vệ Tinh không còn trong hòm vũ khí thường — chỉ có ở thính (bản huyền thoại).
+// (Minigun, Railgun, Đại Kiếm vốn đã chỉ có ở thính.)
+const AIRDROP_ONLY = ['ROCKET', 'LIGHTSABER', 'LASERDES', 'ORBITAB'];
+AIRDROP_ONLY.forEach(id => { delete BASE_WEIGHTS[id]; if (WEAPONS[id] && !LEGEND_POOL.includes(id)) LEGEND_POOL.push(id); });

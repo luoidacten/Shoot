@@ -426,3 +426,4 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - **VFX riêng cho mọi phép**: vệt dịch chuyển, dấu ✚ bay lên, vòng thanh tẩy, vệt gió, vòng sao choáng, mảnh băng, khói phóng tên lửa, sóng radar 3 lớp, tia pháo sáng bay lên…
 - **Buff thêm**: Khởi Đầu Gấp Đôi (2 lần nâng cấp đầu, mỗi lần chọn 2 thẻ) · Song Phép (phép hồi nhanh hơn 25%, dùng 1 phép thì phép còn lại hồi ngay 4 giây) · Nhiều Lựa Chọn (mỗi lần nâng cấp đã qua +10 máu và +4% sát thương, tối đa 5 lần).
 - **Bậc Thầy Vũ Khí (làm lại)**: có sẵn đủ 3 kỹ năng — Kỹ Thuật Cận Chiến + Trang Bị Phụ + Kỹ Thuật Cao — cùng nội tại đổi vũ khí (Đòn Rút Vũ Khí) và dùng được chiêu của vũ khí tay kia; bù lại KHÔNG BAO GIỜ được chọn nâng cấp.
+- **Vũ khí quá mạnh chỉ rơi từ thính**: Pháo, Kiếm Ánh Sáng, Bộ Chỉ Điểm Laser, Bộ Định Vị Vệ Tinh (cùng Minigun, Railgun, Đại Kiếm vốn đã vậy) — không còn trong hòm vũ khí thường và Túi Quân Dụng.
