@@ -5,7 +5,7 @@ let heartTimer = 0;
 
 
 function resetPlayerForRound(p) {
-    p.maxHp = 130; p.maxArmor = 0; p.radius = 15;
+    p.maxHp = 200; p.maxArmor = 0; p.radius = 15;
     p.dmgMult = 1; p.vulnMult = 1; p.moveMult = 1; p.fireRateMult = 1; p.spreadMult = 1; p.cdMult = 1; p.meleeMult = 1;
     p.vampire = p.thorns = p.martyr = p.magnet = p.berserk = p.ghost = p.regen = p.blastRounds = false;
     p.aimshot = p.noMind = p.scavenger = p.eagle = p.silent = p.lastStand = p.hunter = p.quickSwap = p.pyro = p.zoneImmune = false;

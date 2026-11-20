@@ -8,7 +8,7 @@ Object.assign(WEAPONS, {
     SCYTHE:   { id: 'SCYTHE', name: 'Lưỡi Hái', icon: '🌙', type: 'MELEE', mode: 'charge', chargeTime: 1.0, aim: 'arc', color: '#a78bfa', damage: 34, fireRate: 52, range: 112, durability: 28, maxDurability: 28, moveScale: 0.92, width: 5, len: 42, tier: 3, desc: 'Chém rộng 180° rất chậm. Giữ rồi thả: xoay 360°. Mỗi địch trúng hồi 10% máu (tràn thành khiên). Hạ gục: ngụy trang, hồi đầy độ bền, tăng tốc, lộ kẻ yếu nhất.' },
     UMBRELLA: { id: 'UMBRELLA', name: 'Huyền Cơ', icon: '☂️', type: 'MELEE', mode: 'charge', chargeTime: 0.8, aim: 'line', color: '#f472b6', damage: 12, fireRate: 22, range: 110, durability: 40, maxDurability: 40, moveScale: 1.0, width: 4, len: 34, tier: 2, desc: 'Ô 3 dạng. Gập: đâm như giáo · Mở: súng + chắn đạn phía trước · Huyền Cơ: kiếm + khiên trước mặt khi không đánh. Giữ rồi thả để chuyển dạng (mỗi lần chuyển là 1 chiêu). Sau khi chuyển: buff riêng của dạng mới (Gập: +50% tốc chạy · Mở: -30% sát thương nhận · Huyền Cơ: +30% tốc đánh) và 3 đòn đầu được cường hoá.' },
     ICEGUN:   { id: 'ICEGUN', name: 'Súng Băng', icon: '🧊', type: 'GUN', mode: 'auto', aim: 'line', color: '#7dd3fc', damage: 2.6, fireRate: 6, speed: 0, spread: 0, range: 300, magSize: 90, mag: 90, reserve: 90, reloadTime: 2.0, moveScale: 0.95, width: 7, len: 22, tier: 2, desc: 'Giữ để phun tia băng. Làm chậm dần, trúng liên tục 2 giây thì đóng băng 1 giây. Bắn xuống đất tạo vệt băng trơn. Khắc chế lửa, nhưng lửa làm tan băng.' },
-    MUSKET:   { id: 'MUSKET', name: 'Súng Hỏa Mai', icon: '🧨', type: 'GUN', mode: 'charge', chargeTime: 1.0, narrow: [0.5, 0.015], aim: 'line', color: '#b45309', damage: 100, fireRate: 30, speed: 34, spread: 0.3, range: 900, magSize: 1, mag: 1, reserve: 8, reloadTime: 2.2, moveScale: 0.9, width: 5, len: 40, tier: 3, desc: 'Giữ để ngắm. Một viên, gần như một phát chết. Tiếng nổ cực lớn (nghe rất xa). Mỗi phát phải nạp lại.' }
+    MUSKET:   { id: 'MUSKET', name: 'Súng Hỏa Mai', icon: '🧨', type: 'GUN', mode: 'charge', chargeTime: 1.0, narrow: [0.5, 0.015], aim: 'line', color: '#b45309', damage: 100, fireRate: 30, speed: 34, spread: 0.3, range: 900, magSize: 1, mag: 1, reserve: 8, reloadTime: 2.2, moveScale: 0.9, width: 5, len: 40, tier: 3, desc: 'Giữ để ngắm (càng giữ càng chính xác & xa). Một viên 500 SÁT THƯƠNG CHUẨN — bỏ qua giáp, khiên và mọi giảm sát thương. Tiếng nổ cực lớn (nghe rất xa). Mỗi phát phải nạp lại.' }
 });
 Object.assign(BASE_WEIGHTS, { WHIP: 6, EWHIP: 4, SCYTHE: 4, UMBRELLA: 6, ICEGUN: 6, MUSKET: 5 });
 AIM_ZOOM.MUSKET = 0.78;
@@ -346,7 +346,7 @@ chargeRange = function (w, c, p) { if (w && w.id === 'MUSKET') return 300 + 600 
 function musketFix(p, w, ang, charge, mine) {
     const full = charge >= 0.95;
     mine.forEach(b => {
-        b.damage *= 0.55 + 0.8 * charge; b.speed = 34 + 10 * charge; b.size = 4.5; b.knock = 380; b.trail = 80; b.color = '#fde68a';
+        b.damage = 500; b.trueShot = true; b.trueDmg = 500; b.speed = 34 + 10 * charge; b.size = 4.5; b.knock = 380; b.trail = 80; b.color = '#fde68a';
         b.angle = ang + (Math.random() - 0.5) * spreadAt(w, charge) * (p.spreadMult || 1);
         b.life = Math.max(10, chargeRange(w, charge, p)) / (b.speed * 60);
     });
@@ -962,3 +962,24 @@ skillProfile = function (p, id) {
 };
 CARDS.meleeTech.desc += '<br><b>Huyền Cơ</b> theo dạng: Gập = Ô Xoáy Phá (ô xoay trước mặt, phản đạn, kết thúc kéo địch + choáng) · Mở = Ô Xoay · Huyền Cơ = Toàn Trảm (lướt + chém 360°, tốc chạy, trúng thì hồi máu + khiên).';
 CARDS.gunMod.desc += '<br><b>Huyền Cơ</b>: Mưa Kim + tốc chạy + tốc bắn; 3 phát tiếp theo là đạn nổ.';
+
+/* ============================== HỎA MAI: SÁT THƯƠNG CHUẨN ============================== */
+// viên hỏa mai trừ đúng 500 máu: bỏ qua giáp, khiên, mọi giảm sát thương (vẫn bị chặn bởi bất tử / khiên hồi sinh)
+const _dealDamageTrue = dealDamage;
+dealDamage = function (target, dmg, attackerId, opts = {}) {
+    if (!target || attackerId === -1 || opts.zone || opts.melee) return _dealDamageTrue(target, dmg, attackerId, opts);
+    let b = null, bd = 1e9;
+    for (const q of bullets) { if (!q.trueShot || q.trueUsed || q.owner !== attackerId) continue; const d = dist(q.x, q.y, target.x, target.y); if (d < target.radius + 90 && d < bd) { b = q; bd = d; } }
+    if (!b || target.hp <= 0) return _dealDamageTrue(target, dmg, attackerId, opts);
+    b.trueUsed = true;
+    if (target.spawnShield > 0 || (target.st && target.st.invuln > 0) || target.reaperPass > world.time) return _dealDamageTrue(target, dmg, attackerId, opts);
+    const T = b.trueDmg || 500, hp0 = target.hp, ar = target.armor || 0, sh = (target.st && target.st.shield) || 0;
+    target.armor = 0; if (target.st) target.st.shield = 0;
+    let r;
+    try { r = _dealDamageTrue(target, T, attackerId, { ...opts, raw: true }); }
+    finally { if (target.hp > 0) { target.armor = ar; if (target.st) target.st.shield = sh; } }
+    const lost = hp0 - Math.max(0, target.hp);
+    if (target.hp > 0 && lost < T) { target.hp -= T - lost; if (target.hp <= 0) { target.hp = 0; killPlayer(target, attackerId); } }
+    floatText(target.x, target.y - 56, '🧨 500 CHUẨN', '#fde68a', 16);
+    return r;
+};
