@@ -58,7 +58,7 @@ function cheatDeath(p, killerId) {
         smoke(p.x, p.y, 8, 'rgba(192,132,252,0.4)', 18);
         const s = safeSpot(p, 350); if (s) { p.x = s.x; p.y = s.y; p.vx = p.vy = p.kx = p.ky = 0; }
         survive(p, p.maxHp * 0.25, 0.5, '🃏 JOKER!', '#c084fc');
-        if (combo(p, 'jokerInvis')) p.st.invis = Math.max(p.st.invis, 2.5);
+        if (combo(p, 'jokerInvis')) { p.st.invis = Math.max(p.st.invis, 2.5); invisAs(p, 'ghost'); }
         return true;
     }
     if (can('phoenix')) {
@@ -82,7 +82,7 @@ function cheatDeath(p, killerId) {
         const t = combo(p, 'ghostInvis') ? 4 : 2.5;
         p.ghostForm = world.time + t;
         survive(p, 1, t, '👻 HỒN MA!', '#e2e8f0');
-        p.st.invis = Math.max(p.st.invis, t); p.st.haste = Math.max(p.st.haste, t);
+        p.st.invis = Math.max(p.st.invis, t); p.st.haste = Math.max(p.st.haste, t); invisAs(p, 'ghost');
         return true;
     }
     if (can('secondWind')) {
@@ -95,7 +95,7 @@ function cheatDeath(p, killerId) {
         p.adren = { t: 3, kills: p.stats.kills || 0, killer: killerId };
         survive(p, 1, 3, '💉 ADRENALINE!', '#f43f5e');
         p.st.rage = Math.max(p.st.rage, 3); p.st.haste = Math.max(p.st.haste, 3);
-        if (combo(p, 'adrenInvis')) p.st.invis = Math.max(p.st.invis, 3);
+        if (combo(p, 'adrenInvis')) { p.st.invis = Math.max(p.st.invis, 3); invisAs(p, 'camo'); }
         return true;
     }
     return false;

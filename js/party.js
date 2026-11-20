@@ -459,7 +459,7 @@ function landEffect(p, kind, o) {
         spark(p.x, p.y, '#facc15', 10, 200); AudioSys.playAt('block', p.x, p.y, 0.3);
     } else if (kind === 'vault') {
         p.st.haste = Math.max(p.st.haste, combo(p, 'vault_swift') ? 2 : 1);
-        if (combo(p, 'vault_silent')) p.st.invis = Math.max(p.st.invis, 1);
+        if (combo(p, 'vault_silent')) { p.st.invis = Math.max(p.st.invis, 1); invisAs(p, 'camo'); }
         smoke(p.x, p.y, 3, 'rgba(200,200,220,0.3)', 10);
     } else if (kind === 'jet') {
         shockwave(p.x, p.y, p.id, 120, 15);

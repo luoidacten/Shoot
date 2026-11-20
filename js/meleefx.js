@@ -11,7 +11,7 @@ meleeTechCast = function (p) {
             hitLine(p, a, 170, 28, 28 * m, { melee: true, knock: 90 });
             slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: a, range: 170, color: '#c4b5fd', width: 7, life: 0.25, maxLife: 0.25, swing: 1, line: true });
             p.dashTime = 0.16; p.dashAngle = a; p.st.invuln = Math.max(p.st.invuln, 0.22); p.st.empower = Math.max(p.st.empower || 0, 1);
-            p.shotQueue.push({ t: 0.18, fn: () => { if (p.hp <= 0) return; p.st.invis = Math.max(p.st.invis, 1.6); smoke(p.x, p.y, 7, 'rgba(91,33,182,0.45)', 16); floatText(p.x, p.y - 34, '🌑 ẢNH SÁT · TÀNG HÌNH', '#c4b5fd', 14); } });
+            p.shotQueue.push({ t: 0.18, fn: () => { if (p.hp <= 0) return; p.st.invis = Math.max(p.st.invis, 1.6); invisAs(p, 'void'); smoke(p.x, p.y, 7, 'rgba(91,33,182,0.45)', 16); floatText(p.x, p.y - 34, '🌑 ẢNH SÁT · TÀNG HÌNH', '#c4b5fd', 14); } });
             AudioSys.playAt('whoosh', p.x, p.y, 0.5);
             return;
         }

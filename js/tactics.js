@@ -108,7 +108,7 @@ landSkillItem = function (it) {
         st(p);
         if (sCombo(p, 'frostStun')) enemiesOf(p).forEach(e => { if (e.stun > 0 && dist(p.x, p.y, e.x, e.y) < 150 + e.radius) e.st.slow = Math.max(e.st.slow, 2.8); });
     };
-    SPELLS.sprint.cast = p => { sp(p); if (sCombo(p, 'shadowRun') && inSmoke(p.x, p.y)) { p.st.invis = Math.max(p.st.invis, 2); floatText(p.x, p.y - 34, 'BÓNG MA!', '#c4b5fd', 14); } };
+    SPELLS.sprint.cast = p => { sp(p); if (sCombo(p, 'shadowRun') && inSmoke(p.x, p.y)) { p.st.invis = Math.max(p.st.invis, 2); invisAs(p, 'camo'); floatText(p.x, p.y - 34, 'BÓNG MA!', '#c4b5fd', 14); } };
     SPELLS.cleanse.cast = p => { cl(p); floatText(p.x, p.y - 52, 'MIỄN NHIỄM 3s', '#e0f2fe', 13); if (sCombo(p, 'holyLight')) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15); };
     SPELLS.heal.cast = p => { he(p); if (sCombo(p, 'holyLight')) cleanseNow(p); };
     SPELLS.execute.cast = p => {

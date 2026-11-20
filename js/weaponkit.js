@@ -87,7 +87,7 @@ fireWeapon = function (p, w, ang, charge, enemy) {
     const r = _fireWeapon11(p, w, ang, charge, enemy);
     const mine = bullets.slice(n0).filter(b => b.owner === p.id);
     if (w.id === 'BOW') {
-        if (charge < 0.35) { p.dashTime = 0.1; p.dashAngle = p.lastMoveIn > 0.3 ? p.moveDir : ang + Math.PI; p.st.invis = Math.max(p.st.invis, 0.35); }
+        if (charge < 0.35) { p.dashTime = 0.1; p.dashAngle = p.lastMoveIn > 0.3 ? p.moveDir : ang + Math.PI; p.st.invis = Math.max(p.st.invis, 0.35); invisAs(p, 'void'); }
         if (pierceAll) { mine.forEach(b => { b.ghostN = 99; b.pierce = true; b.size *= 2; b.damage *= 1.3; b.color = '#bef264'; }); floatText(p.x, p.y - 34, '🏹 XUYÊN THỦNG!', '#bef264', 15); p.bowOver = 0; }
         if (isMaster(p, 'gunMod')) { p.dashTime = Math.max(p.dashTime, 0.08); p.dashAngle = p.dashAngle !== undefined ? p.dashAngle : ang + Math.PI; }
     }

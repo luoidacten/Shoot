@@ -89,7 +89,7 @@ defS('blink', '✨', 'Dịch Chuyển', 9, 'escape', 'Dịch chuyển tức th�
         if (nx > p.radius && ny > p.radius && nx < MAP_W - p.radius && ny < MAP_H - p.radius && !pointInObstacle(nx, ny, p.radius)) { p.x = nx; p.y = ny; break; }
     }
     ring(p.x, p.y, 5, 60, '#c084fc', 0.35); AudioSys.playAt('trick', p.x, p.y, 0.35);
-    if (combo(p, 'blink_invis')) p.st.invis = Math.max(p.st.invis, 1.5);
+    if (combo(p, 'blink_invis')) { p.st.invis = Math.max(p.st.invis, 1.5); invisAs(p, 'void'); }
     if (combo(p, 'blink_reload')) { const w = getCurrentWeapon(p); if (w.magSize) { w.mag = Math.min(effMag(p, w), w.mag + Math.ceil(effMag(p, w) / 2)); w.reloading = false; } }
 });
 defS('heal', '💖', 'Hồi Phục', 16, 'heal', 'Hồi 40 máu trong 2 giây.', p => {
@@ -379,7 +379,7 @@ function updateAbilities(dt) {
         z.t -= dt; z.tick += dt;
         const owner = players.find(q => q.id === z.owner);
         if (z.type === 'smoke') {
-            if (owner && combo(owner, 'smoke_invis') && dist(owner.x, owner.y, z.x, z.y) < z.r) owner.st.invis = Math.max(owner.st.invis, 0.25);
+            if (owner && combo(owner, 'smoke_invis') && dist(owner.x, owner.y, z.x, z.y) < z.r) { owner.st.invis = Math.max(owner.st.invis, 0.25); invisAs(owner, 'camo'); }
             if (z.tick > 0.25 && owner && combo(owner, 'smoke_fire')) {
                 z.tick = 0;
                 players.forEach(p => { if (p.id !== z.owner && p.hp > 0 && dist(p.x, p.y, z.x, z.y) < z.r) dealDamage(p, 2.5, z.owner, { zone: true }); });
