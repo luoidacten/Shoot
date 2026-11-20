@@ -547,10 +547,10 @@ function spellPhase(reason) {
 }
 function build2Phase() {
     return { kind: 'build2', render: 'build', title: '✖️2 KHỞI ĐẦU GẤP ĐÔI · THẺ THỨ 2', label: 'CHỌN THÊM 1 THẺ',
-        who: p => p.adv === 'doubleUp' && !p.doubleUsed && pickCount >= 1,
+        who: p => p.adv === 'doubleUp' && (p.doubleN || 0) < Math.min(2, pickCount),
         choices: p => cardsForPick(p, 'build', 3),
         bot: (p, ids) => botPickCard(p, ids, 'build'),
-        onPick: (p, id) => { p.doubleUsed = true; p.newCombos = (p.newCombos || []).concat((COMBOS_OF[id] || []).filter(c => p.build.includes(c.a === id ? c.b : c.a)).map(c => c.name)); p.build.push(id); } };
+        onPick: (p, id) => { p.doubleUsed = true; p.doubleN = (p.doubleN || 0) + 1; p.newCombos = (p.newCombos || []).concat((COMBOS_OF[id] || []).filter(c => p.build.includes(c.a === id ? c.b : c.a)).map(c => c.name)); p.build.push(id); } };
 }
 function runPhases(list, done) { phaseQueue = list.slice(); phaseDone = done; runNextPhase(); }
 function runNextPhase() {
