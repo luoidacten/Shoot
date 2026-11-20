@@ -363,3 +363,5 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - **Nghe chỉ biết hướng**: tiếng động hiện thành cung quanh nhân vật (càng gần càng đậm). Bản đồ nhỏ / bảng vẫn hiện rõ tiếng ở gần (≤ 520).
   - 📳 Thẻ **Cảm Quan Địa Chấn** (P): nghe rõ vị trí như cũ.
   - 👂 Lợi thế **Giác Quan Nhạy Bén**: nghe rõ vị trí + nhìn xa hơn 12%.
+- **Tầm nghe ngắn lại & bị vật cản làm nghẹt**: tiếng chân 600, cận chiến 550, súng 950, nổ 1300 (tầm nhìn ~430); mỗi lớp tường giữa bạn và nguồn âm còn 65% (tối đa tính 4 lớp). Áp dụng cho cả người chơi lẫn bot.
+  - 🎧 Thẻ **Tai Nghe Xuyên Vách** (P): mỗi lớp tường chỉ -8%, nghe xa hơn 35%. Phối hợp với Cảm Quan Địa Chấn: **Nghe Thấu Đất** (+25% tầm nghe).

@@ -35,6 +35,28 @@ nearRadius = function (v) { return _nearRadius31(v) * keenK(v); };
 const _visionRange31 = visionRange;
 visionRange = function (viewer) { return _visionRange31(viewer) * keenK(viewer || localPlayer()); };
 
+/* ============================== TẦM NGHE: gần hơn, bị vật cản làm nghẹt ============================== */
+const HEAR_R = { step: 600, melee: 550, gun: 950, boom: 1300 }; // xa hơn tầm nhìn một chút
+defP('keenEar', '🎧', 'Tai Nghe Xuyên Vách', 'Âm thanh truyền qua vật cản gần như không bị giảm (mỗi lớp tường chỉ -8% thay vì -35%), và nghe xa hơn 35%.', p => {});
+{ const c = { id: 'deepListen', a: 'keenEar', b: 'seismic', name: 'Nghe Thấu Đất', desc: 'Nghe xa hơn thêm 25%: nghe rõ vị trí từ rất xa, xuyên nhiều lớp tường.' }; COMBOS.push(c); (COMBOS_OF[c.a] = COMBOS_OF[c.a] || []).push(c); (COMBOS_OF[c.b] = COMBOS_OF[c.b] || []).push(c); }
+function wallsBetween(x1, y1, x2, y2, cap = 4) { let n = 0; for (const o of obstacles) { if (o.energy) continue; if (segRect(x1, y1, x2, y2, o) >= 0 && ++n >= cap) break; } return n; }
+/** tầm nghe thực tế của người nghe tới nguồn âm (đã trừ vật cản) */
+function hearReach(v, kind, x, y) {
+    let R = HEAR_R[kind] || 600;
+    if (v.adv === 'minimap' || has(v, 'miniMapCard')) R *= kind === 'step' ? 1.4 : 1.15;
+    if (combo(v, 'bigEar')) R *= 1.3;
+    if (has(v, 'keenEar')) R *= 1.35;
+    if (combo(v, 'deepListen')) R *= 1.25;
+    const n = wallsBetween(v.x, v.y, x, y);
+    return R * Math.pow(has(v, 'keenEar') ? 0.92 : 0.65, n);
+}
+const soundKind = type => type === 'step' ? 'step' : type === 'explosion' ? 'boom' : ['swing', 'hit', 'crit', 'block'].includes(type) ? 'melee' : 'gun';
+const _onHeard31 = onHeard;
+onHeard = function (type, x, y) {
+    const me = localPlayer();
+    if (me && me.hp > 0 && dist(me.x, me.y, x, y) > hearReach(me, soundKind(type), x, y)) return; // quá xa / bị tường chặn tiếng
+    return _onHeard31(type, x, y);
+};
 /* ============================== NGƯỜI CHƠI: nghe chỉ thấy HƯỚNG ============================== */
 const MINI_NEAR = 520; // bản đồ nhỏ / bảng: tiếng ở gần vẫn hiện rõ chỗ
 const _drawPings31 = drawPings;
@@ -177,8 +199,8 @@ function botAware(p, t, raw, marked) {
 /* ============================== NGHE (bot): chỉ biết hướng, đoán khoảng cách ============================== */
 function botHear(p, e, d) {
     const B = p.brain, now = world.time, w = getCurrentWeapon(e);
-    const loud = e.muzzle > 0 && !w.silent ? 1400 : (!e.silent && !(typeof smokeMuted === 'function' && smokeMuted(e)) && Math.hypot(e.vx || 0, e.vy || 0) > 60) ? (380 + bmDiff() * 120) * (hearsExact(p) ? 1.3 : 1) : 0;
-    if (!(d < loud)) return;
+    const kind = e.muzzle > 0 && !w.silent ? 'gun' : (!e.silent && !(typeof smokeMuted === 'function' && smokeMuted(e)) && Math.hypot(e.vx || 0, e.vy || 0) > 60) ? 'step' : null;
+    if (!kind || !(d < hearReach(p, kind, e.x, e.y) * (kind === 'step' ? 0.75 + bmDiff() * 0.15 : 1))) return;
     B.hearCd = B.hearCd || {}; if ((B.hearCd[e.id] || 0) > now) return; B.hearCd[e.id] = now + 0.35;
     let gx, gy;
     if (hearsExact(p)) { gx = e.x + rr(-40, 40); gy = e.y + rr(-40, 40); }
