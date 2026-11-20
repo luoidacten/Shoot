@@ -28,12 +28,15 @@ function draw() {
     const vy0 = camera.y - H / 2 / zoom - 40, vy1 = camera.y + H / 2 / zoom + 40;
 
     // ---- Sàn ----
+    if (typeof drawFloor2 === 'function') drawFloor2(th, vx0, vx1, vy0, vy1);
+    else {
     ctx.fillStyle = th.floor; ctx.fillRect(0, 0, MAP_W, MAP_H);
     ctx.strokeStyle = th.grid; ctx.lineWidth = 2; ctx.beginPath();
     const gx0 = Math.max(0, Math.floor(vx0 / 60) * 60), gy0 = Math.max(0, Math.floor(vy0 / 60) * 60);
     for (let x = gx0; x <= Math.min(MAP_W, vx1); x += 60) { ctx.moveTo(x, Math.max(0, vy0)); ctx.lineTo(x, Math.min(MAP_H, vy1)); }
     for (let y = gy0; y <= Math.min(MAP_H, vy1); y += 60) { ctx.moveTo(Math.max(0, vx0), y); ctx.lineTo(Math.min(MAP_W, vx1), y); }
     ctx.stroke();
+    }
     // vòng tròn trang trí trung tâm
     ctx.strokeStyle = hexA(th.accent.length === 7 ? th.accent : '#334155', 0.5); ctx.lineWidth = 4;
     ctx.beginPath(); ctx.arc(MAP_W / 2, MAP_H / 2, 220, 0, Math.PI * 2); ctx.stroke();
@@ -84,6 +87,7 @@ function draw() {
     obstacles.forEach(o => {
         if (o.x > vx1 || o.x + o.w < vx0 || o.y > vy1 || o.y + o.h < vy0) return;
         if (o.shieldOf || o.energy) return; // khiên dựng / khiên năng lượng: vẽ riêng hình tấm khiên, không vẽ khối tường
+        if (typeof drawObstacle2 === 'function') { drawObstacle2(o, now); return; }
         const depth = o.wood ? 8 : 14;
         ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(o.x + 8, o.y + 12, o.w, o.h);
         ctx.fillStyle = o.wood ? '#3b2716' : o.sandbag ? '#57452a' : o.ice ? '#1e5f80' : '#121829'; ctx.fillRect(o.x, o.y + depth, o.w, o.h);
@@ -117,6 +121,7 @@ function draw() {
         g.addColorStop(0, hexA(col, c.type === 'LEGEND' ? 0.55 : 0.28)); g.addColorStop(1, hexA(col, 0));
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(c.x, c.y + bob, s * 1.4, 0, Math.PI * 2); ctx.fill(); ctx.restore();
         ctx.save(); ctx.translate(c.x, c.y + bob - 2);
+        if (typeof drawCrateBody === 'function') drawCrateBody(c, s, col, look); else {
         rrect(ctx, -s / 2, -s / 2, s, s, 5); ctx.fillStyle = col; ctx.fill();
         ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(-s / 2, s * 0.1, s, s * 0.4);
         ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(-s / 2 + 3, -s / 2 + 3, s - 6, 3);
@@ -124,6 +129,7 @@ function draw() {
         if (c.type === 'SUPPORT') { ctx.fillRect(-s / 4, -2.5, s / 2, 5); ctx.fillRect(-2.5, -s / 4, 5, s / 2); }
         else if (look === 'LEGEND') { ctx.font = `bold ${s * 0.6}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('★', 0, 1); }
         else { ctx.fillRect(-s / 3, -2.5, s / 1.5, 5); ctx.fillRect(-s / 3, -s / 4, 4, s / 2); ctx.fillRect(s / 3 - 4, -s / 4, 4, s / 2); }
+        }
         ctx.restore();
         // chủ hòm giả / Nhà Sưu Tầm nhìn ra được
         const me = localPlayer();

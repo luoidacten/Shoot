@@ -379,3 +379,13 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - **Đứng mép khói nhìn ra ngoài được**: tầm nhìn trong khói tính theo từng tia (xuyên > ~110 khói mới bị chặn) — đứng mép nhìn ra rõ, đứng giữa khói vẫn chỉ thấy sát bên; người ngoài vẫn không thấy bạn. Bụi: đứng trong bụi vẫn nhìn ra ngoài, người ngoài không thấy bạn.
 - **Sniper lộ ánh ống ngắm**: khi đang ngắm, ống ngắm lóe sáng (xuyên sương mù, có ở mép màn hình) với người bị chĩa vào — càng tụ lực càng sáng. Bot bị chĩa vào cũng nhận ra hướng tay bắn tỉa.
 - **Trường Kiếm**: trúng liên tiếp tích **Kiếm Ý** (tối đa 5, +6% sát thương/tầng, chấm sáng quanh người); đòn chém **chặn đạn**; đòn đâm phóng **Kiếm Khí** lưỡi liềm màu hành (bay 380, xuyên địch, mang hiệu ứng ngũ hành); đủ 5 tầng → **Vạn Kiếm** 5 đạo hình quạt.
+
+## Đồ hoạ toàn diện (js/visuals.js)
+
+- **Vẽ lại nốt 26 vũ khí**: cưa máy, kiếm laser (3 lớp sáng), khiên, khiên tròn, súng lưới, boomerang, lựu đạn, lựu EMP, kiếm liễu, súng năng lượng, súng điện Tesla (cuộn đồng, tia điện), AR giảm thanh (ống phóng lựu), gậy bóng chày, trường kiếm (ngọc màu hành, sáng theo Kiếm Ý), 2 loại nỏ, bộ đàm không kích, bộ chỉ điểm laser và các máy tính bảng chiến thuật (màn hình phát sáng có lưới).
+- **Sàn**: họa tiết theo chủ đề (ô lát có rãnh, đinh tán, hạt nhiễu, vệt bẩn) + ánh sáng trung tâm dịu.
+- **Vật cản 3D**: tường kim loại (gờ sáng/tối, khe ghép, đinh tán, viền màu chủ đề), thùng gỗ (ván, nẹp chéo, ke góc), bao cát (từng bao), tường băng (trong suốt, vệt sáng), lồng nhốt (thanh sắt), tường tạm có viền vàng.
+- **Hòm**: nắp + thân, góc kim loại, biểu tượng (★ huyền thoại, ✚ hỗ trợ, ⌖ vũ khí).
+- **Bụi cây**: nhiều lớp lá đổ bóng, điểm sáng lá, lay nhẹ; bụi cháy ửng cam.
+- **Khói**: mây nhiều cụm cuộn chậm, bung dần khi mới thả; khói tốc hành ánh xanh.
+- **Viền tối màn hình** giúp tập trung vào giữa.
