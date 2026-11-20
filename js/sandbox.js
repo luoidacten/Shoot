@@ -256,7 +256,7 @@ function sbRenderBody() {
         ${chip('heal', '', '💚 Hồi đầy máu', false)}</div>
       <div class="sb-lbl">MỤC TIÊU (${players.length - 1}/${SB_MAX - 1})</div><div class="sb-row">
         ${chip('add-dummy', '', '🎯 + Hình nộm', false)}${chip('add-bot', '', '🤖 + Bot thật', false)}${chip('clear-dummy', '', '🗑 Xoá hết', false)}${chip('pull', '', '📍 Gọi lại gần', false)}</div>
-      <div class="sb-row">Máu hình nộm: ${[130, 500, 5000].map(h => chip('dhp', h, h === 5000 ? '5000' : String(h), SB.dHp === h)).join('')}</div>
+      <div class="sb-row">Máu hình nộm: ${[200, 500, 5000].map(h => chip('dhp', h, h === 5000 ? '5000' : String(h), SB.dHp === h)).join('')}</div>
       <div class="sb-row">Hành vi: ${chip('dmode', 'still', '🧍 Đứng yên', SB.dMode === 'still')}${chip('dmode', 'move', '🚶 Đi lại', SB.dMode === 'move')}${chip('dmode', 'fight', '⚔️ Đánh trả', SB.dMode === 'fight')}</div>
       <div class="sb-row">Vũ khí hình nộm: <select class="sb-chip" data-act="dwep">${['NONE', ...Object.keys(WEAPONS).filter(k => k !== 'NONE')].map(k => `<option value="${k}" ${SB.dWep === k ? 'selected' : ''}>${WEAPONS[k].icon || ''} ${esc(WEAPONS[k].name)}</option>`).join('')}</select></div>
       <div class="sb-lbl">THỜI TIẾT</div><div class="sb-row">${Object.keys(WEATHERS).map(k => chip('wx', k, WEATHERS[k].name, (world.weather && world.weather.id) === k)).join('')}</div>
