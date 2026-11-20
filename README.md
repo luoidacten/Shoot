@@ -418,3 +418,9 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - **Thẻ phối hợp bậc 3** (cần đủ 3 thẻ, hiện ⭐ trên thẻ): Hoả Thần Giáng Thế · Sát Thủ Bóng Đêm · Pháo Đài Di Động · Thần Xạ · Bão Thép · Tổng Chỉ Huy Không Quân · Tam Ảnh · Vua Muông Thú.
 - **Kỹ năng phối hợp** (gộp 2 kỹ năng thành 1, giải phóng ô kỹ năng): Bước Ảnh (Dịch Chuyển + Vô Hình) · Băng Hoả (Băng Phong + Bom Lửa) · Móc Sấm (Móc Câu + Sóng Chấn) · Thánh Quang (Hồi Phục + Khiên) · Hố Đen Độc (Hố Đen + Bom Độc).
 - **Kỹ năng phối hợp bậc 3: ☢️ Tàn Phá Diện Rộng** = Đợt Càn + Không Kích + Tải Trọng Lớn: chọn 1 điểm trên bảng, cả dải ngang bản đồ đi qua điểm đó bị cảnh báo 5 giây rồi phi đội rải thảm bom từ đầu này sang đầu kia.
+
+## Cân bằng lợi thế & phép bổ trợ, VFX phép (js/balance.js)
+
+- **Lợi thế được buff**: Túi Quân Dụng (súng tốt bậc 2+, +40 giáp, +2 băng dự trữ) · Lẩn Trốn (+8% tốc chạy, đầu hiệp Ngụy Trang 3 giây, đứng yên 1 giây tự Ngụy Trang) · Khởi Đầu Gấp Đôi (+25 máu) · Kỹ Thuật Cao Khởi Động (Kỹ Thuật Cao hồi nhanh hơn 30%) · Bản Đồ Nhỏ (mọi tiếng động hiện đúng vị trí trên minimap, nhìn xa +8%).
+- **Phép được buff**: Hồi Máu (35% + 8 máu/giây trong 3 giây) · Ngất Ngư (bán kính 190, choáng 1.2 giây, 20 sát thương) · Không Kích Nhẹ (6 quả × 40) · Rải Mìn (5 quả) · Tiếp Tế Khẩn (hồi 38 giây, khi hộp rơi +30 giáp & đầy đạn).
+- **VFX riêng cho mọi phép**: vệt dịch chuyển, dấu ✚ bay lên, vòng thanh tẩy, vệt gió, vòng sao choáng, mảnh băng, khói phóng tên lửa, sóng radar 3 lớp, tia pháo sáng bay lên…
