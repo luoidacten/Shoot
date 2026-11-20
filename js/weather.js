@@ -150,3 +150,51 @@ drawEnemyArrows = function (zoom) {
     }
     _drawEnemyArrows40(zoom);
 };
+
+/* ============================== BUFF MẠNH: TƯỜNG BĂNG · MÀN KHÓI ============================== */
+{
+    const s = SPELLS.iceWall, f = s.cast; s.cd = 20;
+    s.desc = 'Dựng TƯỜNG BĂNG LỚN (dài 260, 360 độ bền, 8 giây) vuông góc hướng ngắm — luôn dựng được (vướng người thì tự lùi ra). Tường DỘI NGƯỢC đạn, làm chậm địch chạm vào; khi vỡ nổ mảnh băng (30 sát thương, chậm 2 giây).';
+    s.cast = p => {
+        const n = obstacles.length; f(p);
+        let made = obstacles.slice(n).filter(o => o.ice);
+        if (!made.length) { // bị vướng người → thử xa hơn
+            const a = p.angle, hz = Math.abs(Math.sin(a)) > Math.abs(Math.cos(a));
+            for (const d of [150, 190, 230, 110]) { const o = placeTempWall(p.x + Math.cos(a) * d, p.y + Math.sin(a) * d, hz, 170, 8, true); if (o) { made = [o]; break; } }
+        }
+        made.forEach(o => {
+            const hz = o.w > o.h, L = 260;
+            if (hz) { const cx = o.x + o.w / 2; o.x = cx - L / 2; o.w = L; o.h = 28; } else { const cy = o.y + o.h / 2; o.y = cy - L / 2; o.h = L; o.w = 28; }
+            if (players.some(q => q.hp > 0 && q.x > o.x - q.radius && q.x < o.x + o.w + q.radius && q.y > o.y - q.radius && q.y < o.y + o.h + q.radius)) { if (hz) { o.x += (L - 170) / 2; o.w = 170; } else { o.y += (L - 170) / 2; o.h = 170; } } // không đè người
+            o.hp = o.maxHp = 360; o.temp = 8; o.reflect = true; o.frost = true; o.owner = p.id;
+        });
+    };
+}
+const _damageObstacle41 = damageObstacle;
+damageObstacle = function (o, dmg, by) {
+    const r = _damageObstacle41(o, dmg, by);
+    if (o && o.frost && !obstacles.includes(o) && !o._shattered) {
+        o._shattered = true; const cx = o.x + o.w / 2, cy = o.y + o.h / 2, own = players.find(q => q.id === o.owner);
+        ring(cx, cy, 10, 150, '#bae6fd', 0.4, 6); for (let i = 0; i < 24; i++) { const a = Math.random() * 6.28, s = 150 + Math.random() * 300; particles.push({ x: cx, y: cy, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 0.5, maxLife: 0.5, color: '#e0f2fe', size: 3, glow: true, drag: 0.9 }); }
+        players.forEach(e => { if (e.hp > 0 && (!own || (e !== own && !sameTeam(own, e))) && dist(e.x, e.y, cx, cy) < 150 + e.radius) { dealDamage(e, 30, own ? own.id : -1, { angle: Math.atan2(e.y - cy, e.x - cx), knock: 200 }); e.st.slow = Math.max(e.st.slow || 0, 2); } });
+        AudioSys.playAt('block', cx, cy, 0.5);
+    }
+    return r;
+};
+{
+    const s = SPELLS.smokeLine, f = s.cast; s.cd = 22;
+    s.desc = 'Dựng 5 cột khói lớn thành hàng ngang trước mặt (8 giây). Bạn & đồng đội trong màn khói được TĂNG TỐC; địch trong màn khói bị LÀM CHẬM.';
+    s.cast = p => {
+        const n = zones.length; f(p);
+        const z = zones.slice(n).filter(q => q.type === 'smoke');
+        if (z.length >= 2) { const a = z[0], b = z[z.length - 1], dx = (b.x - a.x) / (z.length - 1), dy = (b.y - a.y) / (z.length - 1); zones.push({ type: 'smoke', x: a.x - dx, y: a.y - dy, r: a.r, t: a.t, maxT: a.maxT, owner: p.id, tick: 0 }); }
+        zones.slice(n).forEach(q => { if (q.type === 'smoke') { q.r *= 1.15; q.t = q.maxT = 8; q.phase = HASTE_SMOKE; q.lineSmoke = true; } });
+    };
+}
+const _upe41 = updatePartyExtras;
+updatePartyExtras = function (dt) {
+    _upe41(dt);
+    if (gameState !== 'PLAYING' || net.role === 'guest') return;
+    zones.forEach(z => { if (!z.lineSmoke) return; const o = players.find(q => q.id === z.owner); players.forEach(e => { if (e.hp > 0 && o && e !== o && !sameTeam(o, e) && dist(e.x, e.y, z.x, z.y) < z.r) e.st.slow = Math.max(e.st.slow || 0, 0.2); }); });
+    obstacles.forEach(o => { if (!o.frost) return; players.forEach(e => { if (e.hp > 0 && e.id !== o.owner && e.x > o.x - e.radius - 6 && e.x < o.x + o.w + e.radius + 6 && e.y > o.y - e.radius - 6 && e.y < o.y + o.h + e.radius + 6) e.st.slow = Math.max(e.st.slow || 0, 0.4); }); });
+};
