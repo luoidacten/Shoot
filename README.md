@@ -376,7 +376,7 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 
 ## Mép khói, ánh ống ngắm Sniper, Trường Kiếm mới (js/edge.js)
 
-- **Đứng mép khói nhìn ra ngoài được**: tầm nhìn trong khói tính theo từng tia (xuyên > ~110 khói mới bị chặn) — đứng mép nhìn ra rõ, đứng giữa khói vẫn chỉ thấy sát bên; người ngoài vẫn không thấy bạn. Bụi: đứng trong bụi vẫn nhìn ra ngoài, người ngoài không thấy bạn.
+- **Đứng sát mép khói mới nhìn ra ngoài**: mọi vùng khói to hơn 35%; trong khói luôn thấy sát bên (~105), còn nhìn ra xa chỉ khi lớp khói phía trước mỏng hơn 45 (= đứng sát mép) — đứng mép nhìn ra rõ, đứng giữa khói vẫn chỉ thấy sát bên; người ngoài vẫn không thấy bạn. Bụi: đứng trong bụi vẫn nhìn ra ngoài, người ngoài không thấy bạn.
 - **Sniper lộ ánh ống ngắm**: khi đang ngắm, ống ngắm lóe sáng (xuyên sương mù, có ở mép màn hình) với người bị chĩa vào — càng tụ lực càng sáng. Bot bị chĩa vào cũng nhận ra hướng tay bắn tỉa.
 - **Trường Kiếm**: trúng liên tiếp tích **Kiếm Ý** (tối đa 5, +6% sát thương/tầng, chấm sáng quanh người); đòn chém **chặn đạn**; đòn đâm phóng **Kiếm Khí** lưỡi liềm màu hành (bay 380, xuyên địch, mang hiệu ứng ngũ hành); đủ 5 tầng → **Vạn Kiếm** 5 đạo hình quạt.
 
