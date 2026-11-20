@@ -434,3 +434,8 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - **Đòn đâm**: bề rộng đường đâm 18 (Giáo 24) thay vì 10 — lệch tay một chút vẫn trúng.
 - **Đứng sát người** (kể cả hơi lệch góc): luôn trúng.
 - **Hình nhát chém** quét đúng góc của vùng trúng thật.
+
+## Thời tiết & buff phép (js/weather.js)
+
+- **Thời tiết mỗi hiệp** (nhãn ở trên cùng màn hình, đồng bộ online): ☀️ Quang Đãng · 🌧️ Mưa (-35% tầm nghe, lửa tắt nhanh) · ⛈️ Giông Bão (mưa + sét đánh ngẫu nhiên: cảnh báo 1 giây, 45 sát thương, chớp sáng soi cả vùng) · ❄️ Tuyết (chậm 8%, tầm nhìn -10%) · 🌫️ Sương Dày (tầm nhìn -25%) · 🌪️ Gió Lớn (đạn & vật ném bị đẩy lệch, khói trôi và tan nhanh) · 🔥 Nắng Gắt (lửa to & lâu hơn 30%, vụ nổ để lại lửa). Có lớp phủ mưa / tuyết / sương / gió / nắng theo mức "Hiệu ứng chớp".
+- **Buff 9 phép**: Tốc Biến (~270, bất tử 0.3s, tăng tốc) · Thanh Tẩy (+12% máu, tăng tốc) · Gia Tốc (4.5 giây, bất tử 0.3s) · Trừng Phạt (mạnh hơn, hạ gục hồi một nửa) · Tường Băng (bền hơn 50%, lâu hơn) · Pháo Tên Lửa (+30%) · Bom Mù (mù 4 giây, tăng tốc 3 giây) · Pháo Sáng · Màn Khói (4 cột, 7 giây) — tất cả hồi nhanh hơn (24–32 giây).
