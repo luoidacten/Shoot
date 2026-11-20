@@ -365,3 +365,11 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
   - 👂 Lợi thế **Giác Quan Nhạy Bén**: nghe rõ vị trí + nhìn xa hơn 12%.
 - **Tầm nghe ngắn lại & bị vật cản làm nghẹt**: tiếng chân 600, cận chiến 550, súng 950, nổ 1300 (tầm nhìn ~430); mỗi lớp tường giữa bạn và nguồn âm còn 65% (tối đa tính 4 lớp). Áp dụng cho cả người chơi lẫn bot.
   - 🎧 Thẻ **Tai Nghe Xuyên Vách** (P): mỗi lớp tường chỉ -8%, nghe xa hơn 35%. Phối hợp với Cảm Quan Địa Chấn: **Nghe Thấu Đất** (+25% tầm nghe).
+
+## Làm đẹp (js/artpass.js)
+
+- **Bản đồ rộng hơn 15%** (2760×2070, đông người 3680×2760).
+- **Nhân vật vẽ lại**: vai & ba lô, dây đeo chéo, mũ có kính chắn phát sáng theo màu đội, sọc mũ riêng từng người, găng tay theo kiểu cầm vũ khí, chân bước khi chạy.
+- **24 vũ khí vẽ lại** (súng lục, giảm thanh, ổ quay, song súng, SMG, AR, shotgun, bắn tỉa, minigun, railgun, bazooka, súng phóng lựu, phun lửa, dao, song dao, katana, giáo, búa, đại kiếm, rìu, cung…): kim loại có đổ bóng, viền, chi tiết ống ngắm / băng đạn / báng gỗ.
+- **VFX**: chớp nòng đúng đầu nòng nhiều lớp, đạn có quầng sáng & vệt thon, vụ nổ có sóng xung kích + than hồng + khói đen, tia lửa văng khi trúng đòn, bụi chân khi chạy (tôn trọng mức "Hiệu ứng chớp & rung").
+- **Sửa lỗi ném khiên mất hình cả bản đồ**: khiên đang bay vẽ cung bán kính âm làm hỏng cả khung hình — giờ khiên bay/nằm đất vẽ thành đĩa xoay.
