@@ -39,14 +39,15 @@ explosionFx = function (x, y, radius) {
 };
 
 /* ============================== 2) KHÓI = TƯỜNG CỦA TẦM NHÌN (đi xuyên & bắn xuyên được) ============================== */
-const SMOKE_THICK = 110; // nhìn xuyên được tối đa ~110 đơn vị khói (đứng trong khói chỉ thấy sát bên)
+const SMOKE_THICK = 45; // chỉ nhìn ra ngoài khi lớp khói giữa bạn và mép còn mỏng (< 45) = đứng sát mép
+const SMOKE_NEAR = 105; // trong khói luôn thấy sát bên mình (~105)
 /** t (0..1) trên đoạn thẳng nơi lượng khói đã xuyên qua vượt ngưỡng; 1 = không bị chặn */
 function smokeCutT(x1, y1, x2, y2, thick = SMOKE_THICK) {
     const dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy; if (L2 < 1) return 1;
     const L = Math.sqrt(L2), iv = [];
     for (const z of zones) {
         if (z.type !== 'smoke' || !(z.t > 0)) continue;
-        const r = z.r * 0.9, fx0 = x1 - z.x, fy0 = y1 - z.y, b = 2 * (fx0 * dx + fy0 * dy), c = fx0 * fx0 + fy0 * fy0 - r * r, disc = b * b - 4 * L2 * c;
+        const r = z.r * 0.97, fx0 = x1 - z.x, fy0 = y1 - z.y, b = 2 * (fx0 * dx + fy0 * dy), c = fx0 * fx0 + fy0 * fy0 - r * r, disc = b * b - 4 * L2 * c;
         if (disc <= 0) continue;
         const s = Math.sqrt(disc), t1 = Math.max(0, (-b - s) / (2 * L2)), t2 = Math.min(1, (-b + s) / (2 * L2));
         if (t2 > t1) iv.push([t1, t2]);
@@ -57,12 +58,16 @@ function smokeCutT(x1, y1, x2, y2, thick = SMOKE_THICK) {
     for (const [a, b] of iv) {
         const s = Math.max(a, cur); if (b <= s) continue;
         const len = (b - s) * L;
-        if (acc + len >= thick) return s + (thick - acc) / L;
+        if (acc + len >= thick) return L <= SMOKE_NEAR ? 1 : Math.max(s + (thick - acc) / L, SMOKE_NEAR / L);
         acc += len; cur = b;
     }
     return 1;
 }
 const smokeThick = v => v && combo(v, 'smokeHunter') ? 260 : v && combo(v, 'fogEyes') ? 220 : SMOKE_THICK;
+// mọi vùng khói to hơn 35% (chủ phòng phóng to, máy khách nhận kích thước đã phóng)
+const SMOKE_GROW = 1.35;
+const _upeSmoke = updatePartyExtras;
+updatePartyExtras = function (dt) { _upeSmoke(dt); if (net.role === 'guest') return; zones.forEach(z => { if (z.type === 'smoke' && !z._big) { z._big = true; z.r *= SMOKE_GROW; } }); };
 const smokeBlocks = (x1, y1, x2, y2, v) => smokeCutT(x1, y1, x2, y2, smokeThick(v)) < 1;
 const _los30 = lineOfSight;
 lineOfSight = function (x1, y1, x2, y2) { return _los30(x1, y1, x2, y2) && !smokeBlocks(x1, y1, x2, y2); };
@@ -77,7 +82,7 @@ const _visPoly30 = visPolyFn;
 visPolyFn = function (px, py, Rf, Rmax) {
     const pts = _visPoly30(px, py, Rf, Rmax);
     if (!zones.some(z => z.type === 'smoke' && z.t > 0 && dist(px, py, z.x, z.y) < Rmax + z.r)) return pts;
-    const me = localPlayer(), th = smokeThick(me) + 20;
+    const me = localPlayer(), th = smokeThick(me) + 8;
     for (let i = 0; i < pts.length; i += 2) { const t = smokeCutT(px, py, pts[i], pts[i + 1], th); if (t < 1) { pts[i] = px + (pts[i] - px) * t; pts[i + 1] = py + (pts[i + 1] - py) * t; } }
     return pts;
 };
