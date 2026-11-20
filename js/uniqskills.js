@@ -311,3 +311,81 @@ drawW2Fx = function (now) {
     });
     ctx.restore();
 };
+
+/* ---------- RÌU: Liệt Địa Trảm — giơ rìu bổ xuống, vết nứt chạy thẳng tới trước hất tung địch, phá vật cản, để lại khe nứt làm chậm ---------- */
+function axeHT(p) {
+    const a = aimDir(p);
+    p.st.root = Math.max(p.st.root || 0, 0.3);
+    USK.push({ kind: 'axeWind', owner: p.id, a, t: 0.3, maxT: 0.3 });
+    floatText(p.x, p.y - 40, '🪓 LIỆT ĐỊA TRẢM!', '#f97316', 15); AudioSys.playAt('swing', p.x, p.y, 0.5);
+    p.shotQueue.push({ t: 0.3, fn: () => {
+        if (p.hp <= 0) return;
+        const x0 = p.x + Math.cos(a) * (p.radius + 10), y0 = p.y + Math.sin(a) * (p.radius + 10);
+        USK.push({ kind: 'fissure', owner: p.id, x0, y0, a, d: 0, max: 400, sp: 950, t: 4, maxT: 4, hit: new Set(), segs: [], broke: new Set() });
+        ring(x0, y0, 8, 60, '#f97316', 0.35, 6); addShake(9); hitStop(0.05); AudioSys.playAt('slam', x0, y0, 0.6);
+    } });
+}
+function updateFissure(f, o, dt) {
+    if (f.d < f.max) {
+        const step = Math.min(f.sp * dt, f.max - f.d); f.d += step;
+        const x = f.x0 + Math.cos(f.a) * f.d, y = f.y0 + Math.sin(f.a) * f.d;
+        if (!f.segs.length || dist(x, y, f.segs[f.segs.length - 1].x, f.segs[f.segs.length - 1].y) > 22) {
+            f.segs.push({ x, y, born: world.time, j: (Math.random() - 0.5) * 14 });
+            for (let k = 0; k < 3; k++) particles.push({ x: x + (Math.random() - 0.5) * 20, y: y + (Math.random() - 0.5) * 20, vx: (Math.random() - 0.5) * 120, vy: -60 - Math.random() * 120, life: 0.5, maxLife: 0.5, color: Math.random() < 0.5 ? '#78350f' : '#a8a29e', size: 3 + Math.random() * 3 });
+            if (f.segs.length % 3 === 0) AudioSys.playAt('hit', x, y, 0.2);
+        }
+        // phá vật cản trên đường nứt (mỗi vật cản 1 lần)
+        const ob = pointInObstacle(x, y, 4);
+        if (ob && !f.broke.has(ob)) { f.broke.add(ob); damageObstacle(ob, 90, o); spark(x, y, '#d6d3d1', 12, 240); addShake(4); }
+        // hất tung địch: bị đẩy sang hai bên vết nứt
+        enemiesOf(o).forEach(e => {
+            if (e.air > 0 || f.hit.has(e.id) || dist(e.x, e.y, x, y) > e.radius + 34) return;
+            f.hit.add(e.id);
+            const side = Math.sign(Math.sin(Math.atan2(e.y - f.y0, e.x - f.x0) - f.a)) || 1;
+            dealDamage(e, 34 * uskMM(o), o.id, { melee: true, knock: 300, angle: f.a + side * Math.PI / 2 });
+            e.stun = Math.max(e.stun, 0.75);
+            floatText(e.x, e.y - 44, '⛰ HẤT TUNG!', '#fdba74', 14); spark(e.x, e.y, '#fdba74', 10, 260);
+        });
+    }
+    // khe nứt còn lại: làm chậm địch đứng trên đó
+    if (f.segs.length && f.t > 0.4) enemiesOf(o).forEach(e => { if (!(e.air > 0) && f.segs.some(s => dist(e.x, e.y, s.x, s.y) < 26)) e.st.slow = Math.max(e.st.slow || 0, 0.2); });
+}
+HT.AXE = ['LIỆT ĐỊA TRẢM', axeHT];
+HT_PROFILE.AXE = { aim: 'dir', R: 410, shape: 'line', w: 68, col: '249,115,22', tag: '⛰ VẾT NỨT PHÁ VẬT CẢN' };
+const _updateUSKAxe = updateUSK;
+updateUSK = function (dt) {
+    USK.forEach(f => { if (f.kind === 'fissure') { const o = players.find(q => q.id === f.owner); if (o) updateFissure(f, o, dt); } });
+    return _updateUSKAxe(dt);
+};
+const _drawW2FxAxe = drawW2Fx;
+drawW2Fx = function (now) {
+    USK.forEach(f => { // khe nứt vẽ dưới các hiệu ứng khác
+        if (f.kind !== 'fissure' || f.segs.length < 1) return;
+        const k = Math.min(1, f.t / 0.6);
+        ctx.save(); ctx.globalAlpha = k; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        const nx = -Math.sin(f.a), ny = Math.cos(f.a);
+        const path = () => { ctx.beginPath(); ctx.moveTo(f.x0, f.y0); f.segs.forEach(s => ctx.lineTo(s.x + nx * s.j, s.y + ny * s.j)); };
+        path(); ctx.strokeStyle = 'rgba(41,24,12,0.85)'; ctx.lineWidth = 12; ctx.stroke();
+        path(); ctx.strokeStyle = 'rgba(15,10,6,0.95)'; ctx.lineWidth = 5; ctx.stroke();
+        ctx.globalCompositeOperation = 'lighter';
+        path(); ctx.strokeStyle = `rgba(249,115,22,${0.25 + 0.35 * Math.max(0, 1 - (world.time - f.segs[0].born) / 1.2)})`; ctx.lineWidth = 3; ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
+        // đá nhô lên ở đoạn vừa nứt
+        f.segs.forEach(s => {
+            const age = world.time - s.born; if (age > 0.45) return;
+            const h = Math.sin(Math.min(1, age / 0.45) * Math.PI) * 16;
+            ctx.fillStyle = '#78716c'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 1;
+            [-1, 1].forEach(sd => { const bx = s.x + nx * sd * 10, by = s.y + ny * sd * 10; ctx.beginPath(); ctx.moveTo(bx - 6, by); ctx.lineTo(bx, by - h); ctx.lineTo(bx + 6, by); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+        });
+        ctx.restore();
+    });
+    _drawW2FxAxe(now);
+    USK.forEach(f => { // giơ rìu lên trước khi bổ
+        if (f.kind !== 'axeWind') return; const o = players.find(q => q.id === f.owner); if (!o) return;
+        const k = 1 - Math.max(0, f.t) / f.maxT;
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = `rgba(249,115,22,${0.3 + k * 0.6})`; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(o.x, o.y, o.radius + 12 + k * 10, f.a - 0.9, f.a + 0.9); ctx.stroke();
+        ctx.setLineDash([6, 6]); ctx.strokeStyle = `rgba(253,186,116,${0.25 + k * 0.4})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(o.x + Math.cos(f.a) * 400, o.y + Math.sin(f.a) * 400); ctx.stroke(); ctx.setLineDash([]);
+        ctx.restore();
+    });
+};
