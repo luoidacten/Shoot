@@ -225,7 +225,7 @@ function updatePhaseWalk(p, dt) {
             smoke(p.x, p.y, 5, 'rgba(167,139,250,0.35)', 12);
             p.x = x; p.y = y; p.phaseT = 0; p.phaseCd[o.pid] = world.time + (combo(p, 'phaseRun') ? 4 : 6);
             ring(x, y, 6, 40, '#a78bfa', 0.35, 3); AudioSys.playAt('trick', x, y, 0.3); floatText(x, y - 30, 'XUYÊN TƯỜNG', '#c4b5fd', 12);
-            if (combo(p, 'ghostWall')) p.st.invis = Math.max(p.st.invis, 1.5);
+            if (combo(p, 'ghostWall')) { p.st.invis = Math.max(p.st.invis, 1.5); invisAs(p, 'ghost'); }
             return;
         }
     }

@@ -406,3 +406,15 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
   - 🫥 **Vô Hình** (thẻ cũ): hoàn toàn không thấy, không bóng mờ.
   - 👤 **Bóng Ma** (thẻ mới): lúc ẩn lúc hiện — chớp hiện 0.3 giây mỗi 1.3 giây (lúc hiện bị nhắm được), lúc ẩn nhận ít hơn 50% sát thương, luôn tăng tốc, tấn công không làm hiện hình.
   - Phối hợp **Nhẫn Thuật Bóng Tối** (Ngụy Trang + Bóng Ma): +2 giây, hết tàng hình thì đòn kế +60%.
+
+## Chiều sâu: tàng hình theo nguồn, Bậc Thầy, phối hợp bậc 3, kỹ năng phối hợp (js/depth.js)
+
+- **Mọi nguồn tàng hình có loại riêng** (theo sức mạnh): Vô Hình (thẻ Vô Hình, Dịch Chuyển+Vô Hình, Đâm Lén không mục tiêu, Ảnh Sát, né lướt 0.35s) · Bóng Ma (Joker, Hồn Ma hồi sinh, Xuyên Tường, SAR Bóng Ma) · Ngụy Trang (đứng trong khói, Vượt Rào Im Lặng, Adrenaline, Chạy Trong Khói, lựu khói…). Nếu đang có loại mạnh hơn thì giữ loại mạnh.
+- **Bậc Thầy Cận Chiến / Tầm Xa**: mọi chiêu có VFX lớn (vòng sáng, tia lửa, vệt chém / sóng đầu nòng, vỏ đạn); buff Khiên (sóng chấn choáng), Cưa (cưa xoáy), Song Đao (phi đao), SMG/Minigun (xả loạt), Tesla (giật 3 mục tiêu), Railgun (tia xuyên).
+- **Bậc Thầy Vũ Khí**: dùng được kỹ năng Bậc Thầy của vũ khí ở tay kia (tự rút ra dùng rồi cất lại); mỗi lần đổi vũ khí có **Đòn Rút Vũ Khí** (cận chiến chém vòng cung tốn 3 độ bền · súng bắn nhanh 2 phát tốn 2 viên, hồi 1.2 giây).
+- **Giáp Chống Nổ**: 160 giáp, nhận ít hơn 55% sát thương nổ, không bị nổ đẩy, mỗi vụ nổ trúng hồi 10 giáp, còn giáp thì kháng 15% sát thương khác (trước đây phần giảm sát thương nổ không hoạt động).
+- **Bot**: chạy trốn thì lắc mạnh và quay lại dựng tường / màn khói chặn kẻ đuổi; bị bắn từ xa (> 560) hoặc thấy súng tầm xa chĩa vào → chạy lắt léo vào chỗ khuất (NÉ BẮN TỈA); bị đuổi lâu / bị dồn sát không chỗ nấp / sắp chết → 💢 LIỀU MẠNG 4.5 giây (lao vào, xả mọi kỹ năng, phép, vật phẩm).
+- **Vùng ngắm đúng tác dụng**: Kỹ Thuật Cao theo từng vũ khí (vùng quanh người / nón / đường thẳng / điểm), bom khói (đúng kích thước khói), tường (thanh ngang), bom lửa / keo / độc / hố đen, móc, lướt, dịch chuyển, ụ súng…
+- **Thẻ phối hợp bậc 3** (cần đủ 3 thẻ, hiện ⭐ trên thẻ): Hoả Thần Giáng Thế · Sát Thủ Bóng Đêm · Pháo Đài Di Động · Thần Xạ · Bão Thép · Tổng Chỉ Huy Không Quân · Tam Ảnh · Vua Muông Thú.
+- **Kỹ năng phối hợp** (gộp 2 kỹ năng thành 1, giải phóng ô kỹ năng): Bước Ảnh (Dịch Chuyển + Vô Hình) · Băng Hoả (Băng Phong + Bom Lửa) · Móc Sấm (Móc Câu + Sóng Chấn) · Thánh Quang (Hồi Phục + Khiên) · Hố Đen Độc (Hố Đen + Bom Độc).
+- **Kỹ năng phối hợp bậc 3: ☢️ Tàn Phá Diện Rộng** = Đợt Càn + Không Kích + Tải Trọng Lớn: chọn 1 điểm trên bảng, cả dải ngang bản đồ đi qua điểm đó bị cảnh báo 5 giây rồi phi đội rải thảm bom từ đầu này sang đầu kia.
