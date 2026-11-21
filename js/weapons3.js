@@ -620,7 +620,9 @@ function smHtReset(o, e, F, pref) {
     if (F.resetUsed) return;
     const M = e.smMk; if (!M || M.by !== o.id || M.t < world.time || (M.sun <= 0 && M.moon <= 0)) return;
     const k = M[pref] > 0 ? pref : (pref === 'moon' ? 'sun' : 'moon'); M[k]--; F.resetUsed = true;
-    (o.skills || []).forEach(s => { if (s.id === 'hightech') s.cd = 0; });
+    // hoãn sang khung sau: chiêu trúng ngay lúc bấm thì game đặt hồi chiêu SAU khi hàm chiêu chạy xong
+    const resetCd = () => (o.skills || []).forEach(s => { if (s.id === 'hightech') s.cd = 0; });
+    resetCd(); o.shotQueue.push({ t: 0, fn: resetCd }); setTimeout(resetCd, 0);
     floatText(o.x, o.y - 58, '↺ HỒI CHIÊU (-1 ấn)', '#fef3c7', 14); ring(o.x, o.y, 6, 50, '#fef3c7', 0.35, 3); AudioSys.playAt('select', o.x, o.y, 0.4);
 }
 function smSetInf(o, e, kind) {
