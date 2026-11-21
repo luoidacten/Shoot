@@ -72,8 +72,8 @@ drawW2Fx = function (now) {
 };
 
 /* ============================== 4) LỢI THẾ MỚI: BẬC THẦY ĐA HÌNH ============================== */
-const POLY_WEPS = ['UMBRELLA', 'GUNBLADE', 'SUNMOON'];
-ADVANTAGES.polyMaster = { icon: '🔄', name: 'Bậc Thầy Đa Hình', desc: 'Chỉ dùng được VŨ KHÍ ĐA HÌNH (Huyền Cơ · Gunblade · Nhật Nguyệt Cung) — mỗi hiệp khởi đầu với 2 cái khác nhau, hòm thính chỉ ra vũ khí đa hình. Giống Bậc Thầy Vũ Khí: có sẵn đủ 3 kỹ năng (Kỹ Thuật Cận Chiến + Trang Bị Phụ + Kỹ Thuật Cao), dùng được ở MỌI DẠNG, không chọn nâng cấp nữa. Nội tại ĐA HÌNH: mỗi lần vũ khí đổi dạng → +20% sát thương 3 giây, tăng tốc 1 giây, mọi kỹ năng hồi nhanh 1.5 giây.' };
+const POLY_WEPS = ['UMBRELLA', 'GUNBLADE', 'SUNMOON', 'AXECANNON', 'AXEGUN'];
+ADVANTAGES.polyMaster = { icon: '🔄', name: 'Bậc Thầy Đa Hình', desc: 'Chỉ dùng được VŨ KHÍ ĐA HÌNH (Huyền Cơ · Gunblade · Nhật Nguyệt Cung · Pháo Rìu · Rìu Săn) — mỗi hiệp khởi đầu với 2 cái khác nhau, hòm thính chỉ ra vũ khí đa hình. Giống Bậc Thầy Vũ Khí: có sẵn đủ 3 kỹ năng (Kỹ Thuật Cận Chiến + Trang Bị Phụ + Kỹ Thuật Cao), dùng được ở MỌI DẠNG, không chọn nâng cấp nữa. Nội tại ĐA HÌNH: mỗi lần vũ khí đổi dạng → +20% sát thương 3 giây, tăng tốc 1 giây, mọi kỹ năng hồi nhanh 1.5 giây.' };
 ADV_IDS.push('polyMaster');
 const isPoly = p => !!p && p.adv === 'polyMaster';
 const pickPoly = except => { const L = POLY_WEPS.filter(id => id !== except); return L[Math.floor(Math.random() * L.length)]; };
@@ -96,7 +96,7 @@ applyBuild = function (p) {
 const _skipsPickPoly = skipsPick;
 skipsPick = function (p) { return isPoly(p) || _skipsPickPoly(p); };
 // 3 kỹ năng Bậc Thầy dùng được ở mọi dạng của vũ khí đa hình
-const polyType = w => w.id === 'GUNBLADE' ? (w.form === 'blade' ? 'MELEE' : 'GUN') : w.id === 'SUNMOON' ? ((w.form || 'sun') === 'sun' ? 'GUN' : 'MELEE') : 'MELEE';
+const polyType = w => (w.id === 'AXECANNON' || w.id === 'AXEGUN') ? ((w.form || 'axe') === 'axe' ? 'MELEE' : 'GUN') : w.id === 'GUNBLADE' ? (w.form === 'blade' ? 'MELEE' : 'GUN') : w.id === 'SUNMOON' ? ((w.form || 'sun') === 'sun' ? 'GUN' : 'MELEE') : 'MELEE';
 const _castSkillPoly = castSkill;
 castSkill = function (p, slot, aimVec) {
     const s = p.skills && p.skills[slot], w = getCurrentWeapon(p);
@@ -114,7 +114,7 @@ updatePartyExtras = function (dt) {
     players.forEach(p => {
         if (!isPoly(p) || p.hp <= 0) return;
         const w = getCurrentWeapon(p); if (!w || !POLY_WEPS.includes(w.id)) { p._pmForm = null; return; }
-        const key = w.id + ':' + (w.form === undefined ? (w.id === 'GUNBLADE' ? 'gun' : w.id === 'SUNMOON' ? 'sun' : 0) : w.form);
+        const key = w.id + ':' + (w.form === undefined ? (w.id === 'GUNBLADE' ? 'gun' : w.id === 'SUNMOON' ? 'sun' : (w.id === 'AXECANNON' || w.id === 'AXEGUN') ? 'axe' : 0) : w.form);
         if (p._pmForm && p._pmForm !== key && p._pmForm.split(':')[0] === w.id) {
             p.pmBuffT = world.time + 3; p.st.haste = Math.max(p.st.haste || 0, 1);
             (p.skills || []).forEach(s => { if (s.cd > 0) s.cd = Math.max(0, s.cd - 1.5); });
