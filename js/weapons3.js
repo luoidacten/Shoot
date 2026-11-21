@@ -206,7 +206,10 @@ function smSetForm(p, w, f) {
 function smMark(o, e, kind, n = 1) {
     if (!e || e.hp <= 0) return;
     const M = e.smMk && e.smMk.by === o.id && e.smMk.t > world.time ? e.smMk : (e.smMk = { sun: 0, moon: 0, by: o.id, t: 0 });
-    M[kind] = Math.min(3, M[kind] + n); M.t = world.time + 6;
+    const inf = e.smInf && e.smInf.by === o.id && e.smInf.kind === kind && e.smInf.t > world.time;
+    M[kind] = Math.min(inf ? 999 : 5, M[kind] + n); M.t = world.time + (inf ? 30 : 6);
+    if (inf) { e.smInf.t = world.time + 2; return; } // đang tích vô hạn: làm mới 2 giây
+    if (e.smInf && e.smInf.t > world.time) return; // đang tích vô hạn loại kia: chưa nổ
     if (M.sun > 0 && M.moon > 0) { // ẤN NHẬT NGUYỆT: nổ sát thương chuẩn
         const T = (18 + 9 * (M.sun + M.moon)) * (has(o, 'meleeTech') && getCurrentWeapon(o).id === 'SUNMOON' ? 1.3 : 1);
         M.sun = 0; M.moon = 0;
@@ -217,7 +220,7 @@ function smMark(o, e, kind, n = 1) {
 }
 function smArrow(p, a, o = {}) {
     const m = muzzle(p, getCurrentWeapon(p), a);
-    W3.push({ kind: 'smArrow', owner: p.id, x: m.x, y: m.y, a, sp: o.sp || 1300, d: 0, max: o.max || 560, dmg: o.dmg || 22, pierce: o.pierce || 0, mark: o.mark || 'moon', marks: o.marks || 1, stun: o.stun || 0, blind: o.blind || 0, big: !!o.big, wall: !!o.wall, hit: new Set(), t: 2, maxT: 2 });
+    W3.push({ kind: 'smArrow', owner: p.id, x: m.x, y: m.y, a, sp: o.sp || 1300, d: 0, max: o.max || 560, dmg: o.dmg || 22, pierce: o.pierce || 0, mark: o.mark || 'moon', marks: o.marks !== undefined ? o.marks : 1, stun: o.stun || 0, blind: o.blind || 0, big: !!o.big, wall: !!o.wall, inf: o.inf || null, htReset: !!o.htReset, emp: !!o.emp, hit: new Set(), t: 2, maxT: 2 });
 }
 function smDashGo(p, w, ang, last) {
     // lướt: bay qua người & tường (đáp chỗ trống), né đạn khi đang lướt; địch bị lướt qua chảy máu
@@ -241,7 +244,14 @@ function smFire(p, w, ang, charge, mult) {
         if ((charge || 0) >= 0.9) { p.cooldown = 8; return smDashGo(p, w, ang, false); }
         // bắn thẳng phía trước, không ngắm
         p.cooldown = w.fireRate * p.fireRateMult; p.lastFireT = world.time; onAttack(p); p.stats.shots++; p.muzzle = 0.05; p.recoil = 1;
-        const a = p.angle; smArrow(p, a, { dmg: 22 * mult, pierce: has(p, 'gunMod') ? 1 : 0 });
+        const a = p.angle;
+        if (p.smEmp === 'arrow') { p.smEmp = null; smArrow(p, a, { dmg: 46 * mult, pierce: 2, marks: 2, big: true, sp: 1650, max: 760, emp: true }); floatText(p.x, p.y - 40, '🌙 TIỄN CƯỜNG HOÁ', '#c7d2fe', 14); AudioSys.playAt('shoot_heavy', p.x, p.y, 0.4); addShake(3); return; }
+        if (p.smRapid > 0) { // liên thanh: 5 mũi rất nhanh
+            p.smRapid--; floatText(p.x, p.y - 40, `🏹 LIÊN THANH ${3 - p.smRapid}/3`, '#e0e7ff', 13);
+            for (let i = 0; i < 5; i++) p.shotQueue.push({ t: i * 0.055, fn: () => { if (p.hp <= 0) return; smArrow(p, p.angle + (Math.random() - 0.5) * 0.07, { dmg: 10 * mult, sp: 1500 }); p.muzzle = 0.04; AudioSys.playAt('whoosh', p.x, p.y, 0.15); } });
+            return;
+        }
+        smArrow(p, a, { dmg: 22 * mult, pierce: has(p, 'gunMod') ? 1 : 0 });
         AudioSys.playAt('whoosh', p.x, p.y, 0.3); return;
     }
     // Nguyệt Song Đao
@@ -253,6 +263,19 @@ function smFire(p, w, ang, charge, mult) {
             AudioSys.playAt('shoot_heavy', q.x, q.y, 0.5); addShake(5);
             q.shotQueue.push({ t: 0.05, fn: () => { if (q.hp > 0 && getCurrentWeapon(q) === w) smSetForm(q, w, 'sun'); } });
         } }, 50);
+        return;
+    }
+    if (p.smEmp === 'dash') { // đòn cường hoá: lướt theo hướng đánh rồi chém rộng
+        p.smEmp = null; p.cooldown = 14 * p.fireRateMult; p.lastFireT = world.time; p.angle = ang; onAttack(p); p.stats.shots++;
+        const D = Math.max(40, rayFree(p.x, p.y, ang, 170).d - p.radius), ax = p.x, ay = p.y;
+        p.dashTime = D / 720; p.dashAngle = ang; p.st.invuln = Math.max(p.st.invuln || 0, p.dashTime);
+        afterImages(p, ax, ay, ax + Math.cos(ang) * D, ay + Math.sin(ang) * D, 4, '#fde68a'); AudioSys.playAt('whoosh', p.x, p.y, 0.5);
+        p.shotQueue.push({ t: p.dashTime + 0.02, fn: () => {
+            if (p.hp <= 0) return;
+            slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: ang, range: 115 + p.radius, color: '#fde68a', width: 14, life: 0.24, maxLife: 0.24, swing: 1, line: false, arc: 1.4 });
+            arcFoes(p, ang, 115, 1.4).forEach(e => { dealDamage(e, 22 * w3MM(p) * mult, p.id, { angle: Math.atan2(e.y - p.y, e.x - p.x), knock: 200, melee: true }); p.stats.hits++; smMark(p, e, 'sun'); spark(e.x, e.y, '#fde68a', 10, 240); });
+            hitStop(0.05); addShake(4); floatText(p.x, p.y - 40, '☀️ ĐAO CƯỜNG HOÁ', '#fde68a', 13);
+        } });
         return;
     }
     p.cooldown = 9 * p.fireRateMult; p.lastFireT = world.time; p.angle = ang; onAttack(p); p.stats.shots++;
@@ -306,10 +329,12 @@ function updateW3(dt) {
             if (e) {
                 f.hit.add(e.id);
                 dealDamage(e, f.dmg, o.id, { angle: f.a, knock: f.big ? 300 : 90 }); o.stats.hits++;
+                if (f.htReset) smHtReset(o, e, f, 'moon');
+                if (f.inf) smSetInf(o, e, f.inf);
                 for (let k = 0; k < f.marks; k++) smMark(o, e, f.mark);
                 if (f.stun) e.stun = Math.max(e.stun, f.stun);
                 if (f.blind && !has(e, 'nightVision')) e.st.blind = Math.max(e.st.blind || 0, f.blind);
-                if (f.stun || f.blind) floatText(e.x, e.y - 44, '😵 CHOÁNG + MÙ', '#c7d2fe', 14);
+                if (f.stun) floatText(e.x, e.y - 44, '😵 CHOÁNG + MÙ', '#c7d2fe', 14); else if (f.blind) floatText(e.x, e.y - 44, '🌙 MÙ NHẸ', '#c7d2fe', 13);
                 spark(e.x, e.y, '#e0e7ff', 6, 200);
                 if (f.pierce-- <= 0) { f.t = 0; }
             }
@@ -349,9 +374,13 @@ meleeTechCast = function (p) {
         else floatText(p.x, p.y - 48, '🗡 TRẢM HOÀN ĐẠN', '#fda4af', 14);
         return;
     }
-    if (w.id === 'SUNMOON') { // Nhật Luân Vũ (song đao): xoay đao quanh người 1s, mỗi nhát gắn Ấn Nhật
-        W3.push({ kind: 'smSpin', owner: p.id, t: 1, maxT: 1, tick: 0.2 });
-        p.st.haste = Math.max(p.st.haste || 0, 1); floatText(p.x, p.y - 44, '☀️ NHẬT LUÂN VŨ', '#fde68a', 15);
+    if (w.id === 'SUNMOON') { // Nguyệt Luân Hộ Thể: 1 lớp khiên + 3 lưỡi trăng xoay quanh người 10 giây (giữ cả khi đổi vũ khí)
+        for (let k = W3.length - 1; k >= 0; k--) if (W3[k].kind === 'smOrb' && W3[k].owner === p.id) W3.splice(k, 1);
+        W3.push({ kind: 'smOrb', owner: p.id, t: 10, maxT: 10, hitCd: {}, a0: Math.random() * 6 });
+        p.smOrbT = world.time + 10;
+        p.st.shield = Math.max(p.st.shield || 0, 45); p.st.shieldT = Math.max(p.st.shieldT || 0, 10);
+        ring(p.x, p.y, 10, 90, '#c7d2fe', 0.5, 5); spark(p.x, p.y, '#e0e7ff', 16, 220); castFx(p, '#c7d2fe', true);
+        floatText(p.x, p.y - 44, '🌙 NGUYỆT LUÂN HỘ THỂ', '#e0e7ff', 16); AudioSys.playAt('rail', p.x, p.y, 0.4);
         return;
     }
     return _meleeTechCastW3(p);
@@ -379,7 +408,8 @@ gunModCast = function (p) {
     }
     if (w.id === 'SUNMOON') { // Nguyệt Quang Tiễn (cung): 5 mũi xuyên toả, mỗi mũi gắn Ấn Nguyệt
         for (let i = 0; i < 5; i++) smArrow(p, a + (i - 2) * 0.13, { dmg: 18 * w3DM(p), pierce: 2, mark: 'moon' });
-        AudioSys.playAt('whoosh', p.x, p.y, 0.5); floatText(p.x, p.y - 44, '🌙 NGUYỆT QUANG TIỄN', '#c7d2fe', 15);
+        p.smRapid = 3;
+        AudioSys.playAt('whoosh', p.x, p.y, 0.5); floatText(p.x, p.y - 44, '🌙 NGUYỆT QUANG TIỄN · 3 LOẠT LIÊN THANH', '#c7d2fe', 15);
         return;
     }
     return _gunModCastW3(p);
@@ -412,15 +442,27 @@ Object.assign(HT, {
     }],
     SUNMOON: ['NHẬT NGUYỆT TUYỆT KỸ', p => {
         const w = getCurrentWeapon(p), a = aimDir(p);
-        if ((w.form || 'sun') === 'sun') { // Nguyệt Thực Tiễn: mũi tên khổng lồ xuyên tường, gắn 2 Ấn Nguyệt
-            smArrow(p, a, { dmg: 30 * w3DM(p), pierce: 9, marks: 2, mark: 'moon', big: true, wall: true, sp: 1500, max: 950 });
-            beams.push({ x1: p.x, y1: p.y, x2: p.x + Math.cos(a) * 950, y2: p.y + Math.sin(a) * 950, life: 0.3, maxLife: 0.3, color: '#c7d2fe' });
+        if ((w.form || 'sun') === 'sun') { // Nguyệt Thực Tiễn: xuyên tường, mù nhẹ, kẻ trúng tích Ấn Nguyệt vô hạn 2s → mưa tên
+            smArrow(p, a, { dmg: 30 * w3DM(p), pierce: 9, marks: 0, mark: 'moon', big: true, wall: true, sp: 1500, max: 950, blind: 1, inf: 'moon', htReset: true });
+            beams.push({ x1: p.x, y1: p.y, x2: p.x + Math.cos(a) * 950, y2: p.y + Math.sin(a) * 950, life: 0.35, maxLife: 0.35, color: '#c7d2fe' });
+            W3.push({ kind: 'moonFx', x: p.x, y: p.y, a, t: 0.5, maxT: 0.5 });
+            p.smEmp = 'arrow';
             AudioSys.playAt('shoot_heavy', p.x, p.y, 0.6); addShake(6); floatText(p.x, p.y - 44, '🌑 NGUYỆT THỰC TIỄN', '#c7d2fe', 15);
-        } else { // Nhật Diệu Trảm: lướt xuyên (cả tường) tới điểm, chém mọi kẻ trên đường, gắn 2 Ấn Nhật
+        } else { // Nhật Diệu Trảm: lướt xuyên chém, làm chậm (đang chậm → choáng), kẻ trúng tích Ấn Nhật vô hạn 2s → mất tầm nhìn
             const d = Math.max(80, Math.min(300, p.skillDist || 260)), s = umbFreeSpot(p, p.x + Math.cos(a) * d, p.y + Math.sin(a) * d);
-            const ax = p.x, ay = p.y; startTravel(p, s.x, s.y, 0.2, null, null, 30); afterImages(p, ax, ay, s.x, s.y, 6, '#fde68a');
-            enemiesOf(p).forEach(e => { if (!(e.air > 0) && segDist(e.x, e.y, ax, ay, s.x, s.y) < e.radius + 40) { dealDamage(e, 26 * w3MM(p), p.id, { melee: true, knock: 140, angle: a }); smMark(p, e, 'sun', 2); USK.push({ kind: 'xcut', x: e.x, y: e.y, a, t: 0.4, maxT: 0.4 }); } });
-            AudioSys.playAt('swing', p.x, p.y, 0.7); floatText(p.x, p.y - 44, '☀️ NHẬT DIỆU TRẢM', '#fde68a', 15);
+            const ax = p.x, ay = p.y; startTravel(p, s.x, s.y, 0.2, null, null, 30); afterImages(p, ax, ay, s.x, s.y, 7, '#fde68a');
+            W3.push({ kind: 'sunTrail', x1: ax, y1: ay, x2: s.x, y2: s.y, a, t: 0.6, maxT: 0.6 });
+            const F = {};
+            enemiesOf(p).filter(e => !(e.air > 0) && segDist(e.x, e.y, ax, ay, s.x, s.y) < e.radius + 40).sort((u, v) => dist(ax, ay, u.x, u.y) - dist(ax, ay, v.x, v.y)).forEach(e => {
+                smHtReset(p, e, F, 'sun');
+                const slowed = (e.st.slow || 0) > 0;
+                dealDamage(e, 26 * w3MM(p), p.id, { melee: true, knock: 140, angle: a });
+                if (slowed) { e.stun = Math.max(e.stun, 1); floatText(e.x, e.y - 44, '💫 CHOÁNG', '#fde68a', 14); } else e.st.slow = Math.max(e.st.slow || 0, 1.6);
+                smSetInf(p, e, 'sun');
+                USK.push({ kind: 'xcut', x: e.x, y: e.y, a, t: 0.45, maxT: 0.45 }); spark(e.x, e.y, '#fde68a', 14, 280);
+            });
+            p.smEmp = 'dash';
+            hitStop(0.05); addShake(6); AudioSys.playAt('swing', p.x, p.y, 0.7); floatText(p.x, p.y - 44, '☀️ NHẬT DIỆU TRẢM', '#fde68a', 15);
         }
     }]
 });
@@ -570,4 +612,189 @@ drawHUD = function (W, H, now) {
     if (!s) return;
     ctx.save(); ctx.font = `800 13px ${FONT}`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.75)';
     ctx.strokeText(s, W / 2, H - 112); ctx.fillStyle = col; ctx.fillText(s, W / 2, H - 112); ctx.restore();
+};
+
+/* ============================== NHẬT NGUYỆT CUNG · BẢN NÂNG CẤP ============================== */
+// Kỹ Thuật Cao trúng kẻ có ấn: tiêu 1 ấn để hồi chiêu ngay (chỉ kẻ đầu tiên tốn ấn)
+function smHtReset(o, e, F, pref) {
+    if (F.resetUsed) return;
+    const M = e.smMk; if (!M || M.by !== o.id || M.t < world.time || (M.sun <= 0 && M.moon <= 0)) return;
+    const k = M[pref] > 0 ? pref : (pref === 'moon' ? 'sun' : 'moon'); M[k]--; F.resetUsed = true;
+    (o.skills || []).forEach(s => { if (s.id === 'hightech') s.cd = 0; });
+    floatText(o.x, o.y - 58, '↺ HỒI CHIÊU (-1 ấn)', '#fef3c7', 14); ring(o.x, o.y, 6, 50, '#fef3c7', 0.35, 3); AudioSys.playAt('select', o.x, o.y, 0.4);
+}
+function smSetInf(o, e, kind) {
+    if (!e.smMk || e.smMk.by !== o.id || e.smMk.t < world.time) e.smMk = { sun: 0, moon: 0, by: o.id, t: world.time + 30 };
+    e.smInf = { kind, by: o.id, t: world.time + 2 };
+    floatText(e.x, e.y - 60, kind === 'moon' ? '🌙∞ TÍCH VÔ HẠN' : '☀️∞ TÍCH VÔ HẠN', kind === 'moon' ? '#c7d2fe' : '#fde68a', 13);
+}
+// không thể kích hoạt lại Nguyệt Luân khi lưỡi trăng còn (hồi chiêu vẫn chạy); vũ khí khác vẫn dùng được
+const _castSkillSM = castSkill;
+castSkill = function (p, slot, aimVec) {
+    const s = p.skills && p.skills[slot], w = getCurrentWeapon(p);
+    if (s && s.id === 'meleeTech' && w && w.id === 'SUNMOON' && p.smOrbT > world.time) { if (!p.isBot) floatText(p.x, p.y - 30, `🌙 Lưỡi trăng còn ${Math.ceil(p.smOrbT - world.time)}s`, '#c7d2fe', 12); return; }
+    return _castSkillSM(p, slot, aimVec);
+};
+const _upeSM = updatePartyExtras;
+updatePartyExtras = function (dt) {
+    _upeSM(dt);
+    if (gameState !== 'PLAYING' && gameState !== 'KO') return;
+    const now = world.time;
+    W3.forEach(f => {
+        const o = players.find(q => q.id === f.owner);
+        if (f.kind === 'smOrb') { // 3 lưỡi trăng xoay quanh người
+            if (!o || o.hp <= 0) { f.t = 0; return; }
+            for (let k = 0; k < 3; k++) {
+                const a = f.a0 + now * 3.4 + k * Math.PI * 2 / 3, bx = o.x + Math.cos(a) * 76, by = o.y + Math.sin(a) * 76;
+                for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== o.id && dist(b.x, b.y, bx, by) < 20 + (b.size || 3)) { spark(b.x, b.y, '#e0e7ff', 5, 180); bullets.splice(i, 1); } }
+                enemiesOf(o).forEach(e => {
+                    if (e.air > 0 || dist(e.x, e.y, bx, by) > e.radius + 18) return;
+                    const key = e.id + '_' + k; if ((f.hitCd[key] || 0) > now) return; f.hitCd[key] = now + 0.45;
+                    dealDamage(e, 10 * w3MM(o), o.id, { melee: true, knock: 120, angle: Math.atan2(e.y - o.y, e.x - o.x) }); e.st.slow = Math.max(e.st.slow || 0, 1.2);
+                    spark(e.x, e.y, '#c7d2fe', 6, 200);
+                });
+            }
+        } else if (f.kind === 'smRain') { // mưa tên trút xuống một mục tiêu
+            const e = players.find(q => q.id === f.tid);
+            if (!o || !e || e.hp <= 0) { f.t = 0; return; }
+            f.k += dt;
+            while (f.k >= 0.07 && f.n > 0) { f.k -= 0.07; f.n--; const x = e.x + (Math.random() - 0.5) * 50, y = e.y + (Math.random() - 0.5) * 50; beams.push({ x1: x + 34, y1: y - 300, x2: x, y2: y, life: 0.2, maxLife: 0.2, color: '#c7d2fe' }); if (dist(x, y, e.x, e.y) < e.radius + 26) dealDamage(e, 8 * w3DM(o), o.id, { knock: 1 }); spark(x, y, '#e0e7ff', 3, 120); if (f.n % 3 === 0) AudioSys.playAt('hit', x, y, 0.15); }
+            if (f.n <= 0) f.t = 0; else f.t = Math.max(f.t, 0.2);
+        }
+    });
+    // hết 2 giây không tích thêm → kết thúc trạng thái tích vô hạn
+    players.forEach(e => {
+        const I = e.smInf; if (!I || I.t > now) return;
+        e.smInf = null;
+        const o = players.find(q => q.id === I.by), M = e.smMk; if (!o || !M || e.hp <= 0) return;
+        const n = M[I.kind] || 0; M[I.kind] = 0; if (n <= 0) return;
+        if (I.kind === 'moon') { W3.push({ kind: 'smRain', owner: o.id, tid: e.id, n: Math.min(60, n * 3), k: 0, t: 5, maxT: 5 }); floatText(e.x, e.y - 56, `🌙 MƯA TÊN ×${Math.min(60, n * 3)}`, '#c7d2fe', 16); }
+        else { const T = Math.min(6, 0.6 * n); if (!has(e, 'nightVision')) e.st.blind = Math.max(e.st.blind || 0, T); e.smDark = now + T; floatText(e.x, e.y - 56, `🌑 MẤT TẦM NHÌN ${T.toFixed(1)}s`, '#fde68a', 16); ring(e.x, e.y, 6, 80, '#78350f', 0.5, 6); }
+    });
+};
+// tầm nhìn: bị Nhật Diệu kết thúc thì tối gần như hoàn toàn
+const _visionRangeSM = visionRange;
+visionRange = function (viewer) { const v = viewer || localPlayer(); const r = _visionRangeSM(viewer); return v && v.smDark > world.time ? r * 0.35 : r; };
+const _skillProfileSM = skillProfile;
+skillProfile = function (p, id) {
+    const w = getCurrentWeapon(p);
+    if (w && w.id === 'SUNMOON') {
+        if (id === 'meleeTech') return { aim: null, shape: 'selfaoe', aoe: 94, col: '199,210,254', tag: p.smOrbT > world.time ? `🌙 còn ${Math.ceil(p.smOrbT - world.time)}s` : '🌙 3 LƯỠI TRĂNG 10s' };
+        if (id === 'gunMod') return { aim: 'dir', R: 560, shape: 'cone', half: 0.3, col: '199,210,254', tag: '+3 LOẠT LIÊN THANH' };
+        if (id === 'hightech') return w.form === 'moon' ? { aim: 'point', R: 300, shape: 'point', aoe: 50, col: '253,230,138', tag: '☀️ CHẬM→CHOÁNG · ∞ ẤN' } : { aim: 'dir', R: 950, shape: 'line', w: 40, col: '199,210,254', tag: '🌑 XUYÊN TƯỜNG · ∞ ẤN' };
+    }
+    return _skillProfileSM(p, id);
+};
+WEAPONS.SUNMOON.desc = 'Nhật Cung: bắn thẳng, gắn Ấn Nguyệt; giữ để lướt 2 lần rồi thành song đao. Nguyệt Song Đao: chém nhanh gắn Ấn Nhật; giữ để nhảy lùi bắn tên choáng + mù rồi thành cung. Ấn tích tối đa 5; Ấn Nhật + Ấn Nguyệt trên cùng địch → NỔ sát thương chuẩn. Kỹ Thuật Cao trúng kẻ có ấn: tiêu 1 ấn để hồi chiêu ngay.';
+
+/* ============================== ĐỒ HOẠ MỚI: SONG ĐAO · NHẬT NGUYỆT CUNG ============================== */
+function daggerShape(c, L, glow, now, seed) { // một con dao găm cong: chuôi quấn dây, chắn tay vàng, lưỡi bạc có rãnh
+    c.fillStyle = '#d6d3d1'; c.beginPath(); c.arc(-8, 0, 2.2, 0, Math.PI * 2); c.fill(); outl(c, 0.8); // núm chuôi
+    metal(c, -7, -2, 9, 4, '#3b2416', 1.6, 0.2); // chuôi
+    c.strokeStyle = '#b45309'; c.lineWidth = 0.9; for (let i = 0; i < 3; i++) { c.beginPath(); c.moveTo(-5 + i * 2.6, -2); c.lineTo(-3.6 + i * 2.6, 2); c.stroke(); } // dây quấn
+    metal(c, 1.5, -4.6, 2.4, 9.2, '#ca8a04', 1.2, 0.6); glint(c, 2.6, -3.4, 0.7); // chắn tay
+    const g = c.createLinearGradient(0, -4, 0, 4); g.addColorStop(0, '#f8fafc'); g.addColorStop(0.45, '#cbd5e1'); g.addColorStop(1, '#475569');
+    c.beginPath(); c.moveTo(4, -2.6); c.quadraticCurveTo(L * 0.55, -4.8, L, -0.6); c.lineTo(L + 1.6, 0.5); c.quadraticCurveTo(L * 0.55, 3, 4, 2.6); c.closePath();
+    c.fillStyle = g; c.fill(); outl(c, 0.9);
+    c.strokeStyle = 'rgba(15,23,42,0.45)'; c.lineWidth = 0.7; c.beginPath(); c.moveTo(5, 0); c.quadraticCurveTo(L * 0.5, -1.4, L * 0.85, -0.4); c.stroke(); // rãnh máu
+    c.strokeStyle = 'rgba(255,255,255,0.75)'; c.lineWidth = 0.6; c.beginPath(); c.moveTo(5, -2.3); c.quadraticCurveTo(L * 0.55, -4.4, L - 1, -0.9); c.stroke(); // mép sáng
+    glint(c, 6 + ((now * 22 + seed * 7) % (L - 6)), -1.6, 0.8);
+    if (glow > 0) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(226,232,240,${glow})`; c.lineWidth = 3; c.beginPath(); c.moveTo(5, -2.5); c.quadraticCurveTo(L * 0.55, -4.8, L, -0.6); c.stroke(); c.restore(); }
+}
+function moonBlade(c, R, now, k, glow) { // lưỡi trăng khuyết lớn
+    const g = c.createLinearGradient(0, -R, R, R); g.addColorStop(0, '#f8fafc'); g.addColorStop(0.5, '#c7d2fe'); g.addColorStop(1, '#4338ca');
+    c.beginPath(); c.arc(0, 0, R, -1.35, 1.35); c.arc(-R * 0.42, 0, R * 0.86, 1.12, -1.12, true); c.closePath();
+    c.fillStyle = g; c.fill(); outl(c, 1);
+    c.save(); c.globalCompositeOperation = 'lighter';
+    c.strokeStyle = `rgba(224,231,255,${0.55 + Math.sin(now * 5 + k) * 0.25 + glow})`; c.lineWidth = 1.4; c.beginPath(); c.arc(0, 0, R - 0.8, -1.25, 1.25); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,0.9)'; [[-0.7, 0.8], [0.2, 1.1], [0.85, 0.7]].forEach(([t, s]) => { c.beginPath(); c.arc(Math.cos(t) * (R - 3), Math.sin(t) * (R - 3), s, 0, Math.PI * 2); c.fill(); }); // sao nhỏ
+    c.restore();
+}
+Object.assign(ART2, {
+    DAGGERS: (c, w, r, x0, ch, now, p) => {
+        const alt = p ? (p.strikeN || 0) % 2 : 0;
+        [[-8, -0.2, alt ? 4 : 0, 0], [8, 0.2, alt ? 0 : 4, 1]].forEach(([oy, rot, fwd, i]) => {
+            c.save(); c.translate(r + fwd, oy); c.rotate(rot); daggerShape(c, 22, ch * 0.6, now, i); c.restore();
+        });
+    },
+    SUNMOON: (c, w, r, x0, ch, now, p) => {
+        if ((w.form || 'sun') === 'sun') {
+            // cung vàng hai tầng (recurve) + đĩa mặt trời ở tay cầm + dây + mũi tên đầu trăng
+            const R = 17, pull = ch * 9, cx = x0 + 4;
+            c.save(); c.strokeStyle = '#78350f'; c.lineWidth = 4.2; c.beginPath(); c.arc(cx, 0, R, -1.2, 1.2); c.stroke();
+            const g = c.createLinearGradient(cx, -R, cx, R); g.addColorStop(0, '#fef3c7'); g.addColorStop(0.5, '#f59e0b'); g.addColorStop(1, '#fef3c7');
+            c.strokeStyle = g; c.lineWidth = 2.4; c.beginPath(); c.arc(cx, 0, R, -1.2, 1.2); c.stroke();
+            [-1, 1].forEach(sd => { const tx = cx + Math.cos(1.2) * R, ty = sd * Math.sin(1.2) * R; c.strokeStyle = '#f59e0b'; c.lineWidth = 2; c.beginPath(); c.moveTo(tx, ty); c.quadraticCurveTo(tx + 5, ty + sd * 2, tx + 3, ty + sd * 6); c.stroke(); }); // đầu cong recurve
+            const sx = cx + Math.cos(1.2) * R + 3;
+            c.strokeStyle = 'rgba(254,243,199,0.9)'; c.lineWidth = 0.9; c.beginPath(); c.moveTo(sx, -R + 1); c.lineTo(cx - pull, 0); c.lineTo(sx, R - 1); c.stroke();
+            metal(c, cx - pull, -0.8, 30, 1.6, '#d6d3d1', 0.8, 0.4); // thân tên
+            c.fillStyle = '#e0e7ff'; c.beginPath(); c.moveTo(cx - pull + 36, 0); c.quadraticCurveTo(cx - pull + 30, -4.5, cx - pull + 28, -3); c.quadraticCurveTo(cx - pull + 31, 0, cx - pull + 28, 3); c.quadraticCurveTo(cx - pull + 30, 4.5, cx - pull + 36, 0); c.fill(); outl(c, 0.7); // đầu tên trăng
+            c.fillStyle = '#fde68a'; c.fillRect(cx - pull - 2, -2.2, 4, 1.2); c.fillRect(cx - pull - 2, 1, 4, 1.2); // lông tên
+            c.translate(cx + R - 1, 0); c.globalCompositeOperation = 'lighter';
+            const sg = c.createRadialGradient(0, 0, 0, 0, 0, 7); sg.addColorStop(0, 'rgba(255,251,235,1)'); sg.addColorStop(0.5, 'rgba(253,224,71,0.8)'); sg.addColorStop(1, 'rgba(245,158,11,0)');
+            c.fillStyle = sg; c.beginPath(); c.arc(0, 0, 7, 0, Math.PI * 2); c.fill();
+            c.rotate(now * 1.5); c.fillStyle = `rgba(253,224,71,${0.7 + ch * 0.3})`; for (let i = 0; i < 8; i++) { c.rotate(Math.PI / 4); c.beginPath(); c.moveTo(4.5, -0.9); c.lineTo(8 + ch * 2, 0); c.lineTo(4.5, 0.9); c.fill(); } // tia mặt trời
+            c.restore();
+            if (ch > 0.3) glint(c, cx - pull + 36, 0, 1 + ch);
+        } else {
+            // Nguyệt Song Đao: hai thanh loan đao cầm ở hai tay (chắn tay hình trăng khuyết, lưỡi cong bạc xanh)
+            const alt = p ? (p.strikeN || 0) % 2 : 0;
+            [[-8, -0.22, alt ? 5 : 0, 0], [8, 0.22, alt ? 0 : 5, 1]].forEach(([oy, rot, fwd, k]) => {
+                c.save(); c.translate(r - 1 + fwd, oy); c.rotate(rot);
+                metal(c, -8, -1.9, 10, 3.8, '#1e1b4b', 1.6, 0.3); // chuôi
+                c.strokeStyle = '#a5b4fc'; c.lineWidth = 0.8; for (let q = 0; q < 3; q++) { c.beginPath(); c.moveTo(-6 + q * 2.6, -1.9); c.lineTo(-4.8 + q * 2.6, 1.9); c.stroke(); }
+                c.fillStyle = '#e0e7ff'; c.beginPath(); c.arc(-9, 0, 1.8, 0, Math.PI * 2); c.fill(); outl(c, 0.6);
+                c.fillStyle = '#c7d2fe'; c.beginPath(); c.arc(2.5, 0, 5, -1.9, 1.9); c.arc(0.8, 0, 4.2, 1.6, -1.6, true); c.closePath(); c.fill(); outl(c, 0.8); // chắn tay trăng khuyết
+                const L = 30, g = c.createLinearGradient(0, -5, 0, 4); g.addColorStop(0, '#f8fafc'); g.addColorStop(0.5, '#c7d2fe'); g.addColorStop(1, '#4338ca');
+                c.beginPath(); c.moveTo(4, -1.8); c.quadraticCurveTo(L * 0.55, -3.2 + (k ? 0 : 0), L, -6.5); c.quadraticCurveTo(L * 0.6, 1.2, 4, 2.2); c.closePath(); // lưỡi loan đao cong vút
+                c.fillStyle = g; c.fill(); outl(c, 0.9);
+                c.save(); c.globalCompositeOperation = 'lighter';
+                c.strokeStyle = `rgba(224,231,255,${0.5 + Math.sin(now * 5 + k * 2) * 0.25 + ch * 0.3})`; c.lineWidth = 1.3; c.beginPath(); c.moveTo(5, -1.7); c.quadraticCurveTo(L * 0.55, -3.1, L - 0.5, -6.2); c.stroke(); // mép sáng
+                if (ch > 0.2) { c.strokeStyle = `rgba(165,180,252,${ch * 0.5})`; c.lineWidth = 5; c.stroke(); }
+                c.fillStyle = 'rgba(255,255,255,0.9)'; c.beginPath(); c.arc(12 + ((now * 18 + k * 9) % 14), -2.4, 0.8, 0, Math.PI * 2); c.fill();
+                c.restore();
+                c.restore();
+            });
+        }
+        MUZ.SUNMOON = x0 + 22;
+    }
+});
+
+/* ============================== VẼ HIỆU ỨNG MỚI ============================== */
+const _drawW2FxSM = drawW2Fx;
+drawW2Fx = function (now) {
+    _drawW2FxSM(now);
+    ctx.save(); ctx.lineCap = 'round';
+    const T = world.time;
+    W3.forEach(f => {
+        const k = Math.max(0, f.t / f.maxT);
+        if (f.kind === 'smOrb') {
+            const o = players.find(q => q.id === f.owner); if (!o || o.hp <= 0) return;
+            const fade = Math.min(1, f.t / 0.6);
+            ctx.save(); ctx.globalAlpha = fade;
+            ctx.strokeStyle = 'rgba(199,210,254,0.18)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 8]); ctx.beginPath(); ctx.arc(o.x, o.y, 76, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+            for (let j = 0; j < 3; j++) {
+                const a = f.a0 + T * 3.4 + j * Math.PI * 2 / 3;
+                ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = 'rgba(165,180,252,0.35)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(o.x, o.y, 76, a - 0.55, a); ctx.stroke(); ctx.restore(); // vệt đuôi
+                ctx.save(); ctx.translate(o.x + Math.cos(a) * 76, o.y + Math.sin(a) * 76); ctx.rotate(a + Math.PI / 2);
+                ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(0, 0, 2, 0, 0, 24); g.addColorStop(0, 'rgba(224,231,255,0.6)'); g.addColorStop(1, 'rgba(99,102,241,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
+                ctx.globalCompositeOperation = 'source-over'; moonBlade(ctx, 15, now, j, 0.2);
+                ctx.restore();
+            }
+            ctx.restore();
+        } else if (f.kind === 'moonFx') {
+            ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.a); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = k;
+            const R = 30 + (1 - k) * 90; ctx.fillStyle = 'rgba(199,210,254,0.55)'; ctx.beginPath(); ctx.arc(0, 0, R, -1.3, 1.3); ctx.arc(-R * 0.4, 0, R * 0.85, 1.1, -1.1, true); ctx.closePath(); ctx.fill(); ctx.restore();
+        } else if (f.kind === 'sunTrail') {
+            ctx.save(); ctx.globalCompositeOperation = 'lighter';
+            ctx.strokeStyle = `rgba(253,224,71,${0.5 * k})`; ctx.lineWidth = 26 * k; ctx.beginPath(); ctx.moveTo(f.x1, f.y1); ctx.lineTo(f.x2, f.y2); ctx.stroke();
+            ctx.strokeStyle = `rgba(255,251,235,${k})`; ctx.lineWidth = 3; ctx.stroke();
+            const L = dist(f.x1, f.y1, f.x2, f.y2), n = Math.max(2, Math.floor(L / 70));
+            for (let i = 0; i <= n; i++) { const x = f.x1 + (f.x2 - f.x1) * i / n, y = f.y1 + (f.y2 - f.y1) * i / n, r = (8 + 6 * (1 - k)) ; ctx.save(); ctx.translate(x, y); ctx.rotate(now * 4 + i); ctx.fillStyle = `rgba(253,224,71,${0.8 * k})`; ctx.beginPath(); ctx.arc(0, 0, r * 0.5, 0, Math.PI * 2); ctx.fill(); for (let q = 0; q < 8; q++) { ctx.rotate(Math.PI / 4); ctx.beginPath(); ctx.moveTo(r * 0.6, -1.5); ctx.lineTo(r * 1.3, 0); ctx.lineTo(r * 0.6, 1.5); ctx.fill(); } ctx.restore(); }
+            ctx.restore();
+        }
+    });
+    // ký hiệu ∞ khi đang tích vô hạn
+    players.forEach(e => { const I = e.smInf; if (!I || I.t < T || e.hp <= 0) return; const kk = (I.t - T) / 2; ctx.save(); ctx.strokeStyle = I.kind === 'moon' ? `rgba(199,210,254,${0.5 + kk * 0.5})` : `rgba(253,224,71,${0.5 + kk * 0.5})`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius + 10, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * kk); ctx.stroke(); ctx.font = `800 13px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = ctx.strokeStyle; ctx.fillText('∞', e.x + e.radius + 14, e.y - e.radius - 8); ctx.restore(); });
+    ctx.restore();
 };
