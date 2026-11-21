@@ -165,6 +165,8 @@ function bgGenerate() {
     BG.regions.forEach(R => { const m = 70; BUILD[R.b]({ x: R.x + m, y: R.y + m, w: R.w - 2 * m, h: R.h - 2 * m }); });
     // hòm thính rải khắp bản đồ
     for (let k = 0; k < 150; k++) { const x = rnd(80, MAP_W - 80), y = rnd(80, MAP_H - 80); if (!pointInObstacle(x, y, 30) && !zones.some(z => z.type === 'lava' && dist(z.x, z.y, x, y) < z.r)) crates.push(makeCrate(x, y)); }
+    // hòm thẻ nâng cấp: xanh (chọn 1/3) và vàng (chọn 1/4, hồi máu) — hiếm hơn ở rìa, nhiều hơn ở giữa
+    for (let k = 0, n = 0; k < 400 && n < 54; k++) { const x = rnd(100, MAP_W - 100), y = rnd(100, MAP_H - 100); if (pointInObstacle(x, y, 30) || zones.some(z => (z.type === 'lava' || z.type === 'water') && dist(z.x, z.y, x, y) < z.r + 10)) continue; const gold = n < 10; if (gold && dist(x, y, MAP_W / 2, MAP_H / 2) > MAP_W * 0.33) continue; const c = makeCrate(x, y, gold ? 'CARDGOLD' : 'CARDBOX'); c.size = gold ? 32 : 28; crates.push(c); n++; }
     BG.placed = [];
 }
 const bgRegionAt = (x, y) => BG.regions.find(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
@@ -238,10 +240,14 @@ killPlayer = function (dead, killerId) {
     if (me && dead === me && gameState === 'PLAYING') showBanner(`HẠNG #${dead.bgPlace} / ${BG.N}`, `☠ ${me.bgKills || 0} hạ gục · đang theo dõi trận đấu (tạm dừng → Thoát để về menu)`, '#ff4d5e', 3, 44);
     return r;
 };
-function bgReward(p) {
+function bgCardPool(p) {
+    const skills = (p.build || []).filter(id => CARDS[id] && CARDS[id].kind === 'S').length;
+    return Object.keys(CARDS).filter(id => { const c = CARDS[id]; return c && (c.kind === 'S' || c.kind === 'P') && !c.comboOnly && !c.evo && !c.masterOnly && !(p.build || []).includes(id) && (c.kind === 'P' || skills < 3) && id !== 'weaponMaster'; });
+}
+function bgReward(p, forcedId, heal = 40) {
     const skills = (p.build || []).filter(id => CARDS[id] && CARDS[id].kind === 'S').length;
     const pool = Object.keys(CARDS).filter(id => { const c = CARDS[id]; return c && (c.kind === 'S' || c.kind === 'P') && !c.comboOnly && !c.evo && !c.masterOnly && !(p.build || []).includes(id) && (c.kind === 'P' || skills < 3) && id !== 'weaponMaster'; });
-    const id = pool[Math.floor(Math.random() * pool.length)];
+    const id = forcedId !== undefined ? forcedId : pool[Math.floor(Math.random() * pool.length)];
     const hp = p.hp, x = p.x, y = p.y, a = p.angle, inv = p.inventory.map(w => w), idx = p.weaponIdx, ar = p.armor, sp = (p.spells || []).map(s => ({ ...s }));
     const skCd = {}; (p.skills || []).forEach(s => skCd[s.id] = s.cd);
     if (id) p.build.push(id);
@@ -249,7 +255,7 @@ function bgReward(p) {
     resetPlayerForRound(p);
     p.x = x; p.y = y; p.angle = a; p.inventory = inv; p.weaponIdx = idx; p.armor = Math.max(p.armor || 0, ar || 0); p.spells = sp; p.brain = brain;
     (p.skills || []).forEach(s => { if (skCd[s.id] !== undefined) s.cd = skCd[s.id]; });
-    p.hp = Math.min(p.maxHp, hp + 40); p.ghostHp = p.hp; p.spawnShield = 0;
+    p.hp = Math.min(p.maxHp, hp + heal); p.ghostHp = p.hp; p.spawnShield = 0;
     if (id) { floatText(p.x, p.y - 52, `🎁 ${CARDS[id].icon} ${CARDS[id].name}`, '#fde047', 14); if (p === localPlayer()) showBanner('🎁 THẺ MỚI!', `${CARDS[id].icon} ${CARDS[id].name}`, '#fde047', 1.8, 36); }
     ring(p.x, p.y, 6, 60, '#fde047', 0.4, 4);
 }
@@ -463,3 +469,162 @@ drawNetZones = function (now) {
     }
     return _drawNetZonesBG2(now);
 };
+
+/* ============================== HÒM THẺ NÂNG CẤP ============================== */
+const _openCrateBG = openCrate;
+openCrate = function (p, index) {
+    const c = crates[index];
+    if (!c || (c.type !== 'CARDBOX' && c.type !== 'CARDGOLD')) return _openCrateBG(p, index);
+    crates.splice(index, 1);
+    const gold = c.type === 'CARDGOLD', n = gold ? 4 : 3;
+    const pool = bgCardPool(p).sort(() => Math.random() - 0.5), choices = pool.slice(0, n);
+    ring(c.x, c.y, 8, 70, gold ? '#facc15' : '#a78bfa', 0.5, 5); spark(c.x, c.y, gold ? '#fde68a' : '#c4b5fd', 18, 260);
+    AudioSys.playAt(gold ? 'legend' : 'pickup', c.x, c.y, 0.4);
+    if (gold) { p.hp = Math.min(p.maxHp, p.hp + 40); p.armor = Math.min(Math.max(150, p.maxArmor || 0), (p.armor || 0) + 30); }
+    if (!choices.length) return;
+    if (p.isBot || p.remote) { // bot: chọn ngay (ưu tiên thẻ tạo phối hợp)
+        const combo1 = choices.find(id => (COMBOS_OF[id] || []).some(cb => p.build.includes(cb.a === id ? cb.b : cb.a)));
+        bgReward(p, combo1 || choices[0], gold ? 0 : 15); return;
+    }
+    (p.bgPending = p.bgPending || []).push({ choices, gold });
+    floatText(p.x, p.y - 50, gold ? '🟨 RƯƠNG VÀNG! +1 thẻ (chọn 1/4)' : '🟪 RƯƠNG THẺ! +1 thẻ (chọn 1/3)', gold ? '#fde047' : '#c4b5fd', 15);
+    bagRender();
+};
+
+/* ============================== TÚI ĐỒ ============================== */
+(function bagStyle() {
+    const css = `
+#bg-bag{position:fixed;top:14px;right:66px;z-index:60;border:1px solid rgba(253,224,71,.5);background:rgba(15,23,42,.9);color:#fef3c7;border-radius:10px;padding:7px 11px;font:800 13px system-ui,sans-serif;cursor:pointer}
+#bg-bag .badge{display:inline-block;min-width:18px;margin-left:6px;padding:1px 5px;border-radius:9px;background:#e11d48;color:#fff;font-size:11px}
+#bg-bag-panel{position:fixed;top:60px;right:12px;bottom:12px;width:min(380px,calc(100vw - 24px));z-index:59;display:flex;flex-direction:column;background:rgba(10,15,28,.95);border:1px solid rgba(253,224,71,.35);border-radius:14px;color:#e2e8f0;font:13px system-ui,sans-serif;box-shadow:0 10px 40px rgba(0,0,0,.5);overflow:hidden}
+#bg-bag.hidden,#bg-bag-panel.hidden,#ff-btn.hidden{display:none}
+#bg-bag-panel .h{padding:10px 12px;font-weight:800;color:#fde68a;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(148,163,184,.18)}
+#bg-bag-panel .b{flex:1;overflow-y:auto;padding:8px 10px 14px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#bg-bag-panel,#bg-bag-panel *{touch-action:pan-y}
+#bg-bag-panel .l{font-size:11px;color:#94a3b8;letter-spacing:.06em;margin:10px 0 4px;font-weight:700}
+#bg-bag-panel .it{display:flex;gap:8px;align-items:center;width:100%;border:1px solid rgba(148,163,184,.22);background:rgba(30,41,59,.6);border-radius:9px;padding:7px 8px;margin-bottom:5px;color:#e2e8f0;text-align:left;font:12px system-ui,sans-serif}
+#bg-bag-panel button.it{cursor:pointer}#bg-bag-panel button.it:hover{border-color:#fde047}
+#bg-bag-panel .it i{font-style:normal;font-size:19px;flex:none}
+#bg-bag-panel .it small{display:block;color:#94a3b8;font-size:10.5px;margin-top:2px}
+#bg-bag-panel .pick{border-color:rgba(167,139,250,.6);background:rgba(76,29,149,.35)}
+#bg-bag-panel .pick.gold{border-color:rgba(250,204,21,.7);background:rgba(113,63,18,.4)}
+#bg-bag-panel .x{border:1px solid rgba(148,163,184,.3);background:rgba(30,41,59,.7);color:#cbd5e1;border-radius:8px;padding:4px 9px;cursor:pointer;font:700 12px system-ui,sans-serif}
+#ff-btn{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:61;border:1px solid rgba(125,211,252,.6);background:rgba(15,23,42,.9);color:#e0f2fe;border-radius:12px;padding:10px 18px;font:800 15px system-ui,sans-serif;cursor:pointer}
+`;
+    const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+    const btn = document.createElement('button'); btn.id = 'bg-bag'; btn.className = 'hidden'; document.body.appendChild(btn);
+    const pan = document.createElement('div'); pan.id = 'bg-bag-panel'; pan.className = 'hidden'; document.body.appendChild(pan);
+    const ff = document.createElement('button'); ff.id = 'ff-btn'; ff.className = 'hidden'; ff.textContent = '⏩ TUA ×1'; document.body.appendChild(ff);
+    btn.addEventListener('click', () => { BG.bagOpen = !BG.bagOpen; bagRender(); });
+    ['touchstart', 'touchmove', 'touchend', 'mousedown', 'wheel'].forEach(ev => { pan.addEventListener(ev, e => e.stopPropagation(), { passive: true }); ff.addEventListener(ev, e => e.stopPropagation(), { passive: true }); });
+    pan.addEventListener('click', bagClick);
+    ff.addEventListener('click', () => { FF.speed = FF.speed >= 8 ? 1 : FF.speed * 2; ff.textContent = `⏩ TUA ×${FF.speed}`; AudioSys.play('ui', 0.3); });
+    window.addEventListener('keydown', e => { if (BG.on && e.code === 'KeyJ' && ['PLAYING', 'KO', 'COUNTDOWN'].includes(gameState)) { BG.bagOpen = !BG.bagOpen; bagRender(); } });
+})();
+function bagRender() {
+    const btn = $('bg-bag'), pan = $('bg-bag-panel'), me = localPlayer();
+    const show = BG.on && me && ['PLAYING', 'KO', 'COUNTDOWN'].includes(gameState) && me.hp > 0;
+    btn.classList.toggle('hidden', !show); pan.classList.toggle('hidden', !show || !BG.bagOpen);
+    if (!show) return;
+    const pend = (me.bgPending || []).length;
+    const bh = `🎒 TÚI ĐỒ (J)${pend ? `<span class="badge">${pend}</span>` : ''}`; if (btn._h !== bh) { btn._h = bh; btn.innerHTML = bh; }
+    if (!BG.bagOpen) return;
+    const esc2 = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const strip = s => String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    let h = `<div class="h"><span>🎒 TÚI ĐỒ</span><button class="x" data-a="close">✕</button></div><div class="b">`;
+    if (pend) {
+        const P = me.bgPending[0];
+        h += `<div class="l">${P.gold ? '🟨 RƯƠNG VÀNG' : '🟪 RƯƠNG THẺ'} · CHỌN 1 THẺ NÂNG CẤP${pend > 1 ? ` (còn ${pend - 1} rương nữa)` : ''}</div>`;
+        P.choices.forEach(id => { const c = CARDS[id]; const cb = (COMBOS_OF[id] || []).filter(x => me.build.includes(x.a === id ? x.b : x.a)).map(x => x.name);
+            h += `<button class="it pick ${P.gold ? 'gold' : ''}" data-a="pick" data-v="${id}"><i>${c.icon || '🃏'}</i><span><b>${esc2(c.name)}</b> <small>${c.kind === 'S' ? '⚡ Kỹ năng' : '🛡 Nội tại'} · ${esc2(strip(c.desc)).slice(0, 170)}</small>${cb.length ? `<small style="color:#fde047">⚡ Mở phối hợp: ${esc2(cb.join(', '))}</small>` : ''}</span></button>`; });
+        h += `<button class="it" data-a="skip"><i>❤️</i><span><b>Bỏ qua</b> <small>Đổi lấy +35 máu</small></span></button>`;
+    }
+    h += `<div class="l">VŨ KHÍ</div>`;
+    me.inventory.forEach((w, i) => { const am = w.magSize ? `${w.mag}/${w.reserve}` : w.durability !== undefined ? `độ bền ${Math.ceil(w.durability)}/${w.maxDurability}` : ''; h += `<button class="it" data-a="slot" data-v="${i}"><i>${w.icon || '✊'}</i><span><b>${i === me.weaponIdx ? '▶ ' : ''}${esc2(w.name)}</b> <small>${am}${i !== me.weaponIdx ? ' · chạm để cầm' : ' · đang cầm'}</small></span></button>`; });
+    if ((me.items || []).length) { h += `<div class="l">VẬT PHẨM</div>`; me.items.forEach((it, i) => { const I = ITEMS[it.id]; if (I) h += `<button class="it" data-a="item" data-v="${i}"><i>${I.icon}</i><span><b>${esc2(I.name)}</b> <small>chạm để dùng · còn ${it.uses}</small></span></button>`; }); }
+    if ((me.spells || []).length) { h += `<div class="l">PHÉP BỔ TRỢ</div>`; me.spells.forEach(s => { const S = SPELLS[s.id]; if (S) h += `<div class="it"><i>${S.icon}</i><span><b>${esc2(S.name)}</b> <small>${s.cd > 0 ? `hồi ${Math.ceil(s.cd)}s` : 'sẵn sàng'}</small></span></div>`; }); }
+    h += `<div class="l">BỘ THẺ (${me.build.length})</div>`;
+    me.build.forEach(id => { const c = CARDS[id]; if (c) h += `<div class="it"><i>${c.icon || '🃏'}</i><span><b>${esc2(c.name)}</b> <small>${c.kind === 'S' ? '⚡ Kỹ năng' : '🛡 Nội tại'} · ${esc2(strip(c.desc)).slice(0, 120)}</small></span></div>`; });
+    const cs = (me.combos || []).map(id => COMBOS.find(x => x.id === id)).filter(Boolean);
+    if (cs.length) { h += `<div class="l">PHỐI HỢP ĐANG CÓ</div>`; cs.forEach(c => { h += `<div class="it"><i>⚡</i><span><b style="color:#fde047">${esc2(c.name)}</b> <small>${esc2(strip(c.desc)).slice(0, 120)}</small></span></div>`; }); }
+    h += `<div class="l" style="margin-top:12px">Mở hòm 🟪 / 🟨 trên bản đồ để nhận thẻ. Trận không dừng khi mở túi — cẩn thận!</div></div>`;
+    if (pan._h !== h) { pan._h = h; pan.innerHTML = h; }
+}
+function bagClick(e) {
+    const t = e.target.closest('[data-a]'); if (!t) return;
+    const me = localPlayer(); if (!me || me.hp <= 0) return;
+    const a = t.dataset.a, v = t.dataset.v;
+    AudioSys.play('ui', 0.3);
+    if (a === 'close') { BG.bagOpen = false; }
+    else if (a === 'pick') { const P = (me.bgPending || []).shift(); if (P && P.choices.includes(v)) bgReward(me, v, 0); }
+    else if (a === 'skip') { (me.bgPending || []).shift(); me.hp = Math.min(me.maxHp, me.hp + 35); floatText(me.x, me.y - 40, '+35', '#4ade80', 15); }
+    else if (a === 'slot') { const i = +v; if (i !== me.weaponIdx && me.inventory[i]) { me.weaponIdx = i; me.charge = 0; const w = getCurrentWeapon(me); floatText(me.x, me.y - 26, `${w.icon} ${w.name}`, '#fff', 13); } }
+    else if (a === 'item') { if (typeof useItem === 'function') useItem(me, +v); }
+    bagRender();
+}
+let bagTick = 0;
+
+/* ============================== TUA NHANH KHI ĐANG XEM ============================== */
+const FF = { speed: 1 };
+const _updateFF = update;
+update = function (rawDt) {
+    const me = localPlayer();
+    const watching = me && me.hp <= 0 && ['PLAYING', 'KO'].includes(gameState) && settings.mode !== 'online' && !paused;
+    const ffb = $('ff-btn');
+    if (ffb) ffb.classList.toggle('hidden', !watching);
+    if (!watching && FF.speed !== 1) { FF.speed = 1; if (ffb) ffb.textContent = '⏩ TUA ×1'; }
+    let r;
+    const n = watching ? FF.speed : 1;
+    for (let i = 0; i < n; i++) r = _updateFF(rawDt);
+    // túi đồ: cập nhật nút / bảng định kỳ
+    bagTick -= rawDt; if (bagTick <= 0) { bagTick = 0.5; if (BG.on || !$('bg-bag').classList.contains('hidden')) bagRender(); }
+    return r;
+};
+const _goMenuBag = goMenu;
+goMenu = function () { BG.bagOpen = false; const r = _goMenuBag(); bagRender(); const f = $('ff-btn'); if (f) f.classList.add('hidden'); return r; };
+
+/* ============================== VẼ HÒM THẺ ============================== */
+const _drawW2FxBag = drawW2Fx;
+drawW2Fx = function (now) {
+    _drawW2FxBag(now);
+    if (!BG.on) return;
+    crates.forEach(c => {
+        if (c.type !== 'CARDBOX' && c.type !== 'CARDGOLD') return;
+        const gold = c.type === 'CARDGOLD', s = c.size, bob = Math.sin(now * 3 + c.blinkOffset) * 2;
+        ctx.save(); ctx.translate(c.x, c.y + bob);
+        ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(0, 0, 0, 0, 0, s * 1.6); g.addColorStop(0, gold ? 'rgba(250,204,21,0.45)' : 'rgba(167,139,250,0.45)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, s * 1.6, 0, Math.PI * 2); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+        const gr = ctx.createLinearGradient(0, -s / 2, 0, s / 2); gr.addColorStop(0, gold ? '#fde047' : '#a78bfa'); gr.addColorStop(1, gold ? '#a16207' : '#4c1d95');
+        rrect(ctx, -s / 2, -s / 2, s, s, 6); ctx.fillStyle = gr; ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(-s / 2 + 3, -2, s - 6, 4);
+        ctx.font = `${Math.round(s * 0.55)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🃏', 0, 1);
+        ctx.restore();
+    });
+};
+
+/* ============================== BUFF PHÉP TIẾP TẾ KHẨN ============================== */
+// thêm 1 hộp hỗ trợ + 1 vũ khí tốt rơi xuống đất; 20% là đồ HUYỀN THOẠI (chỉ có trong thính)
+if (SPELLS.supplyDrop) {
+    const m = SPELLS.supplyDrop, f = m.cast;
+    m.desc = 'Sau 1.5 giây: 2 hộp hỗ trợ + 1 VŨ KHÍ TỐT rơi quanh bạn (20% là đồ HUYỀN THOẠI), bạn nhận ngay +30 giáp và nạp đầy băng đạn.';
+    m.cast = p => {
+        f(p);
+        const a = p.angle, spot = o => { for (let k = 0; k < 8; k++) { const t = a + o + k * 0.5, x = p.x + Math.cos(t) * 75, y = p.y + Math.sin(t) * 75; if (!pointInObstacle(x, y, 20) && x > 40 && y > 40 && x < MAP_W - 40 && y < MAP_H - 40) return { x, y }; } return { x: p.x, y: p.y }; };
+        const s1 = spot(1.3), s2 = spot(-1.3);
+        const legend = Math.random() < 0.2;
+        [s1, s2].forEach((s, i) => zones.push({ type: 'artyWarn', x: s.x, y: s.y, r: 30, t: 1.5, maxT: 1.5, owner: p.id, tick: 0 }));
+        p.shotQueue.push({ t: 1.5, fn: () => {
+            crates.push(makeCrate(s1.x, s1.y, 'SUPPORT')); ring(s1.x, s1.y, 6, 50, '#93c5fd', 0.4, 4);
+            const pool = legend && typeof LEGEND_POOL !== 'undefined' && LEGEND_POOL.length ? LEGEND_POOL
+                : Object.keys(BASE_WEIGHTS).filter(id => WEAPONS[id] && (WEAPONS[id].tier || 1) >= 2 && WEAPONS[id].type !== 'THROWABLE' && !(typeof LEGEND_POOL !== 'undefined' && LEGEND_POOL.includes(id)));
+            const id = pool[Math.floor(Math.random() * pool.length)];
+            if (id && WEAPONS[id]) {
+                const w = makeWeapon(id, p); if (legend) w.legendary = true;
+                dropGroundWeapon(p, w, s2.x, s2.y, 40);
+                ring(s2.x, s2.y, 8, legend ? 110 : 60, legend ? '#facc15' : '#e2e8f0', 0.5, legend ? 7 : 4); spark(s2.x, s2.y, legend ? '#fde047' : '#e2e8f0', legend ? 30 : 10, 300);
+                floatText(s2.x, s2.y - 30, `${legend ? '🌟 HUYỀN THOẠI: ' : '📦 '}${WEAPONS[id].icon} ${WEAPONS[id].name}`, legend ? '#fde047' : '#e2e8f0', legend ? 17 : 13);
+                if (legend) { AudioSys.playAt('legend', s2.x, s2.y, 0.5); if (p === localPlayer()) showBanner('🌟 TIẾP TẾ HUYỀN THOẠI!', `${WEAPONS[id].icon} ${WEAPONS[id].name}`, '#fde047', 2, 40); }
+            }
+        } });
+    };
+}

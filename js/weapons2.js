@@ -983,3 +983,34 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
     floatText(target.x, target.y - 56, '🧨 500 CHUẨN', '#fde68a', 16);
     return r;
 };
+
+/* ============================== BOT DÙNG HUYỀN CƠ THÔNG MINH ============================== */
+// bot không còn giữ-thả ngẫu nhiên; nó chọn chiêu chuyển dạng theo tình huống:
+//  Gập → Mở (bật lùi + bất tử): khi đang bị bắn / máu thấp / địch ở xa
+//  Mở → Huyền Cơ (đẩy ô, choáng, bắn chùm): khi địch áp sát
+//  Huyền Cơ → Gập (ném ô, lướt tới, +giáp): khi địch lùi ra tầm trung để đuổi theo
+const _umbAttackBot = umbAttack;
+umbAttack = function (p, w, a, charge, mult, isSuper) { return _umbAttackBot(p, w, a, p.isBot ? 0 : charge, mult, isSuper); };
+function umbBotThink(p, w) {
+    const now = world.time;
+    if ((p.umbAI || 0) > now || p.umbPush || p.travel || p.stun > 0 || p.cooldown > 0) return;
+    const e = (p.brain && players.find(q => q.id === p.brain.targetId && q.hp > 0)) || enemyOf(p);
+    if (!e || e.hp <= 0 || !targetable(p, e)) return;
+    const d = dist(p.x, p.y, e.x, e.y), f = w.form || 0, a = Math.atan2(e.y - p.y, e.x - p.x);
+    const hurt = now - (p.lastHurt || -9) < 0.7;
+    const incoming = bullets.some(b => b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 170 && Math.abs(angleDiff(b.angle, Math.atan2(p.y - b.y, p.x - b.x))) < 0.45);
+    let go = false;
+    if (f === 0) go = incoming || (hurt && p.hp < p.maxHp * 0.55) || d > 280;
+    else if (f === 1) go = d < 140;
+    else go = (d > 170 && d < 330 && lineOfSight(p.x, p.y, e.x, e.y)) || d > 420;
+    if (!go) return;
+    // Gập → Mở bật lùi theo hướng ngược mục tiêu; các chiêu khác hướng vào mục tiêu
+    p.angle = a; umbTransition(p, w, a);
+    p.umbAI = now + 1.1 + Math.random() * 0.6; p.cooldown = Math.max(p.cooldown, 10);
+}
+const _upeUmbBot = updatePartyExtras;
+updatePartyExtras = function (dt) {
+    _upeUmbBot(dt);
+    if (gameState !== 'PLAYING') return;
+    players.forEach(p => { if (p.isBot && p.hp > 0) { const w = getCurrentWeapon(p); if (w && w.id === 'UMBRELLA') umbBotThink(p, w); } });
+};
