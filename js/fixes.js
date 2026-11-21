@@ -135,3 +135,15 @@ drawW2Fx = function (now) {
     _drawW2FxPoly(now);
     players.forEach(p => { if (p.hp > 0 && p.pmBuffT > world.time && (!p.st.invis || p === localPlayer())) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = `rgba(103,232,249,${0.35 + Math.sin(now * 10) * 0.15})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius + 7, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); } });
 };
+
+/* ============================== VŨ KHÍ ĐA HÌNH LÀ NHÁNH RIÊNG ============================== */
+// Bậc Thầy Cận Chiến / Bậc Thầy Tầm Xa không lấy được vũ khí đa hình
+const noPoly = p => !!p && (p.adv === 'meleeMaster' || p.adv === 'rangeMaster');
+const _makeWeaponNoPoly = makeWeapon;
+makeWeapon = function (id, p) {
+    if (noPoly(p) && POLY_WEPS.includes(id)) id = weightedWeapon(W => !POLY_WEPS.includes(W.id) && (p.adv === 'meleeMaster' ? isMeleeWep(W) : isGunWep(W)));
+    return _makeWeaponNoPoly(id, p);
+};
+const _wepAllowedNoPoly = wepAllowed;
+wepAllowed = function (p, w) { if (noPoly(p) && w && POLY_WEPS.includes(w.id)) return false; return _wepAllowedNoPoly(p, w); };
+['meleeMaster', 'rangeMaster'].forEach(id => { if (ADVANTAGES[id]) ADVANTAGES[id].desc += ' Không dùng được VŨ KHÍ ĐA HÌNH (nhánh riêng).'; });
