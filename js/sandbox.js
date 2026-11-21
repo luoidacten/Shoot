@@ -229,7 +229,7 @@ function sbRenderBody() {
         const all = Object.values(WEAPONS).filter(w => w && w.id && w.name);
         const group = (title, f) => { const L = all.filter(f); return L.length ? `<div class="sb-lbl">${title} (${L.length})</div><div class="sb-grid">${L.map(w => `<button class="sb-it ${me.inventory[SB.slot] && me.inventory[SB.slot].id === w.id ? 'on' : ''}" data-act="wep" data-val="${w.id}"><i>${w.icon || '❔'}</i><span class="t${Math.min(5, w.tier || 1)}">${esc(w.name)}${LEGEND_POOL && LEGEND_POOL.includes && LEGEND_POOL.includes(w.id) ? ' 🪂' : ''}</span></button>`).join('')}</div>` : ''; };
         b.innerHTML = `<div class="sb-lbl">Ô ĐANG GẮN</div><div class="sb-row">${chip('slot', 0, '① ' + (cur[0] || '-'), SB.slot === 0)}${chip('slot', 1, '② ' + (cur[1] || '-'), SB.slot === 1)}</div>
-          ${group('CẬN CHIẾN', w => w.type === 'MELEE' || w.type === 'SHIELD')}${group('SÚNG', w => w.type === 'GUN')}${group('VẬT NÉM', w => w.type === 'THROWABLE')}
+          ${group('🔄 ĐA HÌNH', w => typeof POLY_WEPS !== 'undefined' && POLY_WEPS.includes(w.id))}${group('CẬN CHIẾN', w => (w.type === 'MELEE' || w.type === 'SHIELD') && !w.robo && !(typeof POLY_WEPS !== 'undefined' && POLY_WEPS.includes(w.id)))}${group('SÚNG', w => w.type === 'GUN' && !w.robo && !(typeof POLY_WEPS !== 'undefined' && POLY_WEPS.includes(w.id)))}${group('VẬT NÉM', w => w.type === 'THROWABLE')}
           <div class="sb-note">🪂 = chỉ rơi trong thính. Màu tên theo bậc vũ khí.</div>`;
         return;
     }
