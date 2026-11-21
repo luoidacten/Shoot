@@ -172,7 +172,8 @@ function sbDps() { const now = world.time; SB.hits = SB.hits.filter(h => now - h
 #sb-panel .sb-tabs{display:flex;gap:4px;padding:8px 10px 0;flex-wrap:wrap}
 #sb-panel .sb-tabs button,#sb-panel .sb-chip{border:1px solid rgba(148,163,184,.3);background:rgba(30,41,59,.7);color:#cbd5e1;border-radius:8px;padding:5px 9px;font:600 12px system-ui,sans-serif;cursor:pointer}
 #sb-panel .sb-tabs button.on,#sb-panel .sb-chip.on{background:#0ea5e9;border-color:#38bdf8;color:#fff}
-#sb-panel .sb-body{flex:1;overflow-y:auto;padding:8px 10px 12px;-webkit-overflow-scrolling:touch}
+#sb-panel .sb-body{flex:1;overflow-y:auto;padding:8px 10px 12px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#sb-panel,#sb-panel *{touch-action:pan-y}#sb-panel input,#sb-panel select{touch-action:manipulation;user-select:text;-webkit-user-select:text}
 #sb-panel .sb-row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;align-items:center}
 #sb-panel .sb-lbl{font-size:11px;color:#94a3b8;letter-spacing:.06em;margin:10px 0 2px;font-weight:700}
 #sb-panel .sb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
@@ -186,7 +187,7 @@ function sbDps() { const now = world.time; SB.hits = SB.hits.filter(h => now - h
 #sb-panel .sb-list .sb-it span{white-space:normal}
 #sb-panel input.sb-q{width:100%;box-sizing:border-box;background:#0f172a;border:1px solid rgba(148,163,184,.35);border-radius:8px;color:#e2e8f0;padding:7px 9px;font:13px system-ui,sans-serif}
 #sb-panel .t1{color:#cbd5e1}#sb-panel .t2{color:#86efac}#sb-panel .t3{color:#93c5fd}#sb-panel .t4{color:#d8b4fe}#sb-panel .t5{color:#fde68a}
-@media (pointer:coarse){#sb-panel{top:56px;bottom:auto;max-height:70vh;width:min(340px,calc(100vw - 24px));font-size:12px}#sb-toggle{top:12px;right:76px}#sb-panel .sb-dps b{font-size:14px}}
+@media (pointer:coarse){#sb-panel{top:52px;bottom:6px;max-height:none;width:min(340px,calc(100vw - 24px));font-size:12px}#sb-panel .sb-head{padding:6px 10px 4px}#sb-panel .sb-dps{margin-top:4px}#sb-panel .sb-dps div{padding:2px 4px}#sb-panel .sb-tabs{padding:5px 8px 0}#sb-panel .sb-tabs button{padding:4px 7px}#sb-toggle{top:12px;right:76px}#sb-panel .sb-dps b{font-size:14px}}
 #sb-panel .sb-note{font-size:11px;color:#94a3b8;margin-top:6px;line-height:1.45}
 `;
     const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
