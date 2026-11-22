@@ -1,6 +1,6 @@
 /** ==================== ĐA KHÍ CỤ (làm lại): 7 dạng × (Bậc Thầy + Trang Bị Phụ + Kỹ Thuật Cao) + chiêu chuyển dạng ====================
  *  Dạng: Khối · Kiếm · Súng · Bắn Tỉa (thay Cung) · Búa · Giáo · Pháo
- *  Dạng tầm xa có đạn riêng, KHÔNG nạp lại — hết đạn tự chuyển sang dạng kế tiếp (vào lại dạng đó thì đầy đạn).
+ *  Dạng tầm xa có đạn riêng, KHÔNG nạp lại — hết đạn tự chuyển sang một dạng ngẫu nhiên (vào lại dạng đó thì đầy đạn).
  *  Nạp sau rework3.js.
  */
 const W8 = [];
@@ -8,7 +8,7 @@ CUBE_FORMS[3] = { id: 'sniper', name: 'BẮN TỈA', icon: '🎯', type: 'GUN', 
 CUBE_FORMS.push({ id: 'cannon', name: 'PHÁO', icon: '💣', type: 'GUN', range: 480 });
 const CUBE_AMMO = { gun: 24, sniper: 4, cannon: 3 };
 const cM = p => p.meleeMult || 1, cD = p => p.dmgMult || 1;
-WEAPONS.MULTICUBE.desc = 'Khối biến hình 7 dạng: KHỐI (chắn đạn) · KIẾM · SÚNG · BẮN TỈA · BÚA · GIÁO · PHÁO. Giữ rồi thả: chuyển sang dạng kế tiếp và tung CHIÊU CHUYỂN DẠNG riêng. Dạng tầm xa không nạp đạn — hết đạn tự chuyển dạng. Bậc Thầy, Trang Bị Phụ, Kỹ Thuật Cao dùng được ở MỌI dạng, mỗi dạng một chiêu riêng.';
+WEAPONS.MULTICUBE.desc = 'Khối biến hình 7 dạng: KHỐI (chắn đạn) · KIẾM · SÚNG · BẮN TỈA · BÚA · GIÁO · PHÁO. Giữ rồi thả: biến sang một dạng NGẪU NHIÊN khác và tung CHIÊU CHUYỂN DẠNG riêng. Dạng tầm xa không nạp đạn — hết đạn tự biến sang dạng ngẫu nhiên. Bậc Thầy, Trang Bị Phụ, Kỹ Thuật Cao dùng được ở MỌI dạng, mỗi dạng một chiêu riêng.';
 
 /* ---------- tiện ích ---------- */
 function cubeTxt(p, s, col) { floatText(p.x, p.y - 46, s, col || '#67e8f9', 14); }
@@ -20,7 +20,7 @@ const cubeAim = (p, lo, hi) => Math.max(lo, Math.min(hi, p.skillDist || (lo + hi
 /* ---------- đòn đánh thường của các dạng tầm xa (tiêu hao đạn) ---------- */
 function cubeUseAmmo(p, w, n) {
     const F = cubeForm(w); w.cubeAmmo = Math.max(0, (w.cubeAmmo === undefined ? CUBE_AMMO[F.id] : w.cubeAmmo) - n);
-    if (w.cubeAmmo <= 0) p.shotQueue.push({ t: 0.3, fn: () => { if (getCurrentWeapon(p) === w && cubeForm(w).id === F.id && w.cubeAmmo <= 0) { floatText(p.x, p.y - 30, 'HẾT ĐẠN → CHUYỂN DẠNG', '#fbbf24', 12); cubeSetForm(p, w, (w.form || 0) + 1); } } });
+    if (w.cubeAmmo <= 0) p.shotQueue.push({ t: 0.3, fn: () => { if (getCurrentWeapon(p) === w && cubeForm(w).id === F.id && w.cubeAmmo <= 0) { floatText(p.x, p.y - 30, 'HẾT ĐẠN → BIẾN DẠNG NGẪU NHIÊN', '#fbbf24', 12); cubeSetForm(p, w, (w.form || 0) + 1); } } });
 }
 const _cubeFireR4 = cubeFire;
 cubeFire = function (p, w, ang, charge, mult) {
@@ -51,6 +51,7 @@ cubeFire = function (p, w, ang, charge, mult) {
 // vào lại dạng tầm xa → đầy đạn; chiêu chuyển dạng
 const _cubeSetFormR4 = cubeSetForm;
 cubeSetForm = function (p, w, i) {
+    if (!p._cubeExact) { const cur = w.form || 0; let r = cur; while (r === cur) r = Math.floor(Math.random() * CUBE_FORMS.length); i = r; } // chuyển sang dạng NGẪU NHIÊN (khác dạng hiện tại)
     _cubeSetFormR4(p, w, i); const F = cubeForm(w);
     w.cubeAmmo = CUBE_AMMO[F.id];
     if (p.hp > 0 && !(p.cubeEntryT > world.time)) { p.cubeEntryT = world.time + 1.2; try { CUBE_SK[F.id].E(p, w); } catch (e) { console.error(e); } }
