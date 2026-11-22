@@ -7,31 +7,34 @@
 //        + lúc đầu thoáng hiện vùng trúng đòn thật (để thấy chính xác đòn trúng tới đâu).
 // Đâm: mũi thọc phóng nhanh rồi rút, thân thon dần, vòng xung ở mũi, vùng trúng hình thanh.
 const easeOut = x => 1 - Math.pow(1 - Math.max(0, Math.min(1, x)), 3);
+// hiển thị lâu hơn để thấy rõ chuyển động (mảng slashes chỉ dùng để vẽ)
+slashes.push = function (...arr) { arr.forEach(s => { if (s && !s._slow) { s._slow = true; const L = Math.max(0.32, (s.maxLife || 0.2) * 1.7); s.life = L * ((s.life || L) / (s.maxLife || s.life || L)); s.maxLife = L; } }); return Array.prototype.push.apply(this, arr); };
+const easeInOut = x => { x = Math.max(0, Math.min(1, x)); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
 drawSlashFx = function (s, so) {
     const k = Math.max(0, s.life / s.maxLife), t = 1 - k, col = s.color && s.color[0] === '#' && s.color.length === 7 ? s.color : '#f1f5f9';
     ctx.save(); ctx.translate(so.x, so.y - (so.airH || 0)); ctx.rotate(s.angle); ctx.lineCap = 'round';
-    const R = s.range, fade = Math.min(1, k * 1.6);
+    const R = s.range, fade = t < 0.7 ? 1 : Math.max(0, 1 - (t - 0.7) / 0.3);
+    ctx.globalCompositeOperation = 'lighter';
     if (s.line) {
-        const base = (so.radius || 15) * 0.7, out = easeOut(t * 4.5), ext = base + (R - base) * out * (t > 0.55 ? 1 - (t - 0.55) * 0.4 : 1), wd = 3 + s.width * 0.5;
-        // viền vùng trúng (chớp nhẹ lúc đầu)
-        if (t < 0.35) { ctx.strokeStyle = hexA(col, 0.35 * (1 - t / 0.35)); ctx.lineWidth = 1; ctx.setLineDash([5, 5]); rrect(ctx, base, -wd * 2.2, R - base, wd * 4.4, wd * 2); ctx.stroke(); ctx.setLineDash([]); }
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.strokeStyle = hexA(col, 0.35 * fade); ctx.lineWidth = wd * 4.5; ctx.beginPath(); ctx.moveTo(base + (ext - base) * 0.35, 0); ctx.lineTo(ext, 0); ctx.stroke(); // quầng
-        const g = ctx.createLinearGradient(base, 0, ext, 0); g.addColorStop(0, hexA(col, 0)); g.addColorStop(0.45, hexA(col, 0.9 * fade)); g.addColorStop(1, `rgba(255,255,255,${fade})`);
-        ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(base, -wd * 0.6); ctx.lineTo(ext - wd * 2.6, -wd * 1.2); ctx.lineTo(ext + wd * 1.6, 0); ctx.lineTo(ext - wd * 2.6, wd * 1.2); ctx.lineTo(base, wd * 0.6); ctx.closePath(); ctx.fill();
-        ctx.strokeStyle = `rgba(255,255,255,${fade})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(base + (ext - base) * 0.3, 0); ctx.lineTo(ext + wd * 1.2, 0); ctx.stroke(); // lõi trắng
-        ctx.strokeStyle = hexA(col, 0.6 * fade); ctx.lineWidth = 1.2;
-        for (const sg of [-1, 1]) { const off = wd * (2 + t * 3); ctx.beginPath(); ctx.moveTo(base + (ext - base) * 0.15, sg * off); ctx.lineTo(ext - wd * 3.2, sg * off * 0.4); ctx.stroke(); } // vệt tốc độ
-        const pr = Math.min(1, t * 3); ctx.strokeStyle = `rgba(255,255,255,${0.85 * fade})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ext, 0, 5 + pr * 12, -1.15, 1.15); ctx.stroke(); // vòng xung ở mũi
-        ctx.fillStyle = `rgba(255,255,255,${fade})`; ctx.beginPath(); ctx.arc(ext, 0, 2.5 + 3 * fade, 0, Math.PI * 2); ctx.fill();
+        // ĐÂM: mũi thọc DÀI DẦN từ ngắn tới đủ tầm, giữ một chút rồi rút nhẹ
+        const base = (so.radius || 15) * 0.7, grow = easeInOut(t / 0.5), back = t > 0.75 ? (t - 0.75) / 0.25 * 0.25 : 0;
+        const ext = base + (R - base) * grow * (1 - back), wd = 3 + s.width * 0.5, tailX = base + (ext - base) * Math.max(0, (t - 0.35) / 0.65) * 0.6;
+        if (ext - base > 2) {
+            ctx.strokeStyle = hexA(col, 0.3 * fade); ctx.lineWidth = wd * 4; ctx.beginPath(); ctx.moveTo(tailX, 0); ctx.lineTo(ext, 0); ctx.stroke(); // quầng
+            const g = ctx.createLinearGradient(tailX, 0, ext, 0); g.addColorStop(0, hexA(col, 0)); g.addColorStop(0.5, hexA(col, 0.9 * fade)); g.addColorStop(1, `rgba(255,255,255,${fade})`);
+            ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(tailX, -wd * 0.5); ctx.lineTo(Math.max(tailX, ext - wd * 2.6), -wd * 1.2); ctx.lineTo(ext + wd * 1.6, 0); ctx.lineTo(Math.max(tailX, ext - wd * 2.6), wd * 1.2); ctx.lineTo(tailX, wd * 0.5); ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = `rgba(255,255,255,${fade})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(tailX + (ext - tailX) * 0.3, 0); ctx.lineTo(ext + wd * 1.2, 0); ctx.stroke(); // lõi trắng
+            ctx.strokeStyle = hexA(col, 0.55 * fade); ctx.lineWidth = 1.2;
+            for (const sg of [-1, 1]) { ctx.beginPath(); ctx.moveTo(tailX + (ext - tailX) * 0.1, sg * wd * 2.2); ctx.lineTo(ext - wd * 3, sg * wd * 0.8); ctx.stroke(); } // vệt tốc độ
+        }
+        if (grow >= 0.98) { const pr = Math.min(1, (t - 0.5) * 4); ctx.strokeStyle = `rgba(255,255,255,${0.85 * fade * (1 - pr * 0.6)})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ext, 0, 5 + pr * 12, -1.15, 1.15); ctx.stroke(); } // vòng xung khi chạm tầm
+        ctx.fillStyle = `rgba(255,255,255,${fade})`; ctx.beginPath(); ctx.arc(ext, 0, 2.5 + 2.5 * fade, 0, Math.PI * 2); ctx.fill();
     } else {
+        // CHÉM: bắt đầu từ MỘT ĐIỂM ở mép trái/phải, đầu vệt quét sang phía bên kia, đuôi đuổi theo
         const sw = s.swing || 1, half = s.arc ? Math.min(Math.PI, s.arc) : 1.15, span = half * 2;
-        const head = easeOut(t * 3), tail = easeOut(Math.max(0, t - 0.3) * 1.45);
+        const head = easeInOut(t / 0.55), tail = easeInOut((t - 0.22) / 0.7);
         const a0 = -half * sw, aH = a0 + span * sw * head, aT = a0 + span * sw * tail;
         const th = Math.min(R * 0.6, Math.max(12, s.width * 1.7 + 9));
-        // viền vùng trúng (chớp nhẹ lúc đầu)
-        if (t < 0.35) { ctx.strokeStyle = hexA(col, 0.3 * (1 - t / 0.35)); ctx.lineWidth = 1; ctx.setLineDash([5, 6]); ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R, -half, half); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]); }
-        ctx.globalCompositeOperation = 'lighter';
         const lo = Math.min(aT, aH), hi = Math.max(aT, aH);
         if (hi - lo > 0.01) {
             ctx.strokeStyle = hexA(col, 0.2 * fade); ctx.lineWidth = th * 1.5; ctx.beginPath(); ctx.arc(0, 0, R - th * 0.5, lo, hi); ctx.stroke(); // quầng
@@ -45,9 +48,9 @@ drawSlashFx = function (s, so) {
             ctx.strokeStyle = hexA(col, 0.5 * fade); ctx.lineWidth = 1.2;
             [0.6, 0.76].forEach(f => { ctx.beginPath(); ctx.arc(0, 0, R * f, lo + (hi - lo) * 0.35, hi); ctx.stroke(); }); // vệt tốc độ
         }
-        const hx = Math.cos(aH) * R, hy = Math.sin(aH) * R;
+        const hx = Math.cos(aH) * R, hy = Math.sin(aH) * R; // điểm sáng ở đầu vệt (lúc đầu nằm ở mép bắt đầu)
         ctx.fillStyle = `rgba(255,255,255,${fade})`; ctx.beginPath(); ctx.arc(hx, hy, 2.5 + 3 * fade, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = `rgba(255,255,255,${0.8 * fade})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(hx - 8 * fade, hy); ctx.lineTo(hx + 8 * fade, hy); ctx.moveTo(hx, hy - 8 * fade); ctx.lineTo(hx, hy + 8 * fade); ctx.stroke();
+        ctx.strokeStyle = `rgba(255,255,255,${0.8 * fade})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(hx - 7 * fade, hy); ctx.lineTo(hx + 7 * fade, hy); ctx.moveTo(hx, hy - 7 * fade); ctx.lineTo(hx, hy + 7 * fade); ctx.stroke();
     }
     ctx.restore();
 };
