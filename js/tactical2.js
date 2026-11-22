@@ -241,7 +241,7 @@ updateStrikes = function (dt) {
         } else if (s.kind === 'htBurst') {
             s.tick -= dt; const o = players.find(q => q.id === s.owner);
             if (!o || o.hp <= 0) { strikes.splice(i, 1); continue; }
-            while (s.tick <= 0 && s.n > 0) { s.tick += s.gap; s.n--; const a = (o.aimAngle !== undefined ? o.aimAngle : o.angle) + (Math.random() - 0.5) * s.spread; htBullet(o, a, { damage: s.dmg, color: s.color, size: 3.5 }); AudioSys.playAt(s.snd || 'smg', o.x, o.y, 0.15); }
+            while (s.tick <= 0 && s.n > 0) { s.tick += s.gap; s.n--; const a = (s.a !== undefined ? s.a : (s.a = aimDir(o))) + (Math.random() - 0.5) * s.spread; htBullet(o, a, { damage: s.dmg, color: s.color, size: 3.5 }); AudioSys.playAt(s.snd || 'smg', o.x, o.y, 0.15); }
             if (s.n <= 0) strikes.splice(i, 1);
         } else if (s.kind === 'htQuake' && s.t <= 0) {
             strikes.splice(i, 1); const o = players.find(q => q.id === s.owner); if (!o) continue;
