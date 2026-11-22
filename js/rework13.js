@@ -551,3 +551,27 @@ const _initRoundR13 = initRound;
 initRound = function () { currentDestiny = r13NoMore(currentDestiny); return _initRoundR13(); };
 const _upeMoreR13 = updatePartyExtras;
 updatePartyExtras = function (dt) { if (currentDestiny && currentDestiny.more) currentDestiny = r13NoMore(currentDestiny); return _upeMoreR13(dt); };
+
+/* ============================== ĐIỆN THOẠI: nút Vạn Tượng không đè UI · bảng Hiệu Chỉnh vuốt được ==============================
+ *  · Nút 🔄 Đổi mould / 🎛️ Hiệu Chỉnh (rework10, cố định right/bottom) trùng ô vật phẩm → trên màn cảm ứng đặt theo touchLayout():
+ *    cột ngay bên trái 2 ô vật phẩm (it1/it2), kích thước theo nút kỹ năng.
+ *  · style.css đặt `* { touch-action: none }` → #vt-cal không cuộn được trên điện thoại → mở pan-y.
+ */
+(function () {
+    const st = document.createElement('style');
+    st.textContent = '#vt-cal,#vt-cal *{touch-action:pan-y}#vt-cal .box{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}#vt-cal button{touch-action:manipulation}';
+    document.head.appendChild(st);
+    const cal = document.getElementById('vt-cal');
+    if (cal) ['touchstart', 'touchmove', 'touchend', 'wheel'].forEach(ev => cal.addEventListener(ev, e => e.stopPropagation(), { passive: true }));
+})();
+function r13PlaceVtBtns() {
+    const s = document.getElementById('vt-swap'), c = document.getElementById('vt-calb'); if (!s || !c) return;
+    if (!isTouch) { [s, c].forEach(b => { if (b._r13) { b._r13 = false; b.style.left = b.style.top = ''; b.style.bottom = '220px'; b.style.width = b.style.height = '50px'; b.style.fontSize = '20px'; } }); return; }
+    if (s.style.display === 'none' && c.style.display === 'none') return;
+    const L = touchLayout(), it = (L.row || []).filter(q => q.k === 'it1' || q.k === 'it2'); if (it.length < 2) return;
+    const r = Math.round(Math.max(20, Math.min(27, it[0].r))), x = it[0].x - it[0].r - 10 - r;
+    const put = (b, y) => { b._r13 = true; b.style.right = 'auto'; b.style.bottom = 'auto'; b.style.left = Math.round(x - r) + 'px'; b.style.top = Math.round(y - r) + 'px'; b.style.width = b.style.height = r * 2 + 'px'; b.style.fontSize = Math.round(r * 0.8) + 'px'; };
+    put(s, it[0].y); put(c, it[1].y);
+}
+const _upeVtBtnR13 = updatePartyExtras;
+updatePartyExtras = function (dt) { const r = _upeVtBtnR13(dt); r13PlaceVtBtns(); return r; };
