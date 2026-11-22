@@ -12,7 +12,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 7. Tóm tắt bằng tiếng Việt: đã làm gì, số liệu test, hạn chế còn lại.
 
 ## Kiến trúc
-- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework13.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
+- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework14.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
 - **Biến toàn cục dùng chung giữa file** (`const/let` top-level). Hàm khai báo `function f(){}` có thể gán lại: mẫu wrapper
   `const _fR7 = f; f = function (...a) { ...; return _fR7(...a); };`
   → **tên biến lưu hàm cũ phải duy nhất** (dùng hậu tố `R7`, `R12`…). Trước khi thêm, grep trùng tên `const X\b` trong `js/*.js`.
@@ -59,8 +59,10 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 | `rework11.js` | **Bảng chiến thuật 3 cấp** (`TAC_LEVEL`, `tacLevel`, ghi đè `bgWin` lúc load), đổi mould hồi 1s |
 | `rework12.js` | **Ép Xung riêng 16 mould** (`VT_OC`), Nỏ Nổ ghim tường (`wallBolt`) — `W12` |
 | `rework13.js` | Vũ khí **Bom** (`BOMB`), **Bom Lửa** (`FIREBOMBW`), **Phi Tiêu** (`SHURIKEN`) — vật ném riêng `W13`; Rìu Săn Dấu Săn (`huntN`, `bullet.hunt`) + Phát Cuối; **vẽ lại roi** (`drawWhip13`, thay vẽ `W2FX kind 'whip'`); Kim Cô Bổng **Định Thân** (`dinhThan`, `dinhT`) + Bậc Thầy **Chống Gậy** (`ruyiPerch`, dùng lại chọn điểm đáp); **tạm tắt biến cố "Thêm Người Thêm Vui" khi online** (`r13NoMore` → đổi thành Đấu Trường Mở Rộng); điện thoại: nút 🔄/🎛️ Vạn Tượng đặt theo `touchLayout()` (`r13PlaceVtBtns`), `#vt-cal` vuốt được (`touch-action:pan-y`) |
+| `rework14.js` | **Cân bằng**: máu cơ bản **600** (`BASE_HP_R14`, cộng sau `resetPlayerForRound`), vũ khí dễ trúng giảm sát thương theo vũ khí đang cầm (`EASY_NERF_R14`, bọc `dealDamage` + `trueDamage`), Hỏa Mai **999** sát thương chuẩn |
 
 ## Hệ thống đã chốt với người dùng
+- **Máu cơ bản 600.** Vũ khí dễ trúng ×0.8 (Tesla, Phun Lửa, Súng Băng, Roi Điện, Urumi, Ma Đao, Railgun, Shotgun, AR Giảm Thanh, Bộ Cơ Động, Đĩa Nảy, Nỏ Liên Châu, Minigun), Ám Khí ×0.9. Hỏa Mai 999.
 - **Vạn Tượng**: 16 mould = 12 thường (6 gần/6 xa) + 4 độc quyền Chỉ Huy (Khiên NL, Đầu Kiếm, Đầu Súng, Tia Lazer). Gậy thường luôn **1 gần + 1 xa**. Mỗi mould: đòn đánh `A`, buff, chiêu chuyển `S`, kỹ năng `K` (Bậc Thầy/Trang Bị Phụ), Ép Xung riêng. Thuộc nhánh vũ khí đa hình (`POLY_WEPS`).
 - **Kỹ Thuật Cao** của Vạn Tượng = đổi mould tức thì (mould Điểm Đánh Dấu: Tuyệt Diệt Quang, cạn gậy; Chỉ Huy: KTC hồi ×2 thay vì mất gậy). Đổi mould hồi chung 1s.
 - **Thẻ độc quyền** (chỉ ở lần chọn đầu, không cho người có lợi thế Bậc Thầy/Đa Hình): xoá lợi thế cũ, thay bằng lợi thế của thẻ, không chọn nâng cấp nữa.
