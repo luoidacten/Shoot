@@ -53,7 +53,7 @@ const _onHostDataR9 = onHostData;
 onHostData = function (g, m) {
     if (m && m.t === 'vtCalSet') {
         const p = players.find(q => q.id === g.id), sel = Array.isArray(m.sel) ? m.sel.filter(k => typeof k === 'string' && VT[k]) : [];
-        if (p && sel.length === 2 && sel[0] !== sel[1] && has(p, 'calibrate') && (isCmd(p) || !sel.some(k => VT[k].excl))) vtCalApply(p, sel);
+        if (p && sel.length === 2 && sel[0] !== sel[1] && isCmd(p)) vtCalApply(p, sel);
         return;
     }
     return _onHostDataR9(g, m);

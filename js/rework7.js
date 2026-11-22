@@ -51,7 +51,7 @@ const _throwWeaponCmd = throwWeapon;
 throwWeapon = function (p, wep, enemy) { if (isCmd(p)) return; return _throwWeaponCmd(p, wep, enemy); };
 const _applyBuildCmd = applyBuild;
 applyBuild = function (p) {
-    if (isCmd(p)) { p.build = p.build.filter(id => id === 'commander' || (CARDS[id] && CARDS[id].kind !== 'S')); ['meleeTech', 'calibrate', 'hightech'].forEach(c => { if (!p.build.includes(c)) p.build.push(c); }); }
+    if (isCmd(p)) { p.build = p.build.filter(id => id === 'commander' || (CARDS[id] && CARDS[id].kind !== 'S')); ['meleeTech', 'hightech', 'overclock'].forEach(c => { if (!p.build.includes(c)) p.build.push(c); }); }
     const r = _applyBuildCmd(p); cmdArm(p); return r;
 };
 const _resetRoundCmd = resetPlayerForRound;
