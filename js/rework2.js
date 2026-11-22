@@ -291,7 +291,7 @@ updatePartyExtras = function (dt) {
         if (p.isBot && w && w.id === 'MADAO' && (p.mdGauge || 0) >= 100 && !p.mdField && enemiesOf(p).some(e => dist(e.x, e.y, p.x, p.y) < 240)) mdUltimate(p, p.angle);
     });
     const me = localPlayer(), btn = $('md-ex');
-    if (btn) { const show = me && me.hp > 0 && getCurrentWeapon(me).id === 'MADAO'; btn.style.display = show ? 'block' : 'none'; if (show) btn.textContent = me.mdExCd > 0 ? Math.ceil(me.mdExCd) : `⚔${mdShards(me).length}`; }
+    if (btn) { const show = me && me.hp > 0 && getCurrentWeapon(me).id === 'MADAO' && !(me.build || []).includes('seven'); btn.style.display = show ? 'block' : 'none'; if (show) btn.textContent = me.mdExCd > 0 ? Math.ceil(me.mdExCd) : `⚔${mdShards(me).length}`; }
 };
 const _resetRoundR2 = resetPlayerForRound;
 resetPlayerForRound = function (p) { for (const A of [RG, SC, MDS, W6]) for (let i = A.length - 1; i >= 0; i--) if (A[i].owner === p.id) A.splice(i, 1); p.mdField = null; p.mdGauge = 0; p.mdTornadoT = 0; p.mdExCd = 0; return _resetRoundR2(p); };
@@ -438,7 +438,7 @@ const _throwWeaponSeven = throwWeapon;
 throwWeapon = function (p, wep, enemy) { if (isSeven(p)) return; return _throwWeaponSeven(p, wep, enemy); };
 const _applyBuildSeven = applyBuild;
 applyBuild = function (p) {
-    if (isSeven(p)) { p.build = p.build.filter(id => id === 'seven' || (CARDS[id] && CARDS[id].kind !== 'S')); ['meleeTech', 'hightech'].forEach(c => { if (!p.build.includes(c)) p.build.push(c); }); }
+    if (isSeven(p)) { p.build = p.build.filter(id => id === 'seven' || (CARDS[id] && CARDS[id].kind !== 'S')); ['meleeTech', 'hightech', 'mdBlades'].forEach(c => { if (!p.build.includes(c)) p.build.push(c); }); }
     const r = _applyBuildSeven(p); sevenArm(p); return r;
 };
 const _resetRoundSeven = resetPlayerForRound;
