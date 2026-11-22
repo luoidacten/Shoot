@@ -93,13 +93,13 @@ const VT = {
         S: { mirror: true, fn: p => { enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 140 + e.radius) { dealDamage(e, 12 * vM(p), p.id, { melee: true, knock: 1 }); e.st.root = Math.max(e.st.root || 0, 1); } }); ring(p.x, p.y, 10, 140, '#bae6fd', 0.5, 6); vtTxt(p, '❄️ BĂNG HOÀN'); AudioSys.playAt('block', p.x, p.y, 0.5); } },
         K: ['M', 'BĂNG TRỤ', { mirror: true, fn: p => { const a = aimDir(p), hit = new Set(); for (let i = 1; i <= 10; i++) p.shotQueue.push({ t: i * 0.03, fn: () => { const x = p.x + Math.cos(a) * i * 42, y = p.y + Math.sin(a) * i * 42; if (pointInObstacle(x, y, 0)) return; W10.push({ kind: 'spike', owner: p.id, x, y, t: 1.2, T: 1.2 }); enemiesOf(p).forEach(e => { if (!hit.has(e.id) && dist(e.x, e.y, x, y) < e.radius + 30) { hit.add(e.id); dealDamage(e, 30 * vM(p), p.id, { melee: true, knock: 1 }); e.st.root = Math.max(e.st.root || 0, 1.5); } }); } }); AudioSys.playAt('block', p.x, p.y, 0.6); } }],
         prof: { aim: 'dir', R: 420, shape: 'line', w: 60 } },
-    flame: { name: 'HOẢ DIỆM', icon: '🔥', col: '#f97316', type: 'MELEE', buff: { out: 1.1 }, bt: 'sát thương +10%',
-        A: (p, w, a, m) => { meleeBook(p, w, a, 22); vtSlash(p, a, 100, '#fb923c'); const h = cubeArc(p, a, 100, 1.0, 14 * vM(p) * m, { knock: 120 }); h.forEach(e => { if (!e.pyro) { e.st.burn = Math.max(e.st.burn || 0, 2); e.st.burnBy = p.id; } }); vtDur(p, w, h); AudioSys.playAt('swing', p.x, p.y, 0.4); },
+    flame: { name: 'HOẢ DIỆM', icon: '🔥', col: '#f97316', type: 'GUN', buff: { out: 1.1 }, bt: 'sát thương +10%',
+        A: (p, w, a, m) => { meleeBook(p, w, a, 18); const mz = muzzle(p, w, a); spawnBullet(p, mz.x, mz.y, a, { speed: 17, damage: 13 * vD(p) * m, range: 420, color: '#fb923c', size: 6, trail: 30, burn: true, knock: 80 }); for (let i = 0; i < 4; i++) particles.push({ x: mz.x, y: mz.y, vx: Math.cos(a + (Math.random() - 0.5) * 0.6) * 160, vy: Math.sin(a + (Math.random() - 0.5) * 0.6) * 160, life: 0.3, maxLife: 0.3, color: '#fdba74', size: 4, drag: 0.9 }); AudioSys.playAt('flame', p.x, p.y, 0.3); },
         S: { fn: p => { const a = p.angle, x0 = p.x, y0 = p.y; p.dashTime = 0.2; p.dashAngle = a; for (let i = 0; i < 3; i++) zones.push({ type: 'fire', x: x0 + Math.cos(a) * i * 55, y: y0 + Math.sin(a) * i * 55, r: 42, t: 2.5, maxT: 2.5, owner: p.id, tick: 0 }); vtTxt(p, '🔥 HOẢ BỘ'); } },
         K: ['G', 'HOẢ LONG', { mirror: true, fn: p => { p.vtFlame = { t: 1.2, tick: 0 }; AudioSys.playAt('flame', p.x, p.y, 0.6); } }],
         prof: { aim: 'dir', R: 230, shape: 'cone', half: 0.4 } },
-    gravity: { name: 'TRỌNG LỰC', icon: '🌀', col: '#8b5cf6', type: 'MELEE', buff: { inn: 0.92, spd: 1.05 }, bt: 'nhận ít hơn 8%, chạy +5%',
-        A: (p, w, a, m) => { meleeBook(p, w, a, 22); vtSlash(p, a, 110, '#a78bfa'); const h = cubeArc(p, a, 110, 1.0, 15 * vM(p) * m, { knock: 1 }); h.forEach(e => { const b = Math.atan2(p.y - e.y, p.x - e.x), k = Math.max(0, Math.min(45, dist(e.x, e.y, p.x, p.y) - p.radius - e.radius - 6)), nx = e.x + Math.cos(b) * k, ny = e.y + Math.sin(b) * k; if (!pointInObstacle(nx, ny, e.radius)) { e.x = nx; e.y = ny; } }); vtDur(p, w, h); AudioSys.playAt('swing', p.x, p.y, 0.4); },
+    gravity: { name: 'TRỌNG LỰC', icon: '🌀', col: '#8b5cf6', type: 'GUN', buff: { inn: 0.92, spd: 1.05 }, bt: 'nhận ít hơn 8%, chạy +5%',
+        A: (p, w, a, m) => { meleeBook(p, w, a, 24); const tg = vtNear(p, 400, a, 0.35), d = Math.min(400, tg ? dist(tg.x, tg.y, p.x, p.y) : 320), s = rayFree(p.x, p.y, a, d); W10.push({ kind: 'gorb', owner: p.id, x: p.x, y: p.y, x0: p.x, y0: p.y, tx: p.x + Math.cos(a) * s.d, ty: p.y + Math.sin(a) * s.d, dmg: 15 * vD(p) * m, t: 0.4, T: 0.4 }); AudioSys.playAt('whoosh', p.x, p.y, 0.3); },
         S: { mirror: true, fn: p => { const a = p.angle; W10.push({ kind: 'well', owner: p.id, x: p.x + Math.cos(a) * 200, y: p.y + Math.sin(a) * 200, R: 170, pull: 160, dmg: 0, t: 1.5, T: 1.5, tick: 0 }); vtTxt(p, '🌀 GIẾNG TRỌNG LỰC'); } },
         K: ['M', 'HỐ ĐEN', { mirror: true, fn: p => { const a = aimDir(p), d = Math.max(80, Math.min(320, p.skillDist || 260)), s = rayFree(p.x, p.y, a, d); W10.push({ kind: 'well', owner: p.id, x: p.x + Math.cos(a) * s.d, y: p.y + Math.sin(a) * s.d, R: 220, pull: 230, dmg: 5 * vM(p), burst: 40 * vM(p), t: 2.5, T: 2.5, tick: 0, big: true }); AudioSys.playAt('rail', p.x, p.y, 0.5); } }],
         prof: { aim: 'point', R: 320, shape: 'point', aoe: 220, arc: true } },
@@ -120,16 +120,17 @@ const VT = {
         prof: { aim: 'dir', R: 400, shape: 'line', w: 30 } }
 };
 const VT_IDS = Object.keys(VT);
-WEAPONS.VANTUONG.desc = `Gậy biến hình 12 MOULD (${VT_IDS.map(k => VT[k].icon + ' ' + VT[k].name).join(' · ')}). Nội tại VẠN TƯỢNG: mỗi lần nhặt chỉ KÍCH HOẠT NGẪU NHIÊN 2 mould. Mỗi mould: đòn đánh riêng + 1 buff riêng + chiêu khi chuyển tới + kỹ năng Bậc Thầy / Trang Bị Phụ riêng. Giữ rồi thả hoặc Kỹ Thuật Cao: đổi mould ngay lập tức.`;
+WEAPONS.VANTUONG.desc = `Gậy biến hình 12 MOULD (${VT_IDS.map(k => VT[k].icon + ' ' + VT[k].name).join(' · ')}). Nội tại VẠN TƯỢNG: mỗi lần nhặt chỉ KÍCH HOẠT NGẪU NHIÊN 2 mould — luôn 1 mould ĐÁNH GẦN + 1 mould ĐÁNH XA. TÀN DƯ: rời 1 mould thì đòn đánh đầu tiên của mould kế mang hiệu ứng của mould vừa rời. Mỗi mould: đòn đánh riêng + 1 buff riêng + chiêu khi chuyển tới + kỹ năng Bậc Thầy / Trang Bị Phụ riêng. Giữ rồi thả hoặc Kỹ Thuật Cao: đổi mould ngay lập tức.`;
 function vtSetType(w) { const M = VT[vtCur(w)]; w.type = M.type; w.range = M.type === 'GUN' ? 450 : 110; w.aim = M.type === 'GUN' ? 'line' : 'arc'; w.color = M.col; w.mag = 1; }
 const _makeWeaponR6 = makeWeapon;
 makeWeapon = function (id, p) {
     const w = _makeWeaponR6(id, p);
-    if (w && w.id === 'VANTUONG' && !w.mods) { const a = VT_IDS[Math.floor(Math.random() * VT_IDS.length)]; let b = a; while (b === a) b = VT_IDS[Math.floor(Math.random() * VT_IDS.length)]; w.mods = [a, b]; w.mi = 0; vtSetType(w); }
+    if (w && w.id === 'VANTUONG' && !w.mods) { const pick = L => L[Math.floor(Math.random() * L.length)], a = pick(VT_IDS.filter(k => VT[k].type === 'MELEE')), b = pick(VT_IDS.filter(k => VT[k].type === 'GUN')); w.mods = Math.random() < 0.5 ? [a, b] : [b, a]; w.mi = 0; vtSetType(w); }
     return w;
 };
 function vtSwap(p, w) {
     if (!w || w.id !== 'VANTUONG' || !w.mods) return;
+    const prev = vtCur(w); if (!p._vtMirror) p.vtRes = { id: prev, until: world.time + 4 };
     w.mi = 1 - (w.mi || 0); vtSetType(w); const M = VT[vtCur(w)];
     W10.push({ kind: 'morph', owner: p.id, col: M.col, t: 0.35, T: 0.35 }); floatText(p.x, p.y - 62, `${M.icon} ${M.name} · ${M.bt}`, M.col, 12); AudioSys.playAt('rail', p.x, p.y, 0.3);
     try { M.S.fn(p, w); } catch (e) { console.error(e); }
@@ -168,6 +169,22 @@ function vtGiant(p) {
     } });
     vtTxt(p, '📍 TUYỆT DIỆT QUANG — CẢNH BÁO!', '#f472b6');
 }
+// TÀN DƯ: hiệu ứng của mould vừa rời gắn vào đòn đầu tiên của mould mới
+const VT_RES = {
+    thunder: (p, e) => { enemiesOf(p).filter(q => q !== e && q.hp > 0 && dist(q.x, q.y, e.x, e.y) < 220).slice(0, 2).forEach(q => { beams.push({ x1: e.x, y1: e.y, x2: q.x, y2: q.y, life: 0.25, maxLife: 0.25, color: '#fde047', zig: true }); dealDamage(q, 12 * vD(p), p.id, { knock: 1 }); q.stun = Math.max(q.stun, 0.3); }); },
+    steel: (p, e) => { trueDamage(e, 10 * vM(p), p.id); e.stun = Math.max(e.stun, 0.3); },
+    laser: (p, e) => { spotFor(e, p.id, 3); dealDamage(e, 10 * vD(p), p.id, { knock: 1 }); beams.push({ x1: e.x + 30, y1: e.y - 300, x2: e.x, y2: e.y, life: 0.2, maxLife: 0.2, color: '#fb7185' }); },
+    cannon: (p, e) => explode(e.x, e.y, p.id, 12 * vD(p), 55),
+    marker: (p, e) => { spotFor(e, p.id, 4); e.st.slow = Math.max(e.st.slow || 0, 1.2); },
+    white: (p, e, d) => { dealDamage(e, d * 0.25, p.id, { knock: 1 }); floatText(e.x, e.y - 50, '🎩 BẤT NGỜ!', '#f8fafc', 12); },
+    frost: (p, e) => { e.st.slow = Math.max(e.st.slow || 0, 1.8); ring(e.x, e.y, 4, 30, '#bae6fd', 0.3, 3); },
+    flame: (p, e) => { if (!e.pyro) { e.st.burn = Math.max(e.st.burn || 0, 3); e.st.burnBy = p.id; } },
+    gravity: (p, e) => { const b = Math.atan2(p.y - e.y, p.x - e.x), k = Math.max(0, Math.min(60, dist(e.x, e.y, p.x, p.y) - p.radius - e.radius - 8)), nx = e.x + Math.cos(b) * k, ny = e.y + Math.sin(b) * k; if (!pointInObstacle(nx, ny, e.radius)) { e.x = nx; e.y = ny; } },
+    wind: (p, e) => { e.kx = (e.kx || 0) + Math.cos(Math.atan2(e.y - p.y, e.x - p.x)) * 420; e.ky = (e.ky || 0) + Math.sin(Math.atan2(e.y - p.y, e.x - p.x)) * 420; },
+    blood: (p, e, d) => { p.hp = Math.min(p.maxHp, p.hp + d * 0.5); },
+    chain: (p, e) => { e.st.root = Math.max(e.st.root || 0, 0.6); }
+};
+function vtResidue(p, e, d) { const id = p.vtResOn.id, f = VT_RES[id]; if (!f) return; f(p, e, d); floatText(e.x, e.y - 34, `TÀN DƯ ${VT[id].icon}`, VT[id].col, 11); }
 const vtSk = p => { const w = getCurrentWeapon(p), M = VT[vtCur(w)], K = M.K; vtTxt(p, `${M.icon} ${K[1]}`, M.col); K[2].fn(p, w); if (K[2].mirror) vtMirror(p, () => K[2].fn(p, w)); };
 
 /* ---------- bảng chiến thuật cho mould Điểm Đánh Dấu ---------- */
@@ -191,7 +208,7 @@ fireWeapon = function (p, w, ang, charge, enemy) {
     if (w && w.id === 'VANTUONG' && w.mods) {
         if (p.disarmT > world.time) { p.cooldown = Math.max(p.cooldown, 6); return; }
         if ((charge || 0) >= 0.9) { meleeBook(p, w, ang, 16); return vtSwap(p, w); }
-        const M = VT[vtCur(w)], m = attackMult(p, w); M.A(p, w, ang, m); vtMirror(p, () => M.A(p, w, ang, m)); return;
+        const M = VT[vtCur(w)], m = attackMult(p, w); if (p.vtRes && p.vtRes.until > world.time) { p.vtResOn = { id: p.vtRes.id, until: world.time + 0.7, hit: new Set() }; p.vtRes = null; } M.A(p, w, ang, m); vtMirror(p, () => M.A(p, w, ang, m)); return;
     }
     if (w && w.id === 'XBOWX') { // tên ghim
         const n = bullets.length; const r = _fireWeaponR6(p, w, ang, charge, enemy);
@@ -230,12 +247,13 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
         if (w && w.id === 'VANTUONG' && w.mods) { const B = VT[vtCur(w)].buff; if (B.out) dmg *= B.out; if (B.steal && target.hp > 0) atk.hp = Math.min(atk.maxHp, atk.hp + dmg * B.steal); }
         if (w && w.id === 'SAR' && Math.abs(angleDiff(Math.atan2(atk.y - target.y, atk.x - target.x), target.angle)) > 1.9) dmg *= 1.4;
     }
+    if (atk && atk !== target && atk.vtResOn && atk.vtResOn.until > world.time && !atk._vtResIn && !atk.vtResOn.hit.has(target.id) && target.hp > 0) { atk.vtResOn.hit.add(target.id); atk._vtResIn = true; try { vtResidue(atk, target, dmg); } finally { atk._vtResIn = false; } }
     const tw = target && target.inventory && getCurrentWeapon(target);
     if (tw && tw.id === 'VANTUONG' && tw.mods && atk && atk !== target) { const B = VT[vtCur(tw)].buff; if (B.inn) dmg *= B.inn; if (B.dodge && Math.random() < B.dodge) { floatText(target.x, target.y - 40, 'NÉ!', '#f8fafc', 12); return; } }
     return _dealDamageR6(target, dmg, attackerId, opts);
 };
 const _resetRoundR6 = resetPlayerForRound;
-resetPlayerForRound = function (p) { for (const A of [W10, VTI]) for (let i = A.length - 1; i >= 0; i--) if (A[i].owner === p.id) A.splice(i, 1); p.vtFlame = null; p.vtIllCd = 0; return _resetRoundR6(p); };
+resetPlayerForRound = function (p) { for (const A of [W10, VTI]) for (let i = A.length - 1; i >= 0; i--) if (A[i].owner === p.id) A.splice(i, 1); p.vtFlame = null; p.vtIllCd = 0; p.vtRes = null; p.vtResOn = null; return _resetRoundR6(p); };
 // đổi mould với Bậc Thầy: hồi 15 máu
 const _vtSwapR6 = vtSwap;
 vtSwap = function (p, w) { _vtSwapR6(p, w); if (has(p, 'meleeTech') && !p._vtMirror) p.hp = Math.min(p.maxHp, p.hp + 15); };
@@ -259,7 +277,8 @@ updatePartyExtras = function (dt) {
     for (let i = W10.length - 1; i >= 0; i--) {
         const f = W10[i], o = players.find(q => q.id === f.owner); if (!o) { W10.splice(i, 1); continue; }
         f.t -= dt;
-        if (f.kind === 'well') { f.tick += dt; enemiesOf(o).forEach(e => { if (e.air > 0) return; const d = dist(e.x, e.y, f.x, f.y); if (d < f.R + e.radius && d > 8) { const b = Math.atan2(f.y - e.y, f.x - e.x), k = Math.min(d - 6, f.pull * dt), nx = e.x + Math.cos(b) * k, ny = e.y + Math.sin(b) * k; if (!pointInObstacle(nx, ny, e.radius)) { e.x = nx; e.y = ny; } if (f.dmg && f.tick >= 0.25) dealDamage(e, f.dmg, o.id, { melee: true, knock: 1 }); } }); if (f.tick >= 0.25) f.tick = 0; if (f.t <= 0 && f.burst) { cubeAoe(o, f.x, f.y, 120, f.burst, { knock: 420, col: '#a78bfa' }); addShake(6); } }
+        if (f.kind === 'gorb') { const u = Math.min(1, 1 - f.t / f.T); f.x = f.x0 + (f.tx - f.x0) * u; f.y = f.y0 + (f.ty - f.y0) * u; const e = enemiesOf(o).find(q => !(q.air > 0) && dist(q.x, q.y, f.x, f.y) < q.radius + 8); if (e) f.t = 0; if (f.t <= 0) { enemiesOf(o).forEach(q => { if (q.air > 0) return; const d = dist(q.x, q.y, f.x, f.y); if (d < 85 + q.radius) { const b = Math.atan2(f.y - q.y, f.x - q.x), k = Math.min(Math.max(0, d - 10), 45), nx = q.x + Math.cos(b) * k, ny = q.y + Math.sin(b) * k; if (!pointInObstacle(nx, ny, q.radius)) { q.x = nx; q.y = ny; } dealDamage(q, f.dmg, o.id, { knock: 1 }); } }); W10.push({ kind: 'implode', owner: o.id, x: f.x, y: f.y, t: 0.3, T: 0.3 }); AudioSys.playAt('block', f.x, f.y, 0.3); W10.splice(i, 1); continue; } }
+        if (f.kind === 'well') { f.tick += dt; enemiesOf(o).forEach(e => { if (e.air > 0) return; const d = dist(e.x, e.y, f.x, f.y); if (d < f.R + e.radius) { if (d > 8) { const b = Math.atan2(f.y - e.y, f.x - e.x), k = Math.min(d - 6, f.pull * dt), nx = e.x + Math.cos(b) * k, ny = e.y + Math.sin(b) * k; if (!pointInObstacle(nx, ny, e.radius)) { e.x = nx; e.y = ny; } } if (f.dmg && f.tick >= 0.25) dealDamage(e, f.dmg, o.id, { melee: true, knock: 1 }); } }); if (f.tick >= 0.25) f.tick = 0; if (f.t <= 0 && f.burst) { cubeAoe(o, f.x, f.y, 120, f.burst, { knock: 420, col: '#a78bfa' }); addShake(6); } }
         if (f.t > 0) continue;
         if (f.kind === 'bolt') { const e = players.find(q => q.id === f.tid), x = e && e.hp > 0 ? e.x + f.ox : null; if (x !== null) { explode(x, e.y + f.oy, o.id, f.big ? 32 : 17, f.big ? 115 : 72); } }
         else if (f.kind === 'mark') { beams.push({ x1: f.x + 30, y1: f.y - 400, x2: f.x, y2: f.y, life: 0.3, maxLife: 0.3, color: '#f472b6' }); enemiesOf(o).forEach(e => { if (dist(e.x, e.y, f.x, f.y) < 55 + e.radius) dealDamage(e, f.dmg, o.id, { knock: 120, angle: Math.atan2(e.y - f.y, e.x - f.x) }); }); ring(f.x, f.y, 6, 55, '#f472b6', 0.35, 5); AudioSys.playAt('rail', f.x, f.y, 0.35); }
@@ -296,6 +315,8 @@ drawW2Fx = function (now) {
         else if (f.kind === 'sharkBite') { ctx.save(); ctx.translate(f.x, f.y); ctx.globalAlpha = k; ctx.fillStyle = '#475569'; ctx.beginPath(); ctx.ellipse(0, -u * 30, 46, 70 * (0.6 + u * 0.4), 0, Math.PI, 0); ctx.fill(); ctx.fillStyle = '#f8fafc'; for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.moveTo(i * 12 - 5, -u * 30); ctx.lineTo(i * 12, -u * 30 - 14); ctx.lineTo(i * 12 + 5, -u * 30); ctx.closePath(); ctx.fill(); } ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(-18, -u * 30 - 40, 4, 0, Math.PI * 2); ctx.fill(); ctx.restore(); ctx.strokeStyle = `rgba(186,230,253,${k})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(f.x, f.y, 60 + u * 90, 0, Math.PI * 2); ctx.stroke(); }
         else if (f.kind === 'spike') { const h = Math.min(1, u * 6) * 22 * (k < 0.2 ? k / 0.2 : 1); ctx.fillStyle = '#bae6fd'; ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(f.x - 9, f.y + 4); ctx.lineTo(f.x, f.y - h); ctx.lineTo(f.x + 9, f.y + 4); ctx.closePath(); ctx.fill(); ctx.stroke(); }
         else if (f.kind === 'well') { ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (let r = 0; r < 4; r++) { const a0 = -now * (5 + r) + r; ctx.strokeStyle = `rgba(167,139,250,${0.5 - r * 0.1})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(f.x, f.y, f.R * (0.25 + r * 0.22), a0, a0 + 2.4); ctx.stroke(); } ctx.restore(); ctx.fillStyle = '#0f0a1e'; ctx.beginPath(); ctx.arc(f.x, f.y, f.big ? 18 : 10, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 2; ctx.stroke(); }
+        else if (f.kind === 'gorb') { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = 'rgba(167,139,250,0.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(f.x, f.y, 10 + Math.sin(now * 20) * 2, now * 8, now * 8 + 4); ctx.stroke(); ctx.restore(); ctx.fillStyle = '#1e1b4b'; ctx.beginPath(); ctx.arc(f.x, f.y, 6, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#c4b5fd'; ctx.lineWidth = 1.5; ctx.stroke(); }
+        else if (f.kind === 'implode') { ctx.strokeStyle = `rgba(167,139,250,${k})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(f.x, f.y, 85 * k + 6, 0, Math.PI * 2); ctx.stroke(); }
         else if (f.kind === 'bspikes') { ctx.fillStyle = `rgba(220,38,38,${k})`; for (let i = 0; i < 16; i++) { const a = i * 0.39, r0 = 30, r1 = 60 + 100 * Math.min(1, u * 3); ctx.beginPath(); ctx.moveTo(f.x + Math.cos(a - 0.08) * r0, f.y + Math.sin(a - 0.08) * r0); ctx.lineTo(f.x + Math.cos(a) * r1, f.y + Math.sin(a) * r1); ctx.lineTo(f.x + Math.cos(a + 0.08) * r0, f.y + Math.sin(a + 0.08) * r0); ctx.closePath(); ctx.fill(); } }
     });
     ctx.restore();
