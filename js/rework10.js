@@ -12,8 +12,8 @@ vtGiant = function (p) {
     zones.push({ type: 'orbitalWarn2', x: pt.x, y: pt.y, r: R, t: warn, maxT: warn, owner: p.id, tick: 0, pink: true });
     zones.push({ type: 'selfBeacon', x: p.x, y: p.y, r: 30, t: warn + dur, maxT: warn + dur, owner: p.id, tick: 0 });
     strikes.push({ kind: 'vtOrbital', owner: p.id, x: pt.x, y: pt.y, R, t: warn, dur, tick: 0, w });
-    p.vtBeaconT = world.time + warn + dur; p.st.root = Math.max(p.st.root || 0, 0.6); p.st.shield = Math.min(200, (p.st.shield || 0) + 60); p.st.shieldT = Math.max(p.st.shieldT || 0, warn + dur);
-    floatText(p.x, p.y - 50, '☄️ TUYỆT DIỆT QUANG — BẠN ĐANG BỊ LỘ!', '#f472b6', 15); AudioSys.playAt('alarm', pt.x, pt.y, 0.6, 4000); AudioSys.playAt('rail', p.x, p.y, 0.5);
+    p.vtBeaconT = world.time + warn + dur; p.st.root = Math.max(p.st.root || 0, warn + dur); // đứng yên chiếu tia lên trời suốt lúc gọi p.st.shield = Math.min(200, (p.st.shield || 0) + 60); p.st.shieldT = Math.max(p.st.shieldT || 0, warn + dur);
+    floatText(p.x, p.y - 50, '☄️ TUYỆT DIỆT QUANG — ĐỨNG YÊN CHIẾU TIA · BẠN BỊ LỘ!', '#f472b6', 15); AudioSys.playAt('alarm', pt.x, pt.y, 0.6, 4000); AudioSys.playAt('rail', p.x, p.y, 0.5);
 };
 const _updateStrikesR10 = updateStrikes;
 updateStrikes = function (dt) {
