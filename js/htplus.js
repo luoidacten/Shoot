@@ -53,7 +53,7 @@ updateStrikes = function (dt) {
         s.tick -= dt;
         while (s.tick <= 0 && s.n > 0) {
             s.tick += s.gap; s.n--;
-            if (s.kind === 'htBurst2') { const a = (o.aimAngle !== undefined ? o.aimAngle : o.angle) + (Math.random() - 0.5) * s.spread; htBullet(o, a, { damage: s.dmg, color: s.color, size: 3.8, bounces: s.bounces, speed: 22, trail: 36 }); AudioSys.playAt(s.snd, o.x, o.y, 0.15); o.muzzle = 0.05; }
+            if (s.kind === 'htBurst2') { const a = (s.a !== undefined ? s.a : (s.a = aimDir(o))) + (Math.random() - 0.5) * s.spread; htBullet(o, a, { damage: s.dmg, color: s.color, size: 3.8, bounces: s.bounces, speed: 22, trail: 36 }); AudioSys.playAt(s.snd, o.x, o.y, 0.15); o.muzzle = 0.05; }
             else { const k = 40 - s.n; [0, Math.PI].forEach(off => htBullet(o, s.a + k * 0.32 + off, { damage: s.dmg, color: k % 2 ? '#fde68a' : '#fca5a5', size: 3.6, speed: 17, life: 0.7, trail: 26 })); if (k % 4 === 0) AudioSys.playAt('smg', o.x, o.y, 0.2); }
         }
         if (s.n <= 0) strikes.splice(i, 1);
