@@ -1,0 +1,20 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const pg = await b.newPage({ viewport: { width: 1100, height: 620 } }); const errs = []; pg.on('pageerror', e => errs.push('PAGEERR ' + e.message + ' ' + (e.stack || '').split('\n').slice(1,3).join(' | ')));
+await pg.goto('http://localhost:8765/index.html'); await pg.waitForTimeout(800);
+await pg.evaluate(() => startSandbox()); await pg.waitForTimeout(1500);
+await pg.evaluate(() => { SB.panel = false; sbPanel(true); SB.noCd = false; SB.ammo = false; obstacles.length = 0; bushes.length = 0; crates.length = 0; const me = players[0]; me.build = ['meleeTech', 'gunMod', 'hightech']; sbRebuild(me);
+  window.R = (id) => { const me = players[0], es = players.slice(1); me.inventory = [makeWeapon(id, me), makeWeapon('PISTOL', me)]; me.weaponIdx = 0; me.x = 800; me.y = 900; me.angle = 0; me.skillAng = 0; me.skillDist = 200; me.travel = null; me.air = 0; me.st = freshStatus(); me.hp = me.maxHp; me.shotQueue = []; me.cooldown = 0; bullets.length = 0; me.skills.forEach(s => s.cd = 0); me.urN = 0; me.urStab = 0; me.snkN = 0; me.dartMulti = 0; me.musketReady = false; me.vx = me.vy = 0;
+    es.forEach((q, i) => { q.hp = q.maxHp = 5000; q.armor = 0; q.stun = 0; q.kx = q.ky = 0; q.st = freshStatus(); q.travel = null; q.air = 0; q.x = 900; q.y = 900 + i * 500; q.dead = false; q.snakePoison = 0; q.disarmT = 0; q.angle = 0; }); return es; };
+  window.D = () => Math.round(5000 - players[1].hp); });
+const E = f => pg.evaluate(f), out = [];
+out.push('ĐẠI ĐAO: ' + await E(async () => { const s = ms => new Promise(r => setTimeout(r, ms)); const es = R('GREATSWORD'), me = players[0]; es[0].x = 1000; const i = me.skills.findIndex(q => q.id === 'meleeTech'); const r = [];
+  castSkill(me, i, { x: 1, y: 0 }); await s(450); r.push(`T1 -${D()} bay ${es[0].air > 0} cd ${me.skills[i].cd}`); castSkill(me, i, { x: 1, y: 0 }); await s(600); r.push(`T2 -${D()} choáng ${es[0].stun > 0} x ${Math.round(me.x)}`); castSkill(me, i, null); await s(1200); r.push(`T3 -${D()} cd ${me.skills[i].cd.toFixed(1)}`);
+  R('GREATSWORD'); es[0].x = 1250; HT.GREATSWORD[1](me); await s(1600); r.push(`KTC -${D()}`);
+  R('GREATSWORD'); es[0].x = 1000; castSkill(me, i, { x: 1, y: 0 }); await s(2600); r.push(`hết giờ nối: cd ${me.skills[i].cd.toFixed(1)} chain ${me.gsChain}`); return r.join(' · '); }));
+out.push('GẬY: ' + await E(async () => { const s = ms => new Promise(r => setTimeout(r, ms)); const es = R('BAT'), me = players[0]; es[0].x = 1100; es[1].x = 1100; es[1].y = 1200; meleeTechCast(me); await s(1500); const a = `bóng: -${D()} địch2 -${Math.round(5000 - es[1].hp)}`;
+  R('BAT'); es[0].x = 1200; HT.BAT[1](me); for (let k = 0; k < 3; k++) spawnBullet(es[0], 1150, 900, Math.PI, { speed: 10, damage: 10, range: 600 }); await s(2000); return a + ` · KTC: phản ${players[1].hp < 5000} grand slam xong`; }));
+console.log(out.join('\n'));
+await E(() => { const U = updateCamera; updateCamera = function (dt) { U(dt); camera.zoom = 1.3; camera.x = players[0].x + 100; camera.y = players[0].y; }; R('GREATSWORD'); players[1].x = 1000; });
+await pg.waitForTimeout(300); const steps = [[() => castSkill(players[0], players[0].skills.findIndex(q => q.id === 'meleeTech'), { x: 1, y: 0 }), 330], [() => castSkill(players[0], players[0].skills.findIndex(q => q.id === 'meleeTech'), { x: 1, y: 0 }), 500], [() => castSkill(players[0], players[0].skills.findIndex(q => q.id === 'meleeTech'), null), 300], [() => { R('GREATSWORD'); players[1].x = 1250; HT.GREATSWORD[1](players[0]); }, 800], [() => {}, 450], [() => { R('BAT'); players[1].x = 1150; players[2].x = 1150; players[2].y = 1150; meleeTechCast(players[0]); }, 350]];
+let k = 0; for (const [f, w] of steps) { await pg.evaluate(f); await pg.waitForTimeout(w); await pg.screenshot({ path: 'gs_' + (k++) + '.png', clip: { x: 250, y: 60, width: 640, height: 500 } }); }
+console.log(errs.slice(0, 6).join('\n') || 'NO ERRORS'); await b.close(); })();
