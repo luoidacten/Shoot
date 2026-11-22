@@ -58,7 +58,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 | `rework10.js` | Tuyệt Diệt Quang kiểu vệ tinh + cột sáng lộ vị trí (`vtOrbital`, `selfBeacon`), nút 🔄 đổi mould (phím V) + 🎛️ Hiệu Chỉnh (phím 4), kỹ năng **Ép Xung** (`overclock`), vẽ lại **Bộ Định Vị Vệ Tinh** (`orbitalWarn2/orbitalBeam2`) |
 | `rework11.js` | **Bảng chiến thuật 3 cấp** (`TAC_LEVEL`, `tacLevel`, ghi đè `bgWin` lúc load), đổi mould hồi 1s |
 | `rework12.js` | **Ép Xung riêng 16 mould** (`VT_OC`), Nỏ Nổ ghim tường (`wallBolt`) — `W12` |
-| `rework13.js` | Vũ khí **Bom** (`BOMB`), **Bom Lửa** (`FIREBOMBW`), **Phi Tiêu** (`SHURIKEN`) — vật ném riêng `W13`; Rìu Săn Dấu Săn (`huntN`, `bullet.hunt`) + Phát Cuối; **vẽ lại roi** (`drawWhip13`, thay vẽ `W2FX kind 'whip'`); Kim Cô Bổng **Định Thân** (`dinhThan`, `dinhT`) + Bậc Thầy **Chống Gậy** (`ruyiPerch`, dùng lại chọn điểm đáp); **tạm tắt biến cố "Thêm Người Thêm Vui" khi online** (`r13NoMore` → đổi thành Đấu Trường Mở Rộng) |
+| `rework13.js` | Vũ khí **Bom** (`BOMB`), **Bom Lửa** (`FIREBOMBW`), **Phi Tiêu** (`SHURIKEN`) — vật ném riêng `W13`; Rìu Săn Dấu Săn (`huntN`, `bullet.hunt`) + Phát Cuối; **vẽ lại roi** (`drawWhip13`, thay vẽ `W2FX kind 'whip'`); Kim Cô Bổng **Định Thân** (`dinhThan`, `dinhT`) + Bậc Thầy **Chống Gậy** (`ruyiPerch`, dùng lại chọn điểm đáp); **tạm tắt biến cố "Thêm Người Thêm Vui" khi online** (`r13NoMore` → đổi thành Đấu Trường Mở Rộng); điện thoại: nút 🔄/🎛️ Vạn Tượng đặt theo `touchLayout()` (`r13PlaceVtBtns`), `#vt-cal` vuốt được (`touch-action:pan-y`) |
 
 ## Hệ thống đã chốt với người dùng
 - **Vạn Tượng**: 16 mould = 12 thường (6 gần/6 xa) + 4 độc quyền Chỉ Huy (Khiên NL, Đầu Kiếm, Đầu Súng, Tia Lazer). Gậy thường luôn **1 gần + 1 xa**. Mỗi mould: đòn đánh `A`, buff, chiêu chuyển `S`, kỹ năng `K` (Bậc Thầy/Trang Bị Phụ), Ép Xung riêng. Thuộc nhánh vũ khí đa hình (`POLY_WEPS`).
@@ -73,6 +73,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 - Script mẫu trong `tools/tests/` (chép ra scratchpad rồi `node tXXX.js`). `_harness.js` = phần khung: mở sandbox, xoá vật cản, đặt `window.R(id)` (trang bị vũ khí `id`, reset người chơi + hình nộm `players[1..]`, trả về mảng hình nộm) và `window.D()` (sát thương hình nộm 1 đã nhận).
 - `audit.js [ID,ID]`: chạy mọi vũ khí × 4 hướng (đánh, giữ, Bậc Thầy/Trang Bị Phụ, KTC), báo sai hướng/hitbox; `audit_cards.js`: mọi thẻ kỹ năng. Nhiều cờ là nhiễu (chiêu vùng, đạn tản, chiêu trễ).
 - Lưu ý test: `R()` không gọi `resetPlayerForRound` → hiệu ứng cũ còn sót; chiêu dùng `setTimeout` không chạy khi bước `update()` thủ công; test cũ có thể hỏng khi thiết kế đổi (ví dụ Hiệu Chỉnh không còn là ô kỹ năng).
+- Điện thoại: `devices['Pixel 7 landscape']`; vuốt thật bằng CDP `Input.dispatchTouchEvent` (touchStart/Move/End) — `synthesizeScrollGesture` không đáng tin (xem `t134.js`). Lưu ý `style.css` có `* { touch-action: none }` → bảng DOM cần cuộn phải tự đặt `touch-action: pan-y`.
 - Ảnh chụp: `pg.screenshot({ clip })`, ghép bằng PIL để xem nhiều khung.
 
 ## Hạn chế còn biết
