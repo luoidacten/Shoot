@@ -62,7 +62,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 | `rework14.js` | **Cân bằng**: máu cơ bản **600** (`BASE_HP_R14`, cộng sau `resetPlayerForRound`), vũ khí dễ trúng giảm sát thương theo vũ khí đang cầm (`EASY_NERF_R14`, bọc `dealDamage` + `trueDamage`), Hỏa Mai **999** sát thương chuẩn |
 
 ## Hệ thống đã chốt với người dùng
-- **Máu cơ bản 600.** Vũ khí dễ trúng ×0.8 (Tesla, Phun Lửa, Súng Băng, Roi Điện, Urumi, Ma Đao, Railgun, Shotgun, AR Giảm Thanh, Bộ Cơ Động, Đĩa Nảy, Nỏ Liên Châu, Minigun), Ám Khí ×0.9. Hỏa Mai 999.
+- **Máu cơ bản 600.** Vũ khí dễ trúng ×0.8 (Tesla, Phun Lửa, Súng Băng, Roi Điện, Urumi, Railgun, Shotgun, AR Giảm Thanh, Bộ Cơ Động, Đĩa Nảy, Nỏ Liên Châu, Minigun), Ma Đao (người dùng gọi "Ám đao") ×0.9. Ám Khí không giảm. Hỏa Mai 999.
 - **Vạn Tượng**: 16 mould = 12 thường (6 gần/6 xa) + 4 độc quyền Chỉ Huy (Khiên NL, Đầu Kiếm, Đầu Súng, Tia Lazer). Gậy thường luôn **1 gần + 1 xa**. Mỗi mould: đòn đánh `A`, buff, chiêu chuyển `S`, kỹ năng `K` (Bậc Thầy/Trang Bị Phụ), Ép Xung riêng. Thuộc nhánh vũ khí đa hình (`POLY_WEPS`).
 - **Kỹ Thuật Cao** của Vạn Tượng = đổi mould tức thì (mould Điểm Đánh Dấu: Tuyệt Diệt Quang, cạn gậy; Chỉ Huy: KTC hồi ×2 thay vì mất gậy). Đổi mould hồi chung 1s.
 - **Thẻ độc quyền** (chỉ ở lần chọn đầu, không cho người có lợi thế Bậc Thầy/Đa Hình): xoá lợi thế cũ, thay bằng lợi thế của thẻ, không chọn nâng cấp nữa.

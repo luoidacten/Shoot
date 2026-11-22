@@ -1,14 +1,14 @@
 /** ==================== REWORK 14 — CÂN BẰNG ====================
  *  · Máu cơ bản 200 → 600 (cộng thêm sau khi áp thẻ, nên thẻ +máu vẫn cộng như cũ).
- *  · Vũ khí DỄ TRÚNG (tự tìm mục tiêu, đánh tức thì, phun/toả rộng, bỏ qua phòng thủ) giảm sát thương; Ám Khí giảm nhẹ.
+ *  · Vũ khí DỄ TRÚNG (tự tìm mục tiêu, đánh tức thì, phun/toả rộng, bỏ qua phòng thủ) giảm sát thương; Ma Đao giảm nhẹ.
  *    Áp theo vũ khí kẻ tấn công ĐANG CẦM (gồm cả Bậc Thầy / Trang Bị Phụ / KTC dùng khi cầm vũ khí đó).
  *  · Súng Hỏa Mai: 500 → 999 sát thương chuẩn.
  */
 const BASE_HP_R14 = 600;
 const EASY_NERF_R14 = {
-    TESLA: 0.8, FLAME: 0.8, ICEGUN: 0.8, EWHIP: 0.8, URUMI: 0.8, MADAO: 0.8, RAILGUN: 0.8,
+    TESLA: 0.8, FLAME: 0.8, ICEGUN: 0.8, EWHIP: 0.8, URUMI: 0.8, RAILGUN: 0.8,
     SHOTGUN: 0.8, SAR: 0.8, MOBGEAR: 0.8, DISC: 0.8, XBOWR: 0.8, MINIGUN: 0.8,
-    DARTS: 0.9 // Ám Khí: giảm nhẹ
+    MADAO: 0.9 // Ma Đao ("Ám đao"): chỉ giảm nhẹ
 };
 
 /* ---------- máu cơ bản ---------- */
