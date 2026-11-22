@@ -534,3 +534,20 @@ Object.assign(ART2, {
     FIREBOMBW: (c, w, r, x0, ch) => { drawBottle13(c, x0 + 6, 0, Math.PI / 2 + 0.2, 0.9 + ch * 0.15); MUZ.FIREBOMBW = x0 + 10; },
     SHURIKEN: (c, w, r, x0, ch, now) => { drawStar13(c, x0 + 6, 0, 5.5 + ch * 2.5, ch > 0.05 ? now * 20 : 0.4, '#cbd5e1'); if (w.mag > 1) drawStar13(c, x0 + 2, 5, 4, 0.8, '#94a3b8'); MUZ.SHURIKEN = x0 + 10; }
 });
+
+/* ============================== TẠM TẮT "THÊM NGƯỜI THÊM VUI" KHI ONLINE ==============================
+ *  Biến cố này thêm 4 bot tạm vào giữa trận → lỗi khi online. Khi online, biến cố này được đổi thành
+ *  "ĐẤU TRƯỜNG MỞ RỘNG" ở mọi chỗ đọc tới (quay biến cố, khởi tạo hiệp, mỗi khung) — cả chủ phòng lẫn máy khách
+ *  đều đổi giống nhau nên vẫn khớp. Chơi với bot (offline) không đổi.
+ */
+const r13Online = () => settings.mode === 'online' || !!net.role;
+const r13NoMore = d => (d && d.more && r13Online()) ? (DESTINIES.find(q => q.wide) || DESTINIES[0]) : d;
+const _playDestinyRollR13 = playDestinyRoll;
+playDestinyRoll = function (destiny, done) {
+    const d = r13NoMore(destiny); if (d !== destiny && currentDestiny === destiny) currentDestiny = d;
+    return _playDestinyRollR13(d, done);
+};
+const _initRoundR13 = initRound;
+initRound = function () { currentDestiny = r13NoMore(currentDestiny); return _initRoundR13(); };
+const _upeMoreR13 = updatePartyExtras;
+updatePartyExtras = function (dt) { if (currentDestiny && currentDestiny.more) currentDestiny = r13NoMore(currentDestiny); return _upeMoreR13(dt); };

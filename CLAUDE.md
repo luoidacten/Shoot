@@ -58,7 +58,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 | `rework10.js` | Tuyệt Diệt Quang kiểu vệ tinh + cột sáng lộ vị trí (`vtOrbital`, `selfBeacon`), nút 🔄 đổi mould (phím V) + 🎛️ Hiệu Chỉnh (phím 4), kỹ năng **Ép Xung** (`overclock`), vẽ lại **Bộ Định Vị Vệ Tinh** (`orbitalWarn2/orbitalBeam2`) |
 | `rework11.js` | **Bảng chiến thuật 3 cấp** (`TAC_LEVEL`, `tacLevel`, ghi đè `bgWin` lúc load), đổi mould hồi 1s |
 | `rework12.js` | **Ép Xung riêng 16 mould** (`VT_OC`), Nỏ Nổ ghim tường (`wallBolt`) — `W12` |
-| `rework13.js` | Vũ khí **Bom** (`BOMB`), **Bom Lửa** (`FIREBOMBW`), **Phi Tiêu** (`SHURIKEN`) — vật ném riêng `W13`; Rìu Săn Dấu Săn (`huntN`, `bullet.hunt`) + Phát Cuối; **vẽ lại roi** (`drawWhip13`, thay vẽ `W2FX kind 'whip'`); Kim Cô Bổng **Định Thân** (`dinhThan`, `dinhT`) + Bậc Thầy **Chống Gậy** (`ruyiPerch`, dùng lại chọn điểm đáp) |
+| `rework13.js` | Vũ khí **Bom** (`BOMB`), **Bom Lửa** (`FIREBOMBW`), **Phi Tiêu** (`SHURIKEN`) — vật ném riêng `W13`; Rìu Săn Dấu Săn (`huntN`, `bullet.hunt`) + Phát Cuối; **vẽ lại roi** (`drawWhip13`, thay vẽ `W2FX kind 'whip'`); Kim Cô Bổng **Định Thân** (`dinhThan`, `dinhT`) + Bậc Thầy **Chống Gậy** (`ruyiPerch`, dùng lại chọn điểm đáp); **tạm tắt biến cố "Thêm Người Thêm Vui" khi online** (`r13NoMore` → đổi thành Đấu Trường Mở Rộng) |
 
 ## Hệ thống đã chốt với người dùng
 - **Vạn Tượng**: 16 mould = 12 thường (6 gần/6 xa) + 4 độc quyền Chỉ Huy (Khiên NL, Đầu Kiếm, Đầu Súng, Tia Lazer). Gậy thường luôn **1 gần + 1 xa**. Mỗi mould: đòn đánh `A`, buff, chiêu chuyển `S`, kỹ năng `K` (Bậc Thầy/Trang Bị Phụ), Ép Xung riêng. Thuộc nhánh vũ khí đa hình (`POLY_WEPS`).
@@ -76,6 +76,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 - Ảnh chụp: `pg.screenshot({ clip })`, ghép bằng PIL để xem nhiều khung.
 
 ## Hạn chế còn biết
+- Biến cố "THÊM NGƯỜI THÊM VUI" (thêm 4 bot tạm, `modes.js`) lỗi khi online → đang tạm tắt online (rework13.js), offline vẫn có.
 - Online: "dạng kế tiếp" của Đa Khí Cụ có thể hiện sai trên máy khách. Một số hiệu ứng riêng (mảng `W6…W12`, `USK`) không đồng bộ sang máy khách (chỉ `zones`, `bullets`, `slashes`… đồng bộ).
 - Hoả Diệm chưa có âm thanh lửa riêng (`flame` không có trong `audio.js`).
 - Nhãn "Chiến trường: bảng chỉ hiện vùng quanh bạn" (từ battleground.js) hiện cả ở chế độ thường khi bảng cấp 1–2.
