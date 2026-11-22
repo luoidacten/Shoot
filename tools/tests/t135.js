@@ -10,7 +10,7 @@ pg.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE ' + m.text(
 console.log(await pg.evaluate(() => { const p = players[0]; resetPlayerForRound(p); return `máu sau reset hiệp: ${p.hp}/${p.maxHp}`; }));
 // so sánh: bật/tắt nerf cho cùng 1 đòn
 console.log(await pg.evaluate(async () => { const s = ms => new Promise(r => setTimeout(r, ms)); const out = [];
-  for (const id of ['DARTS', 'SHOTGUN', 'RAILGUN', 'URUMI', 'TESLA', 'PISTOL', 'KATANA', 'MUSKET']) {
+  for (const id of ['MADAO', 'DARTS', 'SHOTGUN', 'RAILGUN', 'URUMI', 'TESLA', 'PISTOL', 'KATANA', 'MUSKET']) {
     const res = [];
     for (const on of [false, true]) {
       const saved = EASY_NERF_R14[id]; if (!on) delete EASY_NERF_R14[id];
