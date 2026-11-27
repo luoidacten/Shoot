@@ -88,6 +88,127 @@
    "s_glitch_0.mp3",
    "s_glitch_1.mp3",
    "s_glitch_2.mp3"
+  ],
+  "whoosh": [
+   "s_whoosh_0.mp3",
+   "s_whoosh_1.mp3",
+   "s_whoosh_2.mp3"
+  ],
+  "swing": [
+   "s_swing_0.mp3",
+   "s_swing_1.mp3",
+   "s_swing_2.mp3",
+   "s_swing_3.mp3"
+  ],
+  "alarm": [
+   "s_alarm_0.mp3",
+   "s_alarm_1.mp3"
+  ],
+  "tick": [
+   "s_tick_0.mp3",
+   "s_tick_1.mp3"
+  ],
+  "step": [
+   "s_step_0.mp3",
+   "s_step_1.mp3",
+   "s_step_2.mp3",
+   "s_step_3.mp3"
+  ],
+  "heart": [
+   "s_heart_0.mp3"
+  ],
+  "ko": [
+   "s_ko_0.mp3",
+   "s_ko_1.mp3"
+  ],
+  "win": [
+   "s_win_0.mp3",
+   "s_win_1.mp3"
+  ],
+  "flame": [
+   "s_flame_0.mp3",
+   "s_flame_1.mp3",
+   "s_flame_2.mp3"
+  ],
+  "chainsaw": [
+   "s_chainsaw_0.mp3"
+  ],
+  "bow": [
+   "s_bow_0.mp3",
+   "s_bow_1.mp3"
+  ],
+  "laser": [
+   "s_laser_0.mp3",
+   "s_laser_1.mp3",
+   "s_laser_2.mp3"
+  ],
+  "teleport": [
+   "s_teleport_0.mp3",
+   "s_teleport_1.mp3",
+   "s_teleport_2.mp3"
+  ],
+  "zap": [
+   "s_zap_0.mp3",
+   "s_zap_1.mp3",
+   "s_zap_2.mp3"
+  ],
+  "ground": [
+   "s_ground_0.mp3",
+   "s_ground_1.mp3"
+  ],
+  "clang": [
+   "s_clang_0.mp3",
+   "s_clang_1.mp3",
+   "s_clang_2.mp3"
+  ],
+  "glass": [
+   "s_glass_0.mp3",
+   "s_glass_1.mp3"
+  ],
+  "ricochet": [
+   "s_ricochet_0.mp3",
+   "s_ricochet_1.mp3"
+  ],
+  "sniper": [
+   "s_sniper_0.mp3",
+   "s_sniper_1.mp3"
+  ],
+  "cannon": [
+   "s_cannon_0.mp3"
+  ],
+  "magic": [
+   "s_magic_0.mp3",
+   "s_magic_1.mp3",
+   "s_magic_2.mp3"
+  ],
+  "spell": [
+   "s_spell_0.mp3",
+   "s_spell_1.mp3"
+  ],
+  "whip": [
+   "s_whip_0.mp3"
+  ],
+  "freeze": [
+   "s_freeze_0.mp3",
+   "s_freeze_1.mp3",
+   "s_freeze_2.mp3"
+  ],
+  "heal": [
+   "s_heal_0.mp3",
+   "s_heal_1.mp3"
+  ],
+  "shield": [
+   "s_shield_0.mp3",
+   "s_shield_1.mp3",
+   "s_shield_2.mp3"
+  ],
+  "shield_up": [
+   "s_shield_up_0.mp3",
+   "s_shield_up_1.mp3"
+  ],
+  "throw": [
+   "s_throw_0.mp3",
+   "s_throw_1.mp3"
   ]
  },
  "crowd": {

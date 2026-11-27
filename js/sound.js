@@ -4,7 +4,7 @@
  *  Thiếu file nào thì dùng lại tiếng tổng hợp cũ.
  */
 const SND = { man: null, buf: {}, loading: false, lastSfx: {}, music: { key: null, cur: null }, amb: null };
-fetch('assets/audio/audio.json?v=1', { cache: 'no-cache' }).then(r => r.json()).then(m => { SND.man = m; sndLoad(); }).catch(() => {});
+fetch('assets/audio/audio.json?v=2', { cache: 'no-cache' }).then(r => r.json()).then(m => { SND.man = m; sndLoad(); }).catch(() => {});
 function sndLoad() {
     if (SND.loading || !SND.man || !AudioSys.ctx) return;
     SND.loading = true;
@@ -174,3 +174,9 @@ showBanner = function (text, ...rest) {
     if (text === 'ĐÁNH!' && net.role !== 'guest' && !net.mute) { AudioSys.play('cheer_small', 0.25); AudioSys.play('glitch', 0.2); }
     return r;
 };
+
+/* ---------- Âm mới (nhóm A/B/C): độ to & khoảng cách tối thiểu giữa 2 lần phát ---------- */
+Object.assign(SFX_VOL, { whoosh: 0.55, swing: 0.7, alarm: 0.7, tick: 0.45, step: 0.3, heart: 1.1, ko: 1.1, win: 1.2, flame: 0.45, chainsaw: 0.4, bow: 0.7,
+    laser: 0.8, teleport: 0.8, zap: 0.6, ground: 1, clang: 0.75, glass: 0.9, ricochet: 0.6, sniper: 1, cannon: 1.1, magic: 0.8, spell: 0.8, whip: 0.9,
+    freeze: 0.8, heal: 0.75, shield: 0.8, shield_up: 0.8, throw: 0.6 });
+Object.assign(SFX_GAP, { whoosh: 0.05, swing: 0.05, step: 0.06, tick: 0.05, flame: 0.09, chainsaw: 0.09, zap: 0.06, clang: 0.05, ricochet: 0.05, heart: 0.4 });
