@@ -98,7 +98,7 @@ const _updateStrikes40 = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikes40(dt);
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i]; if (s.kind !== 'bolt' || s.t > 0) continue; strikes.splice(i, 1);
+        const s = strikes[i]; if (!s) continue; if (s.kind !== 'bolt' || s.t > 0) continue; strikes.splice(i, 1);
         players.forEach(p => { if (p.hp > 0 && !(p.air > 0) && dist(p.x, p.y, s.x, s.y) < 95 + p.radius) { dealDamage(p, 45, -1, { zone: true, angle: Math.atan2(p.y - s.y, p.x - s.x), knock: 300 }); p.stun = Math.max(p.stun, 0.4); } });
         zones.push({ type: 'flareLight', x: s.x, y: s.y, r: 420, t: 0.6, maxT: 0.6, owner: -1, tick: 0 }); // chớp sét soi sáng
         beams.push({ x1: s.x + (Math.random() - 0.5) * 120, y1: s.y - 900, x2: s.x, y2: s.y, life: 0.35, maxLife: 0.35, color: '#e0f2fe', zig: 1 });

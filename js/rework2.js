@@ -29,10 +29,10 @@ function rgScout(p) { // luồng điện làm lộ vị trí + drone do thám ba
 }
 function updateRG(dt) {
     for (let i = RG.length - 1; i >= 0; i--) {
-        const d = RG[i], o = players.find(q => q.id === d.owner); d.t -= dt;
+        const d = RG[i]; if (!d) continue; const o = players.find(q => q.id === d.owner); d.t -= dt;
         if (!o || o.hp <= 0 || d.t <= 0 || d.hp <= 0) { if (d.hp <= 0) { spark(d.x, d.y, '#67e8f9', 12, 220); floatText(d.x, d.y - 20, '💥 DRONE HỎNG', '#67e8f9', 12); } RG.splice(i, 1); continue; }
         // bị bắn phá
-        for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== o.id && dist(b.x, b.y, d.x, d.y) < 12 + (b.size || 3)) { d.hp -= b.damage || 10; spark(b.x, b.y, '#67e8f9', 4, 160); bullets.splice(j, 1); } }
+        for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== o.id && dist(b.x, b.y, d.x, d.y) < 12 + (b.size || 3)) { d.hp -= b.damage || 10; spark(b.x, b.y, '#67e8f9', 4, 160); bullets.splice(j, 1); } }
         if (d.scout) { const st = d.sp * dt; d.x += Math.cos(d.a) * st; d.y += Math.sin(d.a) * st; d.d += st; if (d.d >= d.L || d.x < 0 || d.y < 0 || d.x > MAP_W || d.y > MAP_H) d.t = 0; continue; }
         // mục tiêu: địch mà CHỦ đang nhìn thấy (tàng hình / khói làm chủ mất tầm nhìn thì drone cũng mù)
         const blind = (o.st && o.st.blind > 0) || inSmoke(o.x, o.y);
@@ -76,7 +76,7 @@ function scFire(p, w, ang, charge, mult) {
 }
 function updateSC(dt) {
     for (let i = SC.length - 1; i >= 0; i--) {
-        const f = SC[i], o = players.find(q => q.id === f.owner); if (!o || o.hp <= 0) { SC.splice(i, 1); continue; }
+        const f = SC[i]; if (!f) continue; const o = players.find(q => q.id === f.owner); if (!o || o.hp <= 0) { SC.splice(i, 1); continue; }
         const dmgT = (e, d) => { trueDamage(e, d, o.id); spark(e.x, e.y, '#f8fafc', 6, 200); };
         if (f.kind === 'scBlade') { // bay theo vòng cung đối xứng tới điểm hẹn
             f.t += dt; const u = Math.min(1, f.t / f.T), nx = -Math.sin(f.a), ny = Math.cos(f.a), bulge = Math.sin(u * Math.PI) * 90 * f.sd;
@@ -85,7 +85,7 @@ function updateSC(dt) {
             if (u >= 1) { SC.splice(i, 1); if (f.sd > 0) SC.push({ kind: 'scSpin', owner: o.id, x: f.tx, y: f.ty, left: 1, tick: 0 }); }
         } else if (f.kind === 'scSpin') { // ghép lại, xoay 1 giây
             f.left -= dt; f.tick += dt;
-            if (f.tick >= 0.15) { f.tick = 0; enemiesOf(o).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, f.x, f.y) < e.radius + 48) dmgT(e, 6 * r2(o)); }); for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 52) bullets.splice(j, 1); } }
+            if (f.tick >= 0.15) { f.tick = 0; enemiesOf(o).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, f.x, f.y) < e.radius + 48) dmgT(e, 6 * r2(o)); }); for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 52) bullets.splice(j, 1); } }
             if (f.left <= 0) { SC.splice(i, 1); SC.push({ kind: 'scBack', owner: o.id, x: f.x, y: f.y, hit: new Set() }); }
         } else if (f.kind === 'scBack') { // bay thẳng về
             const sp = 900 * dt, d = dist(f.x, f.y, o.x, o.y); if (d < sp + o.radius) { SC.splice(i, 1); spark(o.x, o.y, '#f8fafc', 4, 120); continue; }
@@ -94,7 +94,7 @@ function updateSC(dt) {
         } else if (f.kind === 'scBig') { // Kỹ Thuật Cao: kéo khổng lồ hủy diệt trên đường bay
             const st = 760 * dt; f.x += Math.cos(f.a) * st; f.y += Math.sin(f.a) * st; f.d += st;
             enemiesOf(o).forEach(e => { if (!f.hit.has(e.id) && dist(e.x, e.y, f.x, f.y) < e.radius + 40) { f.hit.add(e.id); dmgT(e, f.dmg); e.st.slow = Math.max(e.st.slow || 0, 1); } });
-            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 46) bullets.splice(j, 1); }
+            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 46) bullets.splice(j, 1); }
             const ob = pointInObstacle(f.x, f.y, 0);
             if (ob) { if (ob.wood || ob.temp !== undefined) damageObstacle(ob, 200, o); else if (!f.wall) { SC.splice(i, 1); spark(f.x, f.y, '#f8fafc', 14, 260); continue; } }
             if (f.d >= f.max) SC.splice(i, 1);
@@ -166,9 +166,9 @@ function mdUltimate(p, ang) { // VẠN NHẬN QUY TÔNG
 }
 function updateMD(dt) {
     const now = world.time;
-    for (let i = MDS.length - 1; i >= 0; i--) { const s = MDS[i]; s.t -= dt; s.a += dt * 3; if (s.tid !== undefined) { const e = players.find(q => q.id === s.tid); if (e && e.hp > 0) { s.x = e.x + s.ox; s.y = e.y + s.oy; } else s.tid = undefined; } if (s.t <= 0) MDS.splice(i, 1); }
+    for (let i = MDS.length - 1; i >= 0; i--) { const s = MDS[i]; if (!s) continue; s.t -= dt; s.a += dt * 3; if (s.tid !== undefined) { const e = players.find(q => q.id === s.tid); if (e && e.hp > 0) { s.x = e.x + s.ox; s.y = e.y + s.oy; } else s.tid = undefined; } if (s.t <= 0) MDS.splice(i, 1); }
     for (let i = W6.length - 1; i >= 0; i--) { // mảnh bay về: xuyên giáp trên đường về
-        const f = W6[i], o = players.find(q => q.id === f.owner); if (!o || o.hp <= 0) { W6.splice(i, 1); continue; }
+        const f = W6[i]; if (!f) continue; const o = players.find(q => q.id === f.owner); if (!o || o.hp <= 0) { W6.splice(i, 1); continue; }
         if (f.kind === 'mdFly') { const sp = (f.fast ? 1300 : 950) * dt, d = dist(f.x, f.y, o.x, o.y); if (d < sp + o.radius) { W6.splice(i, 1); continue; } const a = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(a) * sp; f.y += Math.sin(a) * sp; enemiesOf(o).forEach(e => { if (!f.hit.has(e.id) && dist(e.x, e.y, f.x, f.y) < e.radius + 10) { f.hit.add(e.id); trueDamage(e, (f.dmg || 8) * r2(o), o.id); spark(e.x, e.y, '#c084fc', 4, 160); } }); }
         else if (f.T) { f.t -= dt; if (f.t <= 0) W6.splice(i, 1); continue; }
         else if (f.kind === 'mdVolley') { const st = 950 * dt; f.x += Math.cos(f.a) * st; f.y += Math.sin(f.a) * st; f.d += st; enemiesOf(o).forEach(e => { if (!f.hit.has(e.id) && segDist(e.x, e.y, f.x - Math.cos(f.a) * st, f.y - Math.sin(f.a) * st, f.x, f.y) < e.radius + 30) { f.hit.add(e.id); trueDamage(e, f.dmg, o.id); spark(e.x, e.y, '#e9d5ff', 14, 280); floatText(e.x, e.y - 40, `🗡 ×${f.n}`, '#e9d5ff', 14); } }); if (f.d >= f.max || pointInObstacle(f.x, f.y, 0)) W6.splice(i, 1); }
@@ -187,7 +187,7 @@ function updateMD(dt) {
             }
         }
         if (p.mdTornadoT > now) { // lốc mảnh vỡ: chặn / đánh bật đạn
-            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner === p.id || dist(b.x, b.y, p.x, p.y) > 80) continue; if (now < p.mdTornadoT - 0.5 && !b.explosive) { b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = Math.max(b.life, 0.8); b.color = '#c084fc'; } else bullets.splice(j, 1); }
+            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner === p.id || dist(b.x, b.y, p.x, p.y) > 80) continue; if (now < p.mdTornadoT - 0.5 && !b.explosive) { b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = Math.max(b.life, 0.8); b.color = '#c084fc'; } else bullets.splice(j, 1); }
             if (Math.random() < 0.4) enemiesOf(p).forEach(e => { if (dist(e.x, e.y, p.x, p.y) < 75 + e.radius) trueDamage(e, 2 * r2(p), p.id); });
         }
         if (p.mdExCd > 0) p.mdExCd -= dt;
@@ -284,7 +284,7 @@ updatePartyExtras = function (dt) {
         // Kéo · Kỹ Thuật Cao đang giữ: đứng yên, kéo xoay; sau 1 giây: vùng sát thương + phá đạn
         if (w && w.id === 'SCISSORS' && scHeldSlot(p) >= 0) {
             const i = scHeldSlot(p), h = world.time - (p.skDownAt[i] || world.time); p.scChargeT = h; p.st.root = Math.max(p.st.root || 0, 0.06);
-            if (h >= 1) { p.scZoneT = (p.scZoneT || 0) + dt; if (p.scZoneT >= 0.25) { p.scZoneT = 0; enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 110 + e.radius) trueDamage(e, 5 * r2(p), p.id); }); } for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 110) { spark(b.x, b.y, '#f8fafc', 3, 140); bullets.splice(j, 1); } } }
+            if (h >= 1) { p.scZoneT = (p.scZoneT || 0) + dt; if (p.scZoneT >= 0.25) { p.scZoneT = 0; enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 110 + e.radius) trueDamage(e, 5 * r2(p), p.id); }); } for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 110) { spark(b.x, b.y, '#f8fafc', 3, 140); bullets.splice(j, 1); } } }
         } else if (p.scChargeT) p.scChargeT = 0;
         // bot dùng kỹ năng riêng của Ma Đao
         if (p.isBot && w && w.id === 'MADAO' && !(p.mdExCd > 0) && mdShards(p).length >= 6 && Math.random() < dt) mdExclusive(p);

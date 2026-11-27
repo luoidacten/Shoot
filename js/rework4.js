@@ -144,7 +144,7 @@ updatePartyExtras = function (dt) {
         for (const b of bullets) { if (b.owner === p.id || dist(b.x, b.y, p.x, p.y) > p.radius + 40 || Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) > 1.1) continue; b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = Math.max(b.life || 0, 0.8); b.color = '#67e8f9'; spark(b.x, b.y, '#a5f3fc', 4, 140); }
     });
     for (let i = W8.length - 1; i >= 0; i--) {
-        const f = W8[i], o = players.find(q => q.id === f.owner); if (!o || o.hp <= 0) { W8.splice(i, 1); continue; }
+        const f = W8[i]; if (!f) continue; const o = players.find(q => q.id === f.owner); if (!o || o.hp <= 0) { W8.splice(i, 1); continue; }
         f.t -= dt;
         if (f.kind === 'roll') { const st = 620 * dt; f.x += Math.cos(f.a) * st; f.y += Math.sin(f.a) * st; f.d += st; enemiesOf(o).forEach(e => { if (!f.hit.has(e.id) && !(e.air > 0) && dist(e.x, e.y, f.x, f.y) < e.radius + 22) { f.hit.add(e.id); dealDamage(e, 30 * cM(o), o.id, { melee: true, knock: 340, angle: f.a }); e.stun = Math.max(e.stun, 0.6); } }); if (f.d >= f.max || pointInObstacle(f.x, f.y, 10)) { ring(f.x, f.y, 6, 60, '#67e8f9', 0.3, 4); W8.splice(i, 1); } continue; }
         if (f.kind === 'hammer') {

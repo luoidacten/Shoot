@@ -216,7 +216,7 @@ function handleAttack(p, w, input, dt, allowAct, enemy) {
 
     tickReload(p, w, dt);
     if (p.shotQueue && p.shotQueue.length) {
-        for (let i = p.shotQueue.length - 1; i >= 0; i--) { const q = p.shotQueue[i]; q.t -= dt; if (q.t <= 0) { p.shotQueue.splice(i, 1); q.fn(); } }
+        for (let i = p.shotQueue.length - 1; i >= 0; i--) { const q = p.shotQueue[i]; if (!q) continue; q.t -= dt; if (q.t <= 0) { p.shotQueue.splice(i, 1); q.fn(); } }
     }
     if (p.autoThrowT > 0) { p.autoThrowT -= dt; if (p.autoThrowT <= 0 && getCurrentWeapon(p) === w && !hasAmmo(w)) { floatText(p.x, p.y - 30, 'HẾT ĐẠN — NÉM!', '#f5b100', 14); throwWeapon(p, w, enemy); return; } }
 
@@ -579,7 +579,7 @@ function guestSkillView(me, inp) {
 /* ============================== BẪY (nhiều địch) ============================== */
 function updateTraps(dt) {
     for (let i = mines.length - 1; i >= 0; i--) {
-        const m = mines[i]; if (m.arm > 0) { m.arm -= dt; continue; }
+        const m = mines[i]; if (!m) continue; if (m.arm > 0) { m.arm -= dt; continue; }
         const owner = players.find(q => q.id === m.owner);
         if (!owner) continue;
         for (const e of enemiesOf(owner)) {

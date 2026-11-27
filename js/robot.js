@@ -152,7 +152,7 @@ updatePartyExtras = function (dt) {
             if (now > p.form.until) { endForm(p); return; }
             p.st.slow = 0; p.stun = Math.min(p.stun, 0.25); p.kx *= 0.5; p.ky *= 0.5; // thân nặng: gần như miễn khống chế
         }
-        if (p.roboDomeT > now) for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 95) { spark(b.x, b.y, '#7dd3fc', 4, 160); bullets.splice(i, 1); } }
+        if (p.roboDomeT > now) for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 95) { spark(b.x, b.y, '#7dd3fc', 4, 160); bullets.splice(i, 1); } }
         if (combo(p, 'roboAuto') && !p.roboAutoUsed && !p.form && p.hp < p.maxHp * 0.4) { p.roboAutoUsed = true; transformInto(p, 'robot', 1); }
     });
     // bánh răng xuất hiện khi có người cầm thẻ Gọi Robot

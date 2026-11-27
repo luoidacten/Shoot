@@ -344,7 +344,7 @@ function updateWeaponKit(dt) {
         if (has(p, 'meleeTech') && w.id === 'KATANA') {
             const ch = p.katBlockT > NOW() ? 0.75 : 0.25;
             for (let i = bullets.length - 1; i >= 0; i--) {
-                const b = bullets[i];
+                const b = bullets[i]; if (!b) continue;
                 if (b.owner === p.id || b.katRolled || b.explosive || sameTeamId(p.id, b.owner) || dist(b.x, b.y, p.x, p.y) > p.radius + 60) continue;
                 if (Math.abs(angleDiff(Math.atan2(p.y - b.y, p.x - b.x), b.angle)) > 0.6) continue; // không bay về phía mình
                 b.katRolled = true;
@@ -362,7 +362,7 @@ function updateWeaponKit(dt) {
             if (p.saberEmp.t <= NOW() || w.id !== 'LIGHTSABER') p.saberEmp = null;
             else {
                 p.st.haste = Math.max(p.st.haste, 0.1);
-                for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== p.id && !sameTeamId(p.id, b.owner) && dist(b.x, b.y, p.x, p.y) < p.radius + 55) { bullets.splice(i, 1); spark(b.x, b.y, saberColor(p), 4, 180); } }
+                for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== p.id && !sameTeamId(p.id, b.owner) && dist(b.x, b.y, p.x, p.y) < p.radius + 55) { bullets.splice(i, 1); spark(b.x, b.y, saberColor(p), 4, 180); } }
                 if (Math.random() < 0.5) particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 0.3, maxLife: 0.3, color: hexA(saberColor(p), 0.35), size: p.radius, glow: true });
             }
         }
@@ -439,7 +439,7 @@ function updateWeaponKit(dt) {
     });
     // cầu lửa: nổ thành vùng lửa
     for (let i = fireballs.length - 1; i >= 0; i--) {
-        const F = fireballs[i];
+        const F = fireballs[i]; if (!F) continue;
         if (bullets.includes(F.b)) { F.x = F.b.x; F.y = F.b.y; if (Math.random() < 0.8) particles.push({ x: F.b.x, y: F.b.y, vx: 0, vy: -30, life: 0.35, maxLife: 0.35, color: Math.random() < 0.5 ? '#f97316' : '#facc15', size: 7, glow: true }); continue; }
         fireballs.splice(i, 1);
         const x = F.x !== undefined ? F.x : F.b.x, y = F.y !== undefined ? F.y : F.b.y;

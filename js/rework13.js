@@ -268,7 +268,7 @@ updatePartyExtras = function (dt) {
     _upeR13(dt);
     const now = r13Now();
     for (let i = W13.length - 1; i >= 0; i--) {
-        const f = W13[i]; f.t -= dt; f.spin = (f.spin || 0) + dt;
+        const f = W13[i]; if (!f) continue; f.t -= dt; f.spin = (f.spin || 0) + dt;
         const o = players.find(q => q.id === f.owner);
         if (!o && f.kind !== 'pole') { W13.splice(i, 1); continue; }
         if (f.kind === 'bomb' || f.kind === 'fire') {
@@ -320,7 +320,7 @@ updatePartyExtras = function (dt) {
             } else { f.x = nx; f.y = ny; f.d += st; }
             if (f.kind === 'bigstar') {
                 enemiesOf(o).forEach(e => { if (!f.hit.has(e.id) && !(e.air > 0) && dist(e.x, e.y, f.x, f.y) < e.radius + 26) { f.hit.add(e.id); starHit(o, e, f); } });
-                for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 30) { spark(b.x, b.y, '#f1f5f9', 3, 140); bullets.splice(j, 1); } }
+                for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 30) { spark(b.x, b.y, '#f1f5f9', 3, 140); bullets.splice(j, 1); } }
                 if (!f.back && f.d >= f.max) { f.back = true; f.hit.clear(); }
                 if (f.t <= 0) { W13.splice(i, 1); continue; }
                 continue;

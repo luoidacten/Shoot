@@ -94,14 +94,14 @@ function updateAcidZone(z, dt) {
     });
     // làm mòn tường, thùng
     for (let i = obstacles.length - 1; i >= 0; i--) {
-        const ob = obstacles[i]; if (ob.energy) continue;
+        const ob = obstacles[i]; if (!ob) continue; if (ob.energy) continue;
         const cx = Math.max(ob.x, Math.min(z.x, ob.x + ob.w)), cy = Math.max(ob.y, Math.min(z.y, ob.y + ob.h));
         if (dist(cx, cy, z.x, z.y) > z.r) continue;
         ob.hit = 0.1; ob.acidT = world.time + 0.6;
         if (ob.wood || ob.temp !== undefined) damageObstacle(ob, 7, o);
         else { ob.acidHp = (ob.acidHp === undefined ? 260 : ob.acidHp) - 6; if (ob.acidHp <= 0) { smoke(ob.x + ob.w / 2, ob.y + ob.h / 2, 8, 'rgba(163,230,53,0.35)', 18); floatText(ob.x + ob.w / 2, ob.y + ob.h / 2, '☣ TAN CHẢY', '#bef264', 14); obstacles.splice(i, 1); } }
     }
-    for (let i = crates.length - 1; i >= 0; i--) { const c = crates[i]; if (dist(c.x, c.y, z.x, z.y) > z.r + 10) continue; c.acidT = (c.acidT || 0) + 0.25; if (c.acidT >= 1.5) { smoke(c.x, c.y, 5, 'rgba(163,230,53,0.35)', 14); crates.splice(i, 1); } }
+    for (let i = crates.length - 1; i >= 0; i--) { const c = crates[i]; if (!c) continue; if (dist(c.x, c.y, z.x, z.y) > z.r + 10) continue; c.acidT = (c.acidT || 0) + 0.25; if (c.acidT >= 1.5) { smoke(c.x, c.y, 5, 'rgba(163,230,53,0.35)', 14); crates.splice(i, 1); } }
 }
 
 /* ============================== 💿 SÚNG ĐĨA NẢY ============================== */
@@ -317,7 +317,7 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
 /* ============================== CẬP NHẬT ============================== */
 function updateW3(dt) {
     for (let i = W3.length - 1; i >= 0; i--) {
-        const f = W3[i], o = players.find(q => q.id === f.owner);
+        const f = W3[i]; if (!f) continue; const o = players.find(q => q.id === f.owner);
         if (!o) { W3.splice(i, 1); continue; }
         if (f.kind === 'blob') { f.t += dt; if (f.t >= f.T) { blobLand(f, o); W3.splice(i, 1); } continue; }
         f.t -= dt;
@@ -648,7 +648,7 @@ updatePartyExtras = function (dt) {
             if (!o || o.hp <= 0) { f.t = 0; return; }
             for (let k = 0; k < 3; k++) {
                 const a = f.a0 + now * 3.4 + k * Math.PI * 2 / 3, bx = o.x + Math.cos(a) * 76, by = o.y + Math.sin(a) * 76;
-                for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== o.id && dist(b.x, b.y, bx, by) < 20 + (b.size || 3)) { spark(b.x, b.y, '#e0e7ff', 5, 180); bullets.splice(i, 1); } }
+                for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== o.id && dist(b.x, b.y, bx, by) < 20 + (b.size || 3)) { spark(b.x, b.y, '#e0e7ff', 5, 180); bullets.splice(i, 1); } }
                 enemiesOf(o).forEach(e => {
                     if (e.air > 0 || dist(e.x, e.y, bx, by) > e.radius + 18) return;
                     const key = e.id + '_' + k; if ((f.hitCd[key] || 0) > now) return; f.hitCd[key] = now + 0.45;

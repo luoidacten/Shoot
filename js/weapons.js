@@ -361,7 +361,7 @@ function updateBoomerang(b, dt) {
 function cutBullets(p, ang, reach, arc) {
     let n = 0;
     for (let i = bullets.length - 1; i >= 0; i--) {
-        const b = bullets[i];
+        const b = bullets[i]; if (!b) continue;
         if (b.owner === p.id || b.boomerang) continue;
         if (dist(p.x, p.y, b.x, b.y) > reach) continue;
         if (Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), ang)) > arc) continue;

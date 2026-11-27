@@ -47,7 +47,7 @@ function hitDecoysObs(p, x, y, r, dmg) {
 function blockBulletsArc(p, a, half, R, reflect) { // chặn đạn trong cung phía trước; trả về số viên chặn được
     let n = 0;
     for (let i = bullets.length - 1; i >= 0; i--) {
-        const b = bullets[i]; if (b.owner === p.id || b.flame && !reflect) continue;
+        const b = bullets[i]; if (!b) continue; if (b.owner === p.id || b.flame && !reflect) continue;
         const d = dist(p.x, p.y, b.x, b.y); if (d > R) continue;
         if (half < Math.PI && Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), a)) > half) continue;
         if (reflect && !b.explosive) { b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = Math.max(b.life, 0.8); b.color = '#f9a8d4'; spark(b.x, b.y, '#f9a8d4', 4, 160); }
@@ -307,8 +307,8 @@ function iceFire(p, w, ang) {
     if (Math.random() < 0.6) particles.push({ x: ex + (Math.random() - 0.5) * 16, y: ey + (Math.random() - 0.5) * 16, vx: (Math.random() - 0.5) * 60, vy: (Math.random() - 0.5) * 60, life: 0.5, maxLife: 0.5, color: Math.random() < 0.5 ? '#e0f2fe' : '#7dd3fc', size: 3 });
     if (Math.random() < 0.15) AudioSys.playAt('whoosh', p.x, p.y, 0.08);
     // khắc chế lửa: dập đạn lửa trên đường tia
-    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.flame && b.owner !== p.id && segDist(b.x, b.y, m.x, m.y, ex, ey) < 16) { bullets.splice(i, 1); if (Math.random() < 0.3) smoke(b.x, b.y, 1, 'rgba(226,232,240,0.4)', 8); } }
-    for (let i = zones.length - 1; i >= 0; i--) { const z = zones[i]; if (z.type === 'fire' && dist(z.x, z.y, ex, ey) < z.r + 10) { z.t -= 0.25; if (z.t <= 0) { zones.splice(i, 1); smoke(z.x, z.y, 4, 'rgba(226,232,240,0.45)', 14); } } }
+    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.flame && b.owner !== p.id && segDist(b.x, b.y, m.x, m.y, ex, ey) < 16) { bullets.splice(i, 1); if (Math.random() < 0.3) smoke(b.x, b.y, 1, 'rgba(226,232,240,0.4)', 8); } }
+    for (let i = zones.length - 1; i >= 0; i--) { const z = zones[i]; if (!z) continue; if (z.type === 'fire' && dist(z.x, z.y, ex, ey) < z.r + 10) { z.t -= 0.25; if (z.t <= 0) { zones.splice(i, 1); smoke(z.x, z.y, 4, 'rgba(226,232,240,0.45)', 14); } } }
     if (e) {
         const dmgM = attackMult(p, w);
         dealDamage(e, w.damage * dmgM, p.id, { angle: ang, knock: 1 });
@@ -395,9 +395,9 @@ const _upeW2 = updatePartyExtras;
 updatePartyExtras = function (dt) {
     _upeW2(dt);
     for (let i = W2FX.length - 1; i >= 0; i--) {
-        const f = W2FX[i]; f.t -= dt;
+        const f = W2FX[i]; if (!f) continue; f.t -= dt;
         if (f.kind === 'cres') updateCrescent(f, dt);
-        if (f.kind === 'umbFly') { const o = players.find(q => q.id === f.owner); if (o) { const k = 1 - Math.max(0, f.t) / f.maxT; const cx = f.x0 + (f.x - f.x0) * k, cy = f.y0 + (f.y - f.y0) * k; for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== o.id && dist(b.x, b.y, cx, cy) < 28) { spark(b.x, b.y, '#fbcfe8', 4, 140); bullets.splice(j, 1); } } } }
+        if (f.kind === 'umbFly') { const o = players.find(q => q.id === f.owner); if (o) { const k = 1 - Math.max(0, f.t) / f.maxT; const cx = f.x0 + (f.x - f.x0) * k, cy = f.y0 + (f.y - f.y0) * k; for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== o.id && dist(b.x, b.y, cx, cy) < 28) { spark(b.x, b.y, '#fbcfe8', 4, 140); bullets.splice(j, 1); } } } }
         if (f.kind === 'tether') updateTether(f, dt);
         if (f.t <= 0) W2FX.splice(i, 1);
     }
@@ -414,7 +414,7 @@ updatePartyExtras = function (dt) {
     });
     // lửa làm tan vệt băng
     for (let i = zones.length - 1; i >= 0; i--) {
-        const z = zones[i];
+        const z = zones[i]; if (!z) continue;
         if (z.type === 'icefloor' && z.iceGun && zones.some(q => q.type === 'fire' && dist(q.x, q.y, z.x, z.y) < q.r + z.r * 0.5)) { zones.splice(i, 1); smoke(z.x, z.y, 2, 'rgba(226,232,240,0.45)', 12); continue; }
         if (z.type === 'blizzard') updateBlizzard(z, dt);
     }
@@ -520,7 +520,7 @@ function updateCrescent(f, dt) {
     const o = players.find(q => q.id === f.owner); if (!o || f.d >= f.max) { f.t = Math.min(f.t, 0); return; }
     const step = f.sp * dt; f.x += Math.cos(f.a) * step; f.y += Math.sin(f.a) * step; f.d += step;
     const wall = pointInObstacle(f.x, f.y, 0) || f.x < 4 || f.y < 4 || f.x > MAP_W - 4 || f.y > MAP_H - 4;
-    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 44) { spark(b.x, b.y, '#c4b5fd', 4, 150); bullets.splice(i, 1); } }
+    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 44) { spark(b.x, b.y, '#c4b5fd', 4, 150); bullets.splice(i, 1); } }
     enemiesOf(o).forEach(e => { if (!f.hit.has(e.id) && dist(e.x, e.y, f.x, f.y) < e.radius + 40) { f.hit.add(e.id); dealDamage(e, 38 * (o.meleeMult || 1), o.id, { melee: true, knock: 220, angle: f.a }); e.st.slow = Math.max(e.st.slow || 0, 1); scytheHeal(o, o.maxHp * 0.1); if (e.hp <= 0) reapKill(o, getCurrentWeapon(o)); } });
     if (Math.random() < 0.7) particles.push({ x: f.x, y: f.y, vx: 0, vy: 0, life: 0.35, maxLife: 0.35, color: 'rgba(167,139,250,0.4)', size: 10 });
     if (wall || f.d >= f.max) {
@@ -830,7 +830,7 @@ function updateUmbDrill(f, dt) {
     const o = players.find(q => q.id === f.owner); if (!o || o.hp <= 0) { f.t = 0; return; }
     f.a = o.angle; // ô xoay theo hướng nhìn
     const D = o.radius + 46, x = o.x + Math.cos(f.a) * D, y = o.y + Math.sin(f.a) * D; f.x = x; f.y = y;
-    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner === o.id || dist(b.x, b.y, x, y) > 62) continue; if (b.explosive) { bullets.splice(i, 1); continue; } b.owner = o.id; b.angle = Math.atan2(b.y - o.y, b.x - o.x) + (Math.random() - 0.5) * 0.3; b.life = Math.max(b.life, 0.8); b.color = '#f9a8d4'; spark(b.x, b.y, '#f9a8d4', 3, 140); }
+    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner === o.id || dist(b.x, b.y, x, y) > 62) continue; if (b.explosive) { bullets.splice(i, 1); continue; } b.owner = o.id; b.angle = Math.atan2(b.y - o.y, b.x - o.x) + (Math.random() - 0.5) * 0.3; b.life = Math.max(b.life, 0.8); b.color = '#f9a8d4'; spark(b.x, b.y, '#f9a8d4', 3, 140); }
     f.tick += dt;
     if (f.tick >= 0.15) { f.tick = 0; enemiesOf(o).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, x, y) < e.radius + 44) { dealDamage(e, 5 * (o.meleeMult || 1), o.id, { melee: true, knock: 60, angle: f.a }); spark(e.x, e.y, '#f9a8d4', 3, 160); } }); if (Math.random() < 0.5) AudioSys.playAt('swing', x, y, 0.15); }
     if (f.t - dt <= 0) { // kết thúc: kéo địch trong vùng rộng về trước ô + choáng

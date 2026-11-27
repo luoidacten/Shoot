@@ -74,7 +74,7 @@ function showBanner(text, sub = '', color = '#fff', dur = 1.6, size = 64) {
 
 function updateFx(dt) {
     for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
+        const p = particles[i]; if (!p) continue;
         p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
         const k = Math.pow(p.drag || 1, dt * 60); p.vx *= k; p.vy *= k;
         if (p.grow) p.size += p.grow * dt;
@@ -86,7 +86,7 @@ function updateFx(dt) {
     const cap = isTouch ? 450 : 900; // điện thoại: giới hạn hạt thấp hơn
     if (particles.length > cap) particles.splice(0, particles.length - cap);
     for (let i = texts.length - 1; i >= 0; i--) {
-        const t = texts[i]; t.life -= dt; t.y += t.vy * dt; t.vy *= Math.pow(0.9, dt * 60); t.pop = Math.max(0, t.pop - dt * 6);
+        const t = texts[i]; if (!t) continue; t.life -= dt; t.y += t.vy * dt; t.vy *= Math.pow(0.9, dt * 60); t.pop = Math.max(0, t.pop - dt * 6);
         if (t.life <= 0) texts.splice(i, 1);
     }
     for (let i = rings.length - 1; i >= 0; i--) { rings[i].life -= dt; if (rings[i].life <= 0) rings.splice(i, 1); }

@@ -90,7 +90,7 @@ function updateGunFx(dt) {
     });
     // đạn sên: hết đường / chạm tường → nổ mảnh
     for (let i = slugs.length - 1; i >= 0; i--) {
-        const S = slugs[i];
+        const S = slugs[i]; if (!S) continue;
         if (bullets.includes(S.b)) { S.x = S.b.x; S.y = S.b.y; S.a = S.b.angle; if (Math.random() < 0.7) particles.push({ x: S.b.x, y: S.b.y, vx: 0, vy: 0, life: 0.25, maxLife: 0.25, color: 'rgba(254,243,199,0.5)', size: 5, glow: true }); continue; }
         slugs.splice(i, 1);
         const o = players.find(q => q.id === S.owner); if (!o || S.x === undefined) continue;
@@ -99,7 +99,7 @@ function updateGunFx(dt) {
     }
     // cầu năng lượng: phóng điện mỗi 0.25 giây, hết đường thì nổ
     for (let i = orbs.length - 1; i >= 0; i--) {
-        const O = orbs[i], o = players.find(q => q.id === O.owner);
+        const O = orbs[i]; if (!O) continue; const o = players.find(q => q.id === O.owner);
         if (bullets.includes(O.b)) {
             O.x = O.b.x; O.y = O.b.y; O.tick -= dt;
             if (Math.random() < 0.9) particles.push({ x: O.b.x + (Math.random() - 0.5) * 14, y: O.b.y + (Math.random() - 0.5) * 14, vx: (Math.random() - 0.5) * 60, vy: (Math.random() - 0.5) * 60, life: 0.35, maxLife: 0.35, color: Math.random() < 0.5 ? '#c4b5fd' : '#e0e7ff', size: 3, glow: true });

@@ -36,7 +36,7 @@ function updateKatanaHT(p, dt) {
     p.st.invuln = Math.max(p.st.invuln || 0, 0.35);
     afterImages(p, ax, ay, bx, by, 7, '#7dd3fc');
     USK.push({ kind: 'katLine', x1: ax, y1: ay, x2: bx, y2: by, t: 0.5, maxT: 0.5 });
-    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== p.id && segDist(b.x, b.y, ax, ay, bx, by) < 40) { spark(b.x, b.y, '#e0f2fe', 4, 160); bullets.splice(i, 1); } }
+    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== p.id && segDist(b.x, b.y, ax, ay, bx, by) < 40) { spark(b.x, b.y, '#e0f2fe', 4, 160); bullets.splice(i, 1); } }
     const bonus = 1 + 0.25 * Math.min(3, K.parried);
     const victims = enemiesOf(p).filter(e => !(e.air > 0) && segDist(e.x, e.y, ax, ay, bx, by) < 46 + e.radius);
     AudioSys.playAt('whoosh', p.x, p.y, 0.7);
@@ -197,7 +197,7 @@ function uskHitFoe(o, x, y, r, skip) { return enemiesOf(o).find(e => !(e.air > 0
 function uskWall(x, y) { return x < 4 || y < 4 || x > MAP_W - 4 || y > MAP_H - 4 || !!pointInObstacle(x, y, 0); }
 function updateUSK(dt) {
     for (let i = USK.length - 1; i >= 0; i--) {
-        const f = USK[i]; f.t -= dt;
+        const f = USK[i]; if (!f) continue; f.t -= dt;
         const o = f.owner !== undefined ? players.find(q => q.id === f.owner) : null;
         if (f.kind === 'pin' && o) {
             const st = f.sp * dt; f.x += Math.cos(f.a) * st; f.y += Math.sin(f.a) * st; f.d += st;

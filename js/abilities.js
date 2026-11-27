@@ -366,7 +366,7 @@ function updateAbilities(dt) {
 
     // ---- Vùng hiệu ứng ----
     for (let i = zones.length - 1; i >= 0; i--) {
-        const z = zones[i];
+        const z = zones[i]; if (!z) continue;
         if (z.type === 'lava') {
             const on = lavaActive(z);
             z.tick += dt;
@@ -413,7 +413,7 @@ function updateAbilities(dt) {
 
     // ---- Tháp pháo ----
     for (let i = turrets.length - 1; i >= 0; i--) {
-        const t = turrets[i]; t.t -= dt; t.fire -= dt;
+        const t = turrets[i]; if (!t) continue; t.t -= dt; t.fire -= dt;
         const owner = players.find(q => q.id === t.owner);
         const e = owner && enemyOf(owner);
         if (e && e.hp > 0 && dist(t.x, t.y, e.x, e.y) < 470 && lineOfSight(t.x, t.y, e.x, e.y) && targetable(t, e)) {
@@ -432,7 +432,7 @@ function updateAbilities(dt) {
 
     // ---- Phân thân ----
     for (let i = decoys.length - 1; i >= 0; i--) {
-        const d = decoys[i]; d.t -= dt;
+        const d = decoys[i]; if (!d) continue; d.t -= dt;
         const ox = d.x, oy = d.y;
         d.x += Math.cos(d.angle) * d.speed * dt; d.y += Math.sin(d.angle) * d.speed * dt;
         resolveCircle(d, d.radius);
@@ -447,7 +447,7 @@ function updateAbilities(dt) {
 
     // ---- Bụi rậm trồng ----
     for (let i = bushes.length - 1; i >= 0; i--) {
-        const bu = bushes[i];
+        const bu = bushes[i]; if (!bu) continue;
         if (bu.t === undefined) continue;
         bu.t -= dt;
         const ow = players.find(q => q.id === bu.owner);
@@ -456,7 +456,7 @@ function updateAbilities(dt) {
     }
     // ---- Tường băng tạm thời ----
     for (let i = obstacles.length - 1; i >= 0; i--) {
-        const o = obstacles[i];
+        const o = obstacles[i]; if (!o) continue;
         if (o.temp !== undefined) { o.temp -= dt; if (o.temp <= 0) { spark(o.x + o.w / 2, o.y + o.h / 2, '#bae6fd', 14, 200, 0.5, 3); obstacles.splice(i, 1); } }
     }
 }
@@ -620,11 +620,11 @@ defS('emp', '📡', 'Xung EMP', 15, 'engage', 'Xung điện từ bán kính 260:
     const r = combo(p, 'blackout') ? 390 : 260;
     ring(p.x, p.y, 10, r, '#60a5fa', 0.5, 6); flash('#60a5fa', 0.1); AudioSys.playAt('rail', p.x, p.y, 0.4);
     const inR = (x, y) => dist(p.x, p.y, x, y) < r;
-    for (let i = turrets.length - 1; i >= 0; i--) { const t = turrets[i]; if (t.owner !== p.id && inR(t.x, t.y)) { spark(t.x, t.y, '#60a5fa', 10, 200); turrets.splice(i, 1); } else if (t.owner === p.id && combo(p, 'counterTech')) t.t += 4; }
+    for (let i = turrets.length - 1; i >= 0; i--) { const t = turrets[i]; if (!t) continue; if (t.owner !== p.id && inR(t.x, t.y)) { spark(t.x, t.y, '#60a5fa', 10, 200); turrets.splice(i, 1); } else if (t.owner === p.id && combo(p, 'counterTech')) t.t += 4; }
     for (let i = mines.length - 1; i >= 0; i--) if (mines[i].owner !== p.id && inR(mines[i].x, mines[i].y)) mines.splice(i, 1);
     for (const d of decoys) if (d.owner !== p.id && inR(d.x, d.y)) d.hp = 0;
     for (let i = crates.length - 1; i >= 0; i--) if (crates[i].type === 'FAKE' && crates[i].owner !== p.id && inR(crates[i].x, crates[i].y)) crates.splice(i, 1);
-    for (let i = obstacles.length - 1; i >= 0; i--) { const o = obstacles[i]; if (o.ownerPass !== undefined && o.ownerPass !== p.id && inR(o.x + o.w / 2, o.y + o.h / 2)) obstacles.splice(i, 1); }
+    for (let i = obstacles.length - 1; i >= 0; i--) { const o = obstacles[i]; if (!o) continue; if (o.ownerPass !== undefined && o.ownerPass !== p.id && inR(o.x + o.w / 2, o.y + o.h / 2)) obstacles.splice(i, 1); }
     const e = enemyOf(p);
     if (e && e.hp > 0 && inR(e.x, e.y)) {
         e.st.silence = 3; e.skills.forEach(s => s.cd = Math.max(s.cd, 3));

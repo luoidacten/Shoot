@@ -69,7 +69,7 @@ function buildSnapshot() {
     const z = world.zone;
     return {
         t: 's', gs: gameState, cd: R1(countdown), rd: currentRound, di: DESTINIES.indexOf(currentDestiny), mw: settings.maxWins,
-        sm: R1(fx.slowMo), cf: camera.focus || null, mi: AudioSys.seq.intensity,
+        sm: R1(fx.slowMo), cf: camera.focus || null, mz: AudioSys.seq.intensity,
         w: { mapType: world.mapType, time: R1(world.time), zonePhase: world.zonePhase, darkness: world.darkness, ice: world.ice, infiniteAmmo: world.infiniteAmmo, theme: world.theme, zoneDelay: world.zoneDelay,
              zone: { x: R1(z.x), y: R1(z.y), r: R1(z.r), tx: R1(z.tx), ty: R1(z.ty), endR: z.endR } },
         pl: players.map(snapPlayer),
@@ -101,7 +101,7 @@ function applySnapshot(s) {
     const IN = ['COUNTDOWN', 'PLAYING', 'KO', 'ROUND_OVER'];
     if (gameState === 'GAMEOVER' || gameState === 'AUGMENT' || gameState === 'AUG_DONE') { if (!IN.includes(s.gs)) return; }
     gameState = s.gs; countdown = s.cd; currentRound = s.rd; currentDestiny = DESTINIES[s.di] || currentDestiny; settings.maxWins = s.mw;
-    fx.slowMo = s.sm; camera.focus = s.cf; AudioSys.setIntensity(s.mi);
+    fx.slowMo = s.sm; camera.focus = s.cf; AudioSys.setIntensity(s.mz);
     Object.assign(world, s.w);
     const zone = world.zone; zone.sx = zone.x; zone.sy = zone.y;
 

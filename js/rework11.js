@@ -57,7 +57,7 @@ function vtVent(p) {
     const O = p.vtOC; p.vtOC = null; if (!O || p.hp <= 0) return;
     const R = 120 + O.heat * 4, dmg = (24 + O.heat * 5) * (p.meleeMult || 1);
     enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < R + e.radius) { dealDamage(e, dmg, p.id, { knock: 480, angle: Math.atan2(e.y - p.y, e.x - p.x) }); if (O.heat >= 15) e.stun = Math.max(e.stun, 0.6); } });
-    for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < R) bullets.splice(j, 1); }
+    for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < R) bullets.splice(j, 1); }
     W11.push({ kind: 'vent', owner: p.id, x: p.x, y: p.y, R, c1: O.c1, c2: O.c2, t: 0.6, T: 0.6 });
     flash('#fb7185', 0.1); addShake(6 + O.heat * 0.4); AudioSys.playAt('explosion', p.x, p.y, 0.6);
     floatText(p.x, p.y - 56, `🔥 XẢ NHIỆT ×${O.heat}`, '#fdba74', 16);

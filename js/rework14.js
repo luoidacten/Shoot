@@ -20,14 +20,15 @@ resetPlayerForRound = function (p) {
 };
 
 /* ---------- giảm sát thương vũ khí dễ trúng ---------- */
-function nerfR14(attackerId, target) {
+function nerfR14(attackerId, target, opts) {
     if (attackerId === -1 || attackerId === undefined) return 1;
+    if (typeof isSkillDmgR19 === 'function' && isSkillDmgR19(opts)) return 1; // kỹ năng / phép: không giảm
     const A = players.find(q => q.id === attackerId); if (!A || A === target) return 1;
     const w = getCurrentWeapon(A); return (w && EASY_NERF_R14[w.id]) || 1;
 }
 const _dealDamageR14 = dealDamage;
 dealDamage = function (target, dmg, attackerId, opts = {}) {
-    if (target && !opts.raw) dmg *= nerfR14(attackerId, target);
+    if (target && !opts.raw) dmg *= nerfR14(attackerId, target, opts);
     return _dealDamageR14(target, dmg, attackerId, opts);
 };
 const _trueDamageR14 = trueDamage;
