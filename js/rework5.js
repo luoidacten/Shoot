@@ -102,7 +102,7 @@ function sjSwap(p, w, ang) {
         slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: ang, range: 175, color: '#fbbf24', width: 8, life: 0.2, maxLife: 0.2, swing: 1, line: true });
         lineFoes(p, ang, 175, 18).forEach(e => { dealDamage(e, 18 * w5MM(p), p.id, { melee: true, knock: 260, angle: ang }); e.stun = Math.max(e.stun, 0.5); });
     }
-    if (has(p, 'meleeTech')) p.hp = Math.min(p.maxHp, p.hp + 10);
+    if (has(p, 'meleeTech')) p.hp = Math.min(p.maxHp, p.hp + (10) * HEALK);
     floatText(p.x, p.y - 58, `🥢 TAM VŨ KHÚC → ${SJ_FORMS[to].name.toUpperCase()}`, SJ_FORMS[to].col, 13); AudioSys.playAt('whoosh', p.x, p.y, 0.5);
 }
 sjFire = function (p, w, ang, charge, mult) {

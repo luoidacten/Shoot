@@ -100,7 +100,7 @@ function updateModes(dt) {
         const r = world.robot, p = players.find(q => q.hp > 0 && dist(q.x, q.y, r.x, r.y) < q.radius + 30);
         if (p) {
             world.robot = null; p.mech = true;
-            p.maxHp += 200; p.hp += 200; p.radius += 8; p.dmgMult *= 1.4; p.moveMult *= 0.8;
+            p.maxHp += 200 * HEALK; p.hp += 200 * HEALK; p.radius += 8; p.dmgMult *= 1.4; p.moveMult *= 0.8;
             showBanner(`${p.label} LÁI ROBOT!`, 'Hạ nó: mọi người còn sống +1 điểm', p.color, 1.8, 40);
             ring(p.x, p.y, 10, 120, '#fde047', 0.6, 8); AudioSys.play('legend', 0.35);
         }

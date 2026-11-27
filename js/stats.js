@@ -168,7 +168,7 @@ function updateStats(dt) {
         p.lastPx = p.x; p.lastPy = p.y;
         p.runT = moved > 60 * dt ? (p.runT || 0) + dt : 0;
         const idle = world.time - (p.lastHurt || -10);
-        if (p.statRegen > 0 && idle > 3 && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + p.statRegen * dt);
+        if (p.statRegen > 0 && idle > 3 && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + (p.statRegen * dt) * HEALK);
         if (p.armorPlate && idle > 4 && p.armor < p.maxArmor) p.armor = Math.min(p.maxArmor, p.armor + (combo(p, 'jugArmor') ? 4 : 2) * (combo(p, 'armorBunker') && (p.stillT || 0) >= 1 ? 2 : 1) * dt);
     });
 }

@@ -108,7 +108,7 @@ updatePartyExtras = function (dt) {
             for (const b of bullets) { if (b.owner === p.id || dist(b.x, b.y, p.x, p.y) > 90) continue; const a = Math.atan2(b.y - p.y, b.x - p.x); b.angle = a + (angleDiff(b.angle, a) > 0 ? 0.9 : -0.9); }
             enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < p.radius + e.radius + 10 && !(e.vtGustT > now)) { e.vtGustT = now + 0.6; const a = Math.atan2(e.y - p.y, e.x - p.x); dealDamage(e, 12 * vD(p), p.id, { knock: 520, angle: a }); spark(e.x, e.y, '#a7f3d0', 8, 220); } });
         }
-        const L = p.vtLink; if (L) { if (L.until <= now) p.vtLink = null; else { L.tick -= dt; if (L.tick <= 0) { L.tick = 0.5; L.ids.forEach(id => { const e = players.find(q => q.id === id); if (e && e.hp > 0) { _dealDamageR12(e, 3, p.id, { zone: true }); p.hp = Math.min(p.maxHp, p.hp + 3); } }); } } }
+        const L = p.vtLink; if (L) { if (L.until <= now) p.vtLink = null; else { L.tick -= dt; if (L.tick <= 0) { L.tick = 0.5; L.ids.forEach(id => { const e = players.find(q => q.id === id); if (e && e.hp > 0) { _dealDamageR12(e, 3, p.id, { zone: true }); p.hp = Math.min(p.maxHp, p.hp + (3) * HEALK); } }); } } }
         const F = p.vtFort; if (F && F.until <= now) { p.vtFort = null; const D = Math.min(320, F.abs + 30), a = p.angle; enemiesOf(p).forEach(e => { if (dist(e.x, e.y, p.x, p.y) < 320 + e.radius && Math.abs(angleDiff(Math.atan2(e.y - p.y, e.x - p.x), a)) < 0.6) dealDamage(e, D * vD(p), p.id, { knock: 500, angle: a }); }); W12.push({ kind: 'fortWave', owner: p.id, a, t: 0.5, T: 0.5 }); addShake(8); AudioSys.playAt('explosion', p.x, p.y, 0.6); floatText(p.x, p.y - 50, `🛡️ PHẢN KÍCH ${Math.round(D)}`, '#7dd3fc', 16); }
     });
     for (let i = W12.length - 1; i >= 0; i--) {

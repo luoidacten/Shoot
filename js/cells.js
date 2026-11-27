@@ -198,7 +198,7 @@ const _upe23b = updatePartyExtras;
 updatePartyExtras = function (dt) {
     _upe23b(dt);
     players.forEach(p => {
-        if (p.mech && !p.mechUp) { p.mechUp = true; p.maxHp += 300; p.hp += 300; p.armor = Math.max(p.armor || 0, 100); floatText(p.x, p.y - 50, '🤖 GIÁP ROBOT +300 MÁU · +100 GIÁP', '#fde047', 14); }
+        if (p.mech && !p.mechUp) { p.mechUp = true; p.maxHp += 300 * HEALK; p.hp += 300 * HEALK; p.armor = Math.max(p.armor || 0, 100); floatText(p.x, p.y - 50, '🤖 GIÁP ROBOT +' + 300 * HEALK + ' MÁU · +100 GIÁP', '#fde047', 14); }
         if (!p.mech) p.mechUp = false;
     });
 };

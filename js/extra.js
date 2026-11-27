@@ -214,7 +214,7 @@ function castSpell(p, i) {
     const def = SPELLS[s.id];
     if (def.cast(p) === false) return;
     s.cd = spellCd(p, s.id);
-    if (combo(p, 'spellLib')) p.hp = Math.min(p.maxHp, p.hp + 10);
+    if (combo(p, 'spellLib')) p.hp = Math.min(p.maxHp, p.hp + (10) * HEALK);
     floatText(p.x, p.y - 40, def.icon + ' ' + def.name, '#fde68a', 14);
 }
 
@@ -222,7 +222,7 @@ function castSpell(p, i) {
 const ITEMS = {};
 SPELL_IDS.forEach(id => ITEMS[id] = { icon: SPELLS[id].icon, name: 'Cuộn ' + SPELLS[id].name, cast: SPELLS[id].cast });
 Object.assign(ITEMS, {
-    bigPotion:    { icon: '🧪', name: 'Bình Máu Lớn', cast: p => { p.hp = Math.min(p.maxHp, p.hp + 60); spark(p.x, p.y, '#4ade80', 12, 120); AudioSys.playAt('pickup', p.x, p.y, 0.4); } },
+    bigPotion:    { icon: '🧪', name: 'Bình Máu Lớn', cast: p => { p.hp = Math.min(p.maxHp, p.hp + (60) * HEALK); spark(p.x, p.y, '#4ade80', 12, 120); AudioSys.playAt('pickup', p.x, p.y, 0.4); } },
     shieldPotion: { icon: '🛡️', name: 'Thuốc Khiên', cast: p => { p.st.shield = Math.max(p.st.shield, 60); p.st.shieldT = Math.max(p.st.shieldT, 4); AudioSys.playAt('block', p.x, p.y, 0.4); } },
     smokeBomb:    { icon: '💨', name: 'Lựu Khói', cast: p => { zones.push({ type: 'smoke', x: p.x, y: p.y, r: 135, t: 5, maxT: 5, owner: p.id, tick: 0 }); smoke(p.x, p.y, 14, 'rgba(180,190,210,0.45)', 30); } },
     drone:        { icon: '🛸', name: 'Drone Định Vị', cast: p => { enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 750) spotFor(e, p.id, 4); }); ring(p.x, p.y, 10, 750, '#60a5fa', 0.6, 3); AudioSys.playAt('legend', p.x, p.y, 0.2); } },
@@ -433,7 +433,7 @@ function updateExtras(dt) {
             const enemy = !owner || (p.id !== z.owner && !sameTeam(owner, p));
             if (z.type === 'emp' && enemy) { if (!(p.st.silence > 0)) floatText(p.x, p.y - 34, 'KHOÁ KỸ NĂNG!', '#38bdf8', 13); p.st.silence = Math.max(p.st.silence, 2); }
             if (z.type === 'poison') {
-                if (!enemy && combo(owner, 'chemist') && p.id === z.owner) p.hp = Math.min(p.maxHp, p.hp + 4 * dt);
+                if (!enemy && combo(owner, 'chemist') && p.id === z.owner) p.hp = Math.min(p.maxHp, p.hp + (4 * dt) * HEALK);
                 else if (enemy && !p.gasMask && z.tk > 0.25) dealDamage(p, 3, z.owner, { zone: true });
             }
         });

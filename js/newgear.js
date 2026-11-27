@@ -99,7 +99,7 @@ updatePartyExtras = function (dt) {
     players.forEach(p => {
         if (p.hp <= 0) return;
         const w = getCurrentWeapon(p);
-        if (w && w.id === 'LONGSWORD' && w.elem === 'MOC' && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + 2 * elemK(p) * dt);
+        if (w && w.id === 'LONGSWORD' && w.elem === 'MOC' && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + (2 * elemK(p) * dt) * HEALK);
         const f = p.batFly; if (!f) return;
         f.t -= dt; if (f.t <= 0 || p.air > 0) { p.batFly = null; return; }
         const px = p.x + Math.cos(f.ang) * (p.radius + 5), py = p.y + Math.sin(f.ang) * (p.radius + 5);
@@ -266,7 +266,7 @@ meleeTechCast = function (p) {
     if (w.id === 'LONGSWORD') {
         const E = w.elem || 'KIM', m = (p.meleeMult || 1);
         if (E === 'KIM') { for (let i = 0; i < 5; i++) htBullet(p, a + (i - 2) * 0.12, { damage: 30 * m, speed: 22, size: 5, pierce: true, color: '#f8fafc', life: 0.6, trail: 40 }); floatText(p.x, p.y - 38, '⚙️ KIM: VẠN KIẾM QUY TÔNG', '#f8fafc', 15); }
-        else if (E === 'MOC') { enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 220) { e.st.root = Math.max(e.st.root || 0, 1.6); dealDamage(e, 18 * m, p.id, { melee: true }); } }); p.hp = Math.min(p.maxHp, p.hp + 30); ring(p.x, p.y, 10, 220, '#4ade80', 0.5, 5); floatText(p.x, p.y - 38, '🌿 MỘC: RỄ TRÓI', '#4ade80', 15); }
+        else if (E === 'MOC') { enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 220) { e.st.root = Math.max(e.st.root || 0, 1.6); dealDamage(e, 18 * m, p.id, { melee: true }); } }); p.hp = Math.min(p.maxHp, p.hp + (30) * HEALK); ring(p.x, p.y, 10, 220, '#4ade80', 0.5, 5); floatText(p.x, p.y - 38, '🌿 MỘC: RỄ TRÓI', '#4ade80', 15); }
         else if (E === 'THUY') { enemiesOf(p).forEach(e => { const d = dist(p.x, p.y, e.x, e.y); if (d < 260 && Math.abs(angleDiff(Math.atan2(e.y - p.y, e.x - p.x), a)) < 0.7) { dealDamage(e, 26 * m, p.id, { melee: true, knock: 700, angle: a, slow: 2 }); e.stun = Math.max(e.stun, 0.5); } }); for (let i = 0; i < 18; i++) particles.push({ x: p.x, y: p.y, vx: Math.cos(a + (Math.random() - 0.5) * 1.3) * 420, vy: Math.sin(a + (Math.random() - 0.5) * 1.3) * 420, life: 0.5, maxLife: 0.5, color: '#7dd3fc', size: 6, drag: 0.92 }); floatText(p.x, p.y - 38, '💧 THỦY: SÓNG DỮ', '#7dd3fc', 15); }
         else if (E === 'HOA') { for (let i = 0; i < 8; i++) { const t = i / 8 * Math.PI * 2; zones.push({ type: 'fire', x: p.x + Math.cos(t) * 110, y: p.y + Math.sin(t) * 110, r: 55, t: 4, maxT: 4, owner: p.id, tick: 0 }); } floatText(p.x, p.y - 38, '🔥 HỎA: VÒNG LỬA', '#fb923c', 15); }
         else { const cx = p.x + Math.cos(a) * 80, cy = p.y + Math.sin(a) * 80; placeTempWall(cx, cy, Math.abs(Math.sin(a)) > Math.abs(Math.cos(a)), 150, 6, false); enemiesOf(p).forEach(e => { if (dist(p.x, p.y, e.x, e.y) < 170) { e.stun = Math.max(e.stun, 0.8); dealDamage(e, 22 * m, p.id, { melee: true }); } }); ring(p.x, p.y, 10, 170, '#d6a15a', 0.5, 6); addShake(8); floatText(p.x, p.y - 38, '⛰️ THỔ: ĐỊA THÀNH', '#d6a15a', 15); }

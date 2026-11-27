@@ -195,7 +195,7 @@ Object.assign(ITEMS, {
     flareGun: { icon: '🎇', name: 'Súng Pháo Sáng', cast: p => castFlare(p, p.angle) },
     radio:    { icon: '📟', name: 'Bộ Đàm Mini', cast: p => planeStrike(p, p.angle, p.x, p.y, { from: 120, to: 420, gap: 100, dmg: 25, R: 75, warn: 1.0, label: '📟 GỌI KHÔNG KÍCH' }) },
     landmine: { icon: '💣', name: 'Mìn Cá Nhân', cast: p => { mines.push({ kind: 'spike', x: p.x, y: p.y, owner: p.id, arm: 0.8 }); AudioSys.playAt('ui', p.x, p.y, 0.3); } },
-    adrenShot:{ icon: '💉', name: 'Tiêm Adrenaline', cast: p => { p.st.haste = Math.max(p.st.haste, 3); p.hp = Math.min(p.maxHp, p.hp + 20); spark(p.x, p.y, '#f43f5e', 10, 120); } },
+    adrenShot:{ icon: '💉', name: 'Tiêm Adrenaline', cast: p => { p.st.haste = Math.max(p.st.haste, 3); p.hp = Math.min(p.maxHp, p.hp + (20) * HEALK); spark(p.x, p.y, '#f43f5e', 10, 120); } },
     armorKit: { icon: '🔧', name: 'Bộ Vá Giáp', cast: p => { p.armor = Math.min(Math.max(150, p.maxArmor), (p.armor || 0) + 60); spark(p.x, p.y, COLORS.armor, 10, 120); } }
 });
 ITEM_IDS.push('flareGun', 'radio', 'landmine', 'adrenShot', 'armorKit');

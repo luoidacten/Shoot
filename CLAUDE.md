@@ -12,7 +12,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 7. Tóm tắt bằng tiếng Việt: đã làm gì, số liệu test, hạn chế còn lại.
 
 ## Kiến trúc
-- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework19.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
+- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework20.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
 - **Biến toàn cục dùng chung giữa file** (`const/let` top-level). Hàm khai báo `function f(){}` có thể gán lại: mẫu wrapper
   `const _fR7 = f; f = function (...a) { ...; return _fR7(...a); };`
   → **tên biến lưu hàm cũ phải duy nhất** (dùng hậu tố `R7`, `R12`…). Trước khi thêm, grep trùng tên `const X\b` trong `js/*.js`.
@@ -68,9 +68,11 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 | `rework17.js` | **Cưa Máy làm lại** (`sawFire17`: rồ máy `sawRev`, nhiệt `sawHeat`/quá nhiệt `sawJam`, Xé Thịt, thả = Lao Cưa; Bậc Thầy Đĩa Cưa Bay, KTC Bão Cưa — `W17`); **buff Vạn Tượng** (sửa thẳng `VT[k].buff`, Điểm Đánh Dấu mạnh nhất) + **Chỉ Huy** (+200 máu, hồi chiêu −25%, +10% sát thương, tự hồi máu); **đầu gậy riêng 16 mould** (`VT_HEAD17`, ghi đè `ART2.VANTUONG`); **Huyền Cơ** chặn đạn: dạng Mở đứng yên, dạng Huyền Cơ chậm (bọc `blockBulletsArc`) |
 | `rework18.js` | **Gắn 17 âm nhóm C** (xem `AUDIO_MOI.md`): lớp đổi tên âm theo ngữ cảnh bọc `AudioSys.playAt/play` — ngăn xếp `SND_CTX18` (vũ khí / `VT:mould` / `S:kỹ năng` / `SP:phép`), bảng `SND_MAP18`, đoán theo người đứng tại chỗ phát; âm kèm: nổ đầu roi, đạn nảy (`updateBullets`), đóng băng (`frozenT`); thiếu file thì giữ âm cũ. Muốn gắn âm mới cho vũ khí: thêm dòng vào `SND_MAP18` |
 | `rework19.js` | **Sửa sau rà soát**: nhãn NGUỒN SÁT THƯƠNG (`SRC19`, `runCtx19`: đạn/vật ném/vùng/hàng đợi do đòn thường → `_atkW`, do kỹ năng/phép → `_skill`; `gunSrcR19`, `isSkillDmgR19`) → buff súng rework15 chỉ áp đòn bắn thường, nerf rework14 không áp kỹ năng; **lưới an toàn NaN** (góc, lực đẩy, toạ độ, âm thanh, góc đẩy lùi) |
+| `rework20.js` | **Nhân theo tỉ lệ máu mới** `HEALK = 600/200 = 3`: hồi máu CỐ ĐỊNH đã sửa tại chỗ ở file gốc thành `(x) * HEALK` (34 chỗ; KHÔNG nhân hồi theo % máu / hút máu theo % sát thương); máu Robot/Titan/Mech ×HEALK; **sát thương kỹ năng/phép ×HEALK** (đòn trực tiếp, đạn/vật/vùng của kỹ năng, không kích do kỹ năng gọi `strikeOwner20`, cú đáp sau nhảy từ kỹ năng `_landSkill20`, triệu hồi `opts.summon`); khiên từ kỹ năng ×HEALK. Đòn đánh thường vũ khí KHÔNG đổi |
 
 ## Hệ thống đã chốt với người dùng
 - **Máu cơ bản 600.** Vũ khí dễ trúng ×0.8 (Tesla, Phun Lửa, Súng Băng, Roi Điện, Urumi, Railgun, Shotgun, AR Giảm Thanh, Bộ Cơ Động, Đĩa Nảy, Nỏ Liên Châu, Minigun), Ma Đao (người dùng gọi "Ám đao") ×0.9. Ám Khí không giảm. Hỏa Mai 999.
+- **Tỉ lệ máu mới (rework20)**: hồi máu cố định, sát thương kỹ năng/phép/triệu hồi/không kích của kỹ năng, khiên từ kỹ năng, máu Robot/Titan ×3. Code mới: hồi cố định viết `x * HEALK`; sát thương kỹ năng viết theo mốc 200 máu cũ (tự ×3), đòn thường vũ khí viết theo mốc 600.
 - **Súng**: trúng hết 2 băng gốc = 600 (1 mạng); súng đã mạnh hơn thì giữ. Sniper: mỗi viên đúng 100 → đủ 6 viên. Không áp: Hỏa Mai, Boomerang, Súng Lưới, súng chiến thuật, đa hình.
 - **Độ bền**: mỗi đòn cận chiến/đa hình đều tốn (trúng hay trượt); chặn đạn tốn nhiều; vũ khí combo bền 5 lượt combo rồi gãy.
 - **Vạn Tượng buff** (rework17): mọi mould sát thương ×1.2, chịu đòn ×0.88, chạy ×1.05, độ bền 120; **Điểm Đánh Dấu mạnh nhất** (×1.5 / ×0.8 / ×1.12, dấu nổ ×1.25). **Chỉ Huy**: +200 máu, hồi chiêu −25%, +10% sát thương, hồi 4 máu/giây khi 3 giây không bị đánh.

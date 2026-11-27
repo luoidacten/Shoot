@@ -20,7 +20,7 @@ applyBuild = function (p) {
         p.inventory.forEach(w => { if (w && w.magSize && !w.noReload) w.reserve = (w.reserve || 0) + w.magSize * 2; });
     }
     if (p.adv === 'stealth') { p.moveMult *= 1.08; p.stillCamo = 0; }
-    if (p.adv === 'doubleUp') { p.maxHp += 25; p.hp = Math.min(p.maxHp, p.hp + 25); }
+    if (p.adv === 'doubleUp') { p.maxHp += 25; p.hp = Math.min(p.maxHp, p.hp + (25) * HEALK); }
 };
 const _skillCd37 = skillCooldown;
 skillCooldown = function (p, id) { const cd = _skillCd37(p, id); return p && p.adv === 'techStart' && id === 'hightech' ? cd * 0.7 : cd; };
@@ -58,7 +58,7 @@ if (SPELLS.mineField) { const m = SPELLS.mineField; m.desc = 'Rải 5 quả mìn
 if (SPELLS.supplyDrop) { const m = SPELLS.supplyDrop, f = m.cast; m.cd = 38; m.desc = 'Sau 1.5 giây một hộp hỗ trợ rơi ngay cạnh bạn; khi hộp chạm đất bạn nhận ngay +30 giáp và nạp đầy băng đạn.';
     m.cast = p => { f(p); p.shotQueue.push({ t: 1.5, fn: () => { if (p.hp <= 0) return; p.armor = Math.min(Math.max(150, p.maxArmor || 0), (p.armor || 0) + 30); const w = getCurrentWeapon(p); if (w.magSize && !w.noReload) w.mag = effMag(p, w); floatText(p.x, p.y - 34, '+30 GIÁP · ĐẦY ĐẠN', '#93c5fd', 13); } }); }; }
 const _upe37b = updatePartyExtras;
-updatePartyExtras = function (dt) { _upe37b(dt); players.forEach(p => { if (p.hp > 0 && p.healOverT > world.time) { p.hp = Math.min(p.maxHp, p.hp + 8 * dt); if (Math.random() < dt * 6) particles.push({ x: p.x + (Math.random() - 0.5) * 24, y: p.y, vx: 0, vy: -50, life: 0.6, maxLife: 0.6, color: '#86efac', size: 3, glow: true }); } }); };
+updatePartyExtras = function (dt) { _upe37b(dt); players.forEach(p => { if (p.hp > 0 && p.healOverT > world.time) { p.hp = Math.min(p.maxHp, p.hp + (8 * dt) * HEALK); if (Math.random() < dt * 6) particles.push({ x: p.x + (Math.random() - 0.5) * 24, y: p.y, vx: 0, vy: -50, life: 0.6, maxLife: 0.6, color: '#86efac', size: 3, glow: true }); } }); };
 
 /* ============================== VFX RIÊNG CHO TỪNG PHÉP BỔ TRỢ ============================== */
 function burst(x, y, col, n, sp, life = 0.5, size = 3, up = 0) { for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = sp * (0.4 + Math.random() * 0.8); particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - up, life, maxLife: life, color: col, size: size * (0.6 + Math.random() * 0.8), glow: true, drag: 0.9 }); } }
@@ -108,7 +108,7 @@ castSpell = function (p, i) {
 };
 const manyN = () => Math.min(5, typeof pickCount === 'number' ? pickCount : 0);
 const _applyBuild38 = applyBuild;
-applyBuild = function (p) { _applyBuild38(p); if (p.adv === 'manyChoices') { const n = manyN(); p.maxHp += 10 * n; p.hp = Math.min(p.maxHp, p.hp + 10 * n); } };
+applyBuild = function (p) { _applyBuild38(p); if (p.adv === 'manyChoices') { const n = manyN(); p.maxHp += 10 * n; p.hp = Math.min(p.maxHp, p.hp + (10 * n) * HEALK); } };
 const _dealDamage38 = dealDamage;
 dealDamage = function (target, dmg, attackerId, opts = {}) {
     const a = attackerId >= 0 && players.find(q => q.id === attackerId);

@@ -103,7 +103,7 @@ function sjFire(p, w, ang, charge, mult) {
             startTravel(p, s.x, s.y, 0.42, 'umbLand', { fn: q => { enemiesOf(q).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, q.x, q.y) < 90 + e.radius) dealDamage(e, 20 * w5MM(q), q.id, { melee: true, knock: 300, angle: Math.atan2(e.y - q.y, e.x - q.x) }); }); ring(q.x, q.y, 6, 90, '#d97706', 0.35, 5); } }, 90);
             floatText(p.x, p.y - 44, '🥢 NHẢY CÔN', '#fbbf24', 13);
         }
-        w.form = next; if (has(p, 'meleeTech')) p.hp = Math.min(p.maxHp, p.hp + 10); floatText(p.x, p.y - 60, SJ_FORMS[next].name.toUpperCase(), SJ_FORMS[next].col, 13); AudioSys.playAt('whoosh', p.x, p.y, 0.5);
+        w.form = next; if (has(p, 'meleeTech')) p.hp = Math.min(p.maxHp, p.hp + (10) * HEALK); floatText(p.x, p.y - 60, SJ_FORMS[next].name.toUpperCase(), SJ_FORMS[next].col, 13); AudioSys.playAt('whoosh', p.x, p.y, 0.5);
         return;
     }
     if (f === 0) { meleeBook(p, w, ang, 24); slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: ang, range: 135 + p.radius, color: '#d97706', width: 9, life: 0.2, maxLife: 0.2, swing: (p.strikeN = (p.strikeN || 0) + 1) % 2 ? 1 : -1, line: false }); hitArc(p, w, ang, 135, 0.95, dmg * 1.1, { knock: 360 }); AudioSys.playAt('swing', p.x, p.y, 0.5); }

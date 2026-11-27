@@ -110,8 +110,8 @@ const VT = {
         prof: { aim: 'dir', R: 540, shape: 'line', w: 120 } },
     blood: { name: 'HUYẾT TẾ', icon: '🩸', col: '#dc2626', type: 'MELEE', buff: { steal: 0.12 }, bt: 'hút máu 12%',
         A: (p, w, a, m) => { meleeBook(p, w, a, 22); vtSlash(p, a, 100, '#ef4444'); const dmg = 17 * vM(p) * m, h = cubeArc(p, a, 100, 1.0, dmg, { knock: 140 }); if (h.length) p.hp = Math.min(p.maxHp, p.hp + dmg * 0.3 * h.length); vtDur(p, w, h); AudioSys.playAt('swing', p.x, p.y, 0.4); },
-        S: { fn: p => { p.hp = Math.min(p.maxHp, p.hp + 25); ['burn', 'slow', 'root', 'silence', 'poison', 'blind'].forEach(k => { if (p.st[k]) p.st[k] = 0; }); vtTxt(p, '🩸 HUYẾT HỒI +25', '#fca5a5'); ring(p.x, p.y, 6, 60, '#ef4444', 0.4, 4); } },
-        K: ['M', 'HUYẾT THỨ', { mirror: true, fn: p => { let n = 0; enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 160 + e.radius) { dealDamage(e, 35 * vM(p), p.id, { melee: true, knock: 260, angle: Math.atan2(e.y - p.y, e.x - p.x) }); n++; } }); if (!p._vtMirror) p.hp = Math.min(p.maxHp, p.hp + 8 * n); W10.push({ kind: 'bspikes', owner: p.id, x: p.x, y: p.y, t: 0.6, T: 0.6 }); addShake(6); AudioSys.playAt('slam', p.x, p.y, 0.5); } }],
+        S: { fn: p => { p.hp = Math.min(p.maxHp, p.hp + (25) * HEALK); ['burn', 'slow', 'root', 'silence', 'poison', 'blind'].forEach(k => { if (p.st[k]) p.st[k] = 0; }); vtTxt(p, '🩸 HUYẾT HỒI +25', '#fca5a5'); ring(p.x, p.y, 6, 60, '#ef4444', 0.4, 4); } },
+        K: ['M', 'HUYẾT THỨ', { mirror: true, fn: p => { let n = 0; enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 160 + e.radius) { dealDamage(e, 35 * vM(p), p.id, { melee: true, knock: 260, angle: Math.atan2(e.y - p.y, e.x - p.x) }); n++; } }); if (!p._vtMirror) p.hp = Math.min(p.maxHp, p.hp + (8 * n) * HEALK); W10.push({ kind: 'bspikes', owner: p.id, x: p.x, y: p.y, t: 0.6, T: 0.6 }); addShake(6); AudioSys.playAt('slam', p.x, p.y, 0.5); } }],
         prof: { aim: null, shape: 'selfaoe', aoe: 160 } },
     chain: { name: 'XÍCH HỒN', icon: '⛓️', col: '#94a3b8', type: 'MELEE', buff: { out: 1.06, spd: 1.06 }, bt: 'sát thương +6%, chạy +6%',
         A: (p, w, a, m) => { meleeBook(p, w, a, 24); W2FX.push({ kind: 'whip', owner: p.id, a, len: 190, t: 0.22, maxT: 0.22, col: '#94a3b8' }); const h = []; vtLine(p, a, 190, 16, e => { dealDamage(e, 16 * vM(p) * m, p.id, { melee: true, knock: 120, angle: a }); e.st.slow = Math.max(e.st.slow || 0, 1); h.push(e); }); vtDur(p, w, h); AudioSys.playAt('swing', p.x, p.y, 0.4); },
@@ -256,7 +256,7 @@ const _resetRoundR6 = resetPlayerForRound;
 resetPlayerForRound = function (p) { for (const A of [W10, VTI]) for (let i = A.length - 1; i >= 0; i--) if (A[i].owner === p.id) A.splice(i, 1); p.vtFlame = null; p.vtIllCd = 0; p.vtRes = null; p.vtResOn = null; return _resetRoundR6(p); };
 // đổi mould với Bậc Thầy: hồi 15 máu
 const _vtSwapR6 = vtSwap;
-vtSwap = function (p, w) { _vtSwapR6(p, w); if (has(p, 'meleeTech') && !p._vtMirror) p.hp = Math.min(p.maxHp, p.hp + 15); };
+vtSwap = function (p, w) { _vtSwapR6(p, w); if (has(p, 'meleeTech') && !p._vtMirror) p.hp = Math.min(p.maxHp, p.hp + (15) * HEALK); };
 
 const _upeR6 = updatePartyExtras;
 updatePartyExtras = function (dt) {

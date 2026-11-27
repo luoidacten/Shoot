@@ -480,7 +480,7 @@ openCrate = function (p, index) {
     const pool = bgCardPool(p).sort(() => Math.random() - 0.5), choices = pool.slice(0, n);
     ring(c.x, c.y, 8, 70, gold ? '#facc15' : '#a78bfa', 0.5, 5); spark(c.x, c.y, gold ? '#fde68a' : '#c4b5fd', 18, 260);
     AudioSys.playAt(gold ? 'legend' : 'pickup', c.x, c.y, 0.4);
-    if (gold) { p.hp = Math.min(p.maxHp, p.hp + 40); p.armor = Math.min(Math.max(150, p.maxArmor || 0), (p.armor || 0) + 30); }
+    if (gold) { p.hp = Math.min(p.maxHp, p.hp + (40) * HEALK); p.armor = Math.min(Math.max(150, p.maxArmor || 0), (p.armor || 0) + 30); }
     if (!choices.length) return;
     if (p.isBot || p.remote) { // bot: chọn ngay (ưu tiên thẻ tạo phối hợp)
         const combo1 = choices.find(id => (COMBOS_OF[id] || []).some(cb => p.build.includes(cb.a === id ? cb.b : cb.a)));
@@ -557,7 +557,7 @@ function bagClick(e) {
     AudioSys.play('ui', 0.3);
     if (a === 'close') { BG.bagOpen = false; }
     else if (a === 'pick') { const P = (me.bgPending || []).shift(); if (P && P.choices.includes(v)) bgReward(me, v, 0); }
-    else if (a === 'skip') { (me.bgPending || []).shift(); me.hp = Math.min(me.maxHp, me.hp + 35); floatText(me.x, me.y - 40, '+35', '#4ade80', 15); }
+    else if (a === 'skip') { (me.bgPending || []).shift(); me.hp = Math.min(me.maxHp, me.hp + (35) * HEALK); floatText(me.x, me.y - 40, '+' + 35 * HEALK, '#4ade80', 15); }
     else if (a === 'slot') { const i = +v; if (i !== me.weaponIdx && me.inventory[i]) { me.weaponIdx = i; me.charge = 0; const w = getCurrentWeapon(me); floatText(me.x, me.y - 26, `${w.icon} ${w.name}`, '#fff', 13); } }
     else if (a === 'item') { if (typeof useItem === 'function') useItem(me, +v); }
     bagRender();

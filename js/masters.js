@@ -128,7 +128,7 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
             switch (id) {
                 case 'REVOLVER': dmg *= 1.25; break;
                 case 'AR': case 'SAR': dmg *= 1.1; break;
-                case 'DUAL': atk.hp = Math.min(atk.maxHp, atk.hp + 1); break;
+                case 'DUAL': atk.hp = Math.min(atk.maxHp, atk.hp + (1) * HEALK); break;
                 case 'SMG': target.st.slow = Math.max(target.st.slow || 0, 0.3); break;
                 case 'SHOTGUN': if (d < 120) dmg *= 1.3; break;
                 case 'SNIPER': case 'BOW': case 'RAILGUN': if (d > 400) { dmg *= 1.25; spotFor(target, atk.id, 3); } break;
@@ -255,7 +255,7 @@ const SUPPLY = {
     gift:    { w: 6, name: 'Hộp Quà', col: '#ec4899', shape: 'gift', icon: '', fx: p => giveItem(p) ? 'QUÀ!' : supplyHeal(p, 30) },
     holy:    { w: 4, name: 'Nước Thánh', col: '#7dd3fc', shape: 'drop', icon: '', fx: p => { cleanseNow(p); supplyHeal(p, 20); return 'THANH TẨY'; } }
 };
-function supplyHeal(p, n) { p.hp = Math.min(p.maxHp, p.hp + n * (p.scavenger ? 2 : 1)); spark(p.x, p.y, '#4ade80', 10, 120); return `+${n} HP`; }
+function supplyHeal(p, n) { p.hp = Math.min(p.maxHp, p.hp + (n * (p.scavenger ? 2 : 1)) * HEALK); spark(p.x, p.y, '#4ade80', 10, 120); return `+${Math.round(n * HEALK)} HP`; }
 const SUPPLY_IDS = Object.keys(SUPPLY);
 function rollSupply() { const tot = SUPPLY_IDS.reduce((s, k) => s + SUPPLY[k].w, 0); let r = Math.random() * tot; for (const k of SUPPLY_IDS) { if (r < SUPPLY[k].w) return k; r -= SUPPLY[k].w; } return 'med'; }
 const _makeCrate9 = makeCrate;
