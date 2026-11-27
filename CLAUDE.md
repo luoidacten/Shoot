@@ -12,7 +12,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 7. Tóm tắt bằng tiếng Việt: đã làm gì, số liệu test, hạn chế còn lại.
 
 ## Kiến trúc
-- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework17.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
+- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework18.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
 - **Biến toàn cục dùng chung giữa file** (`const/let` top-level). Hàm khai báo `function f(){}` có thể gán lại: mẫu wrapper
   `const _fR7 = f; f = function (...a) { ...; return _fR7(...a); };`
   → **tên biến lưu hàm cũ phải duy nhất** (dùng hậu tố `R7`, `R12`…). Trước khi thêm, grep trùng tên `const X\b` trong `js/*.js`.
@@ -40,7 +40,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 | `ART2[id] = (c,w,r,x0,ch,now,p)` | vẽ vũ khí cầm tay, `MUZ[id]` = đầu nòng |
 
 ### Tiện ích hay dùng
-`arcFoes(p,a,R,half)`, `lineFoes(p,a,L,pad)`, `rayFree(x,y,a,max)`, `umbFreeSpot(p,x,y)`, `startTravel(p,x,y,T,land,o,h)` (bay/nhảy, đang bay thì `air>0`), `trueDamage(e,d,id)`, `spawnBullet`, `htBullet(p,a,o)`, `dropBomb(p,x,y,dmg,R,delay)`, `explode(x,y,owner,dmg,R)`, `laserStrike(p,a,b,opt)`, `orbitalStrike(p,x,y)`, `warnLine`, `spotFor(e,viewerId,t)`, `afterImages`, `slashes.push({...})`, `beams.push({...})`, `zones.push({type,...})`, `ring/spark/smoke/flash/addShake/hitStop`, `floatText`, `AudioSys.playAt(type,x,y,vol)` (tên âm có thật: swing, slam, crit, whoosh, explosion, block, rail, smg, shotgun, shoot_heavy, legend, alarm, ui, select, tick, confirm).
+`arcFoes(p,a,R,half)`, `lineFoes(p,a,L,pad)`, `rayFree(x,y,a,max)`, `umbFreeSpot(p,x,y)`, `startTravel(p,x,y,T,land,o,h)` (bay/nhảy, đang bay thì `air>0`), `trueDamage(e,d,id)`, `spawnBullet`, `htBullet(p,a,o)`, `dropBomb(p,x,y,dmg,R,delay)`, `explode(x,y,owner,dmg,R)`, `laserStrike(p,a,b,opt)`, `orbitalStrike(p,x,y)`, `warnLine`, `spotFor(e,viewerId,t)`, `afterImages`, `slashes.push({...})`, `beams.push({...})`, `zones.push({type,...})`, `ring/spark/smoke/flash/addShake/hitStop`, `floatText`, `AudioSys.playAt(type,x,y,vol)` (tên âm: xem `assets/audio/audio.json` — gồm cả laser, teleport, zap, ground, clang, glass, ricochet, sniper, cannon, magic, spell, whip, freeze, heal, shield, shield_up, throw, flame, chainsaw, bow…).
 `defS(id,icon,name,cd,ai,desc,cast,range)` (kỹ năng), `defP(id,icon,name,desc,apply)` (nội tại); `CARDS[id].masterOnly = true` để không lọt vào bộ bài thường.
 
 ## Bản đồ file rework (mới nhất ở dưới)
@@ -63,6 +63,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 | `rework15.js` | **Súng: 2 băng = 1 mạng** — hệ số theo số đo 1 băng (`MAG_DMG_R15` → `GUN_BUFF_R15`, đo bằng `t136.js`), Sniper mỗi viên đúng 100 (`SNIPER_HIT_R15`, raw) |
 | `rework16.js` | **Độ bền**: cận chiến/khiên/đa hình mỗi đòn −1 dù trượt (bỏ −1 khi trúng), dò chặn đạn chung (`blockScanR16`, −max(2, dmg/8); khiên ×2), vũ khí combo = số đòn × 5 (`COMBO_LEN_R16`) |
 | `rework17.js` | **Cưa Máy làm lại** (`sawFire17`: rồ máy `sawRev`, nhiệt `sawHeat`/quá nhiệt `sawJam`, Xé Thịt, thả = Lao Cưa; Bậc Thầy Đĩa Cưa Bay, KTC Bão Cưa — `W17`); **buff Vạn Tượng** (sửa thẳng `VT[k].buff`, Điểm Đánh Dấu mạnh nhất) + **Chỉ Huy** (+200 máu, hồi chiêu −25%, +10% sát thương, tự hồi máu); **đầu gậy riêng 16 mould** (`VT_HEAD17`, ghi đè `ART2.VANTUONG`); **Huyền Cơ** chặn đạn: dạng Mở đứng yên, dạng Huyền Cơ chậm (bọc `blockBulletsArc`) |
+| `rework18.js` | **Gắn 17 âm nhóm C** (xem `AUDIO_MOI.md`): lớp đổi tên âm theo ngữ cảnh bọc `AudioSys.playAt/play` — ngăn xếp `SND_CTX18` (vũ khí / `VT:mould` / `S:kỹ năng` / `SP:phép`), bảng `SND_MAP18`, đoán theo người đứng tại chỗ phát; âm kèm: nổ đầu roi, đạn nảy (`updateBullets`), đóng băng (`frozenT`); thiếu file thì giữ âm cũ. Muốn gắn âm mới cho vũ khí: thêm dòng vào `SND_MAP18` |
 
 ## Hệ thống đã chốt với người dùng
 - **Máu cơ bản 600.** Vũ khí dễ trúng ×0.8 (Tesla, Phun Lửa, Súng Băng, Roi Điện, Urumi, Railgun, Shotgun, AR Giảm Thanh, Bộ Cơ Động, Đĩa Nảy, Nỏ Liên Châu, Minigun), Ma Đao (người dùng gọi "Ám đao") ×0.9. Ám Khí không giảm. Hỏa Mai 999.
@@ -88,5 +89,4 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 ## Hạn chế còn biết
 - Biến cố "THÊM NGƯỜI THÊM VUI" (thêm 4 bot tạm, `modes.js`) lỗi khi online → đang tạm tắt online (rework13.js), offline vẫn có.
 - Online: "dạng kế tiếp" của Đa Khí Cụ có thể hiện sai trên máy khách. Một số hiệu ứng riêng (mảng `W6…W12`, `USK`) không đồng bộ sang máy khách (chỉ `zones`, `bullets`, `slashes`… đồng bộ).
-- Hoả Diệm chưa có âm thanh lửa riêng (`flame` không có trong `audio.js`).
 - Nhãn "Chiến trường: bảng chỉ hiện vùng quanh bạn" (từ battleground.js) hiện cả ở chế độ thường khi bảng cấp 1–2.
