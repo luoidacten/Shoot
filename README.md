@@ -441,3 +441,10 @@ Chỉ còn **5 thẻ đặc trưng** được bốc ngẫu nhiên: ✈️ Không
 - **Buff 9 phép**: Tốc Biến (~270, bất tử 0.3s, tăng tốc) · Thanh Tẩy (+12% máu, tăng tốc) · Gia Tốc (4.5 giây, bất tử 0.3s) · Trừng Phạt (mạnh hơn, hạ gục hồi một nửa) · Tường Băng (bền hơn 50%, lâu hơn) · Pháo Tên Lửa (+30%) · Bom Mù (mù 4 giây, tăng tốc 3 giây) · Pháo Sáng · Màn Khói (4 cột, 7 giây) — tất cả hồi nhanh hơn (24–32 giây).
 - **Buff mạnh Tường Băng**: luôn dựng được (trước đây vướng người là không ra tường mà vẫn mất hồi chiêu), dài 260, 360 độ bền, 8 giây, dội ngược đạn, làm chậm địch chạm vào, vỡ thì nổ mảnh băng (30 sát thương, chậm 2 giây); hồi 20 giây.
 - **Buff mạnh Màn Khói**: 5 cột khói lớn, 8 giây; phe mình trong khói được tăng tốc, địch bị làm chậm; hồi 22 giây.
+
+## Âm thanh & ghi công
+- Nhạc nền: **tricksntraps** — "T & T Free Cyberpunk Pack" 1 & 2 (CC0), OpenGameArt.org.
+- Hiệu ứng (CC0): **Kenney** — Sci-Fi Sounds, Interface Sounds, 50 RPG sound effects, 63 Digital sound effects (kenney.nl / OpenGameArt.org); rubberduck — "50 CC0 Sci-fi SFX", "75 CC0 breaking/falling/hit sfx", "80 CC0 RPG SFX", "50 CC0 retro/synth SFX"; artisticdude — "Swishes Sound Pack", "Freeze Spell"; remaxim — "3 Melee sounds"; StarNinjas — "20 Sword Sound Effects", "10 Impact/Shield Blocks"; bart — "Heartbeat sounds", "Ice spells"; yd — "Short alarm"; Listener — "Win sound effect"; fvcalderan — "Classic fanfare lick"; Thimras — "Cannon fire"; themightyglider — "Catching fire"; frosty ham — "Laser Beam"; Ogrebane — "Teleport Spell"; qubodup — "(defect) motor loop".
+- Tiếng khán giả: **Gregor Quendel** — "Free Crowd Cheering Sounds", giấy phép CC-BY 4.0 (https://creativecommons.org/licenses/by/4.0/), OpenGameArt.org. Đã cắt ngắn và nén lại.
+- Tiếng roi quất: **Reemax** — "Whip sound", giấy phép CC-BY 4.0, OpenGameArt.org. Đã cắt ngắn và nén lại.
+- Icon nâng cấp: vẽ bằng Google Gemini.
