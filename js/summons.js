@@ -376,7 +376,7 @@ function updateSummons(dt) {
         if (decoys.includes(d)) return;
         const o = players.find(q => q.id === d.owner); if (!o) return;
         if (SUMMON[d.sk].turret && o.explosiveTurret) { const big = combo(o, 'trapBlast'); explode(d.x, d.y, o.id, big ? 90 : 55, big ? 200 : 120); }
-        if (o.summonerSoul && o.hp > 0 && d.hp <= 0) { o.hp = Math.min(o.maxHp, o.hp + 10); (o.skills || []).forEach(s => { if (s.cd > 0) s.cd = Math.max(0, s.cd - 2); }); floatText(o.x, o.y - 36, '🔮 +10', '#c4b5fd', 13); }
+        if (o.summonerSoul && o.hp > 0 && d.hp <= 0) { o.hp = Math.min(o.maxHp, o.hp + (10) * HEALK); (o.skills || []).forEach(s => { if (s.cd > 0) s.cd = Math.max(0, s.cd - 2); }); floatText(o.x, o.y - 36, '🔮 +10', '#c4b5fd', 13); }
     });
     prevSummons = decoys.filter(d => d.kind === 'sm');
 }

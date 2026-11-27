@@ -71,7 +71,7 @@ function botThink(p, dt) {
     if (B.throwHold > 0) { B.throwHold -= dt; out.b = true; }
 
     const armed = usable(w) && w.id !== 'NONE' && (w.id !== 'KNIFE' || dE < 200);
-    const needLoot = (w.tier || 0) <= 1 && (other.tier || 0) <= 1;
+    const needLoot = (w.tier || 0) <= 1 && ((other && other.tier) || 0) <= 1;
 
     if (goalAng === null) {
         if (needLoot && dE > 160) {

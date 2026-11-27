@@ -266,8 +266,8 @@ updatePartyExtras = function (dt) {
         if (p._wIdx === undefined) p._wIdx = p.weaponIdx;
         if (p.weaponIdx !== p._wIdx) { p._wIdx = p.weaponIdx; if (p.adv === 'weaponMaster' && gameState === 'PLAYING') drawStrike(p, getCurrentWeapon(p)); }
         if (gameState !== 'PLAYING' || net.role === 'guest') return;
-        if (combo3(p, 'infernoLord') && zones.some(z => (z.type === 'fire' || z.type === 'cellFire') && dist(p.x, p.y, z.x, z.y) < z.r)) p.hp = Math.min(p.maxHp, p.hp + 5 * dt);
-        if (combo3(p, 'shadowTrinity') && p.st.invis > 0) p.hp = Math.min(p.maxHp, p.hp + 3 * dt);
+        if (combo3(p, 'infernoLord') && zones.some(z => (z.type === 'fire' || z.type === 'cellFire') && dist(p.x, p.y, z.x, z.y) < z.r)) p.hp = Math.min(p.maxHp, p.hp + (5 * dt) * HEALK);
+        if (combo3(p, 'shadowTrinity') && p.st.invis > 0) p.hp = Math.min(p.maxHp, p.hp + (3 * dt) * HEALK);
         if (combo3(p, 'nightReaper') && p.st.invis > 0) { if (p.invisKind === 'camo') p.invisKind = 'void'; p.reaperNext = true; }
         if (combo3(p, 'steelStorm')) { p.ssT = (p.ssT || 0) + dt; if (p.ssT > 4) { p.ssT = 0; const w = getCurrentWeapon(p); if (w.magSize && !w.noReload) w.mag = Math.min(effMag(p, w), w.mag + Math.ceil(effMag(p, w) * 0.3)); } }
     });

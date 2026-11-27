@@ -192,9 +192,10 @@ function openCrate(p, index) {
     }
     // Chọn ô: ưu tiên ô yếu (tay không / dao). Thính vàng thì thay ô yếu hơn.
     let slot = -1;
-    if (cur.tier <= 1) slot = p.weaponIdx;
-    else if (p.inventory[otherSlot(p)].tier <= 1) slot = otherSlot(p);
-    else if (crate.type === 'LEGEND') slot = p.inventory[0].tier <= p.inventory[1].tier ? 0 : 1;
+    const tierOf = w => (w && w.tier) || 0;
+    if (tierOf(cur) <= 1) slot = p.weaponIdx;
+    else if (tierOf(p.inventory[otherSlot(p)]) <= 1) slot = otherSlot(p);
+    else if (crate.type === 'LEGEND') slot = tierOf(p.inventory[0]) <= tierOf(p.inventory[1]) ? 0 : 1;
     if (slot < 0) {
         if (!p.fullMsgT || world.time - p.fullMsgT > 1.5) { floatText(p.x, p.y - 24, 'Túi đầy — ném bớt (B)', '#94a3b8', 12); p.fullMsgT = world.time; }
         return;

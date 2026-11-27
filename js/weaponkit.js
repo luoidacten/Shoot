@@ -189,7 +189,7 @@ meleeTechCast = function (p) {
 const _spinnerHit11 = spinnerHit;
 spinnerHit = function (it, owner, e) {
     _spinnerHit11(it, owner, e);
-    if (it.rsBuff && owner && owner.hp > 0) { owner.hp = Math.min(owner.maxHp, owner.hp + 10); owner.armor = Math.min(Math.max(150, owner.maxArmor), (owner.armor || 0) + 25); owner.st.haste = Math.max(owner.st.haste, 1.2); floatText(owner.x, owner.y - 30, '+10 ❤ +25 🛡', '#7dd3fc', 12); }
+    if (it.rsBuff && owner && owner.hp > 0) { owner.hp = Math.min(owner.maxHp, owner.hp + (10) * HEALK); owner.armor = Math.min(Math.max(150, owner.maxArmor), (owner.armor || 0) + 25); owner.st.haste = Math.max(owner.st.haste, 1.2); floatText(owner.x, owner.y - 30, '+10 ❤ +25 🛡', '#7dd3fc', 12); }
 };
 // ghi lại thời điểm bấm kỹ năng (để biết chạm hay giữ)
 const _handleSkillButtons11 = handleSkillButtons;

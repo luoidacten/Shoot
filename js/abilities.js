@@ -99,7 +99,7 @@ defS('heal', '💖', 'Hồi Phục', 16, 'heal', 'Hồi 40 máu trong 2 giây.',
 });
 defS('shieldS', '🔰', 'Khiên Năng Lượng', 14, 'defend', 'Tạo khiên hấp thụ 60 sát thương trong 3 giây.', p => {
     p.st.shield = 60; p.st.shieldT = 3;
-    if (combo(p, 'heal_shield')) { p.hp = Math.min(p.maxHp, p.hp + 25); floatText(p.x, p.y - 20, '+25', '#4ade80', 14); }
+    if (combo(p, 'heal_shield')) { p.hp = Math.min(p.maxHp, p.hp + (25) * HEALK); floatText(p.x, p.y - 20, '+25', '#4ade80', 14); }
     AudioSys.playAt('block', p.x, p.y, 0.4);
 });
 defS('rage', '🔥', 'Cuồng Bạo', 15, 'buff', '4 giây: +40% sát thương, +33% tốc độ đánh.', p => {
@@ -338,7 +338,7 @@ function updateAbilities(dt) {
         const st = p.st;
         ['invis', 'haste', 'rage', 'slow', 'mark', 'reveal', 'reflect', 'invuln', 'ambush', 'focus', 'root', 'silence', 'anchor', 'exposed', 'quickdraw', 'ambushBush', 'glued'].forEach(k => { if (st[k] > 0) st[k] = Math.max(0, st[k] - dt); });
         if (st.shieldT > 0) { st.shieldT -= dt; if (st.shieldT <= 0) st.shield = 0; }
-        if (st.heal > 0) { st.heal -= dt; p.hp = Math.min(p.maxHp, p.hp + st.healRate * dt); if (Math.random() < 0.3) spark(p.x, p.y, '#4ade80', 1, 60, 0.5, 2); }
+        if (st.heal > 0) { st.heal -= dt; p.hp = Math.min(p.maxHp, p.hp + (st.healRate * dt) * HEALK); if (Math.random() < 0.3) spark(p.x, p.y, '#4ade80', 1, 60, 0.5, 2); }
         if (st.burn > 0) {
             st.burn -= dt; st.burnTick = (st.burnTick || 0) + dt;
             if (Math.random() < 0.5) particles.push({ x: p.x + (Math.random() - 0.5) * 16, y: p.y, vx: 0, vy: -60, life: 0.4, maxLife: 0.4, color: '#fb923c', size: 4, glow: true });
@@ -393,7 +393,7 @@ function updateAbilities(dt) {
         } else if (z.type === 'glue') {
             players.forEach(p => { if (p.id !== z.owner && p.hp > 0 && !(p.air > 0) && dist(p.x, p.y, z.x, z.y) < z.r) { p.st.slow = Math.max(p.st.slow, 0.2); p.st.glued = 0.2; } });
         } else if (z.type === 'heal') {
-            if (owner && owner.hp > 0 && dist(owner.x, owner.y, z.x, z.y) < z.r) { owner.hp = Math.min(owner.maxHp, owner.hp + z.rate * dt); if (Math.random() < 0.2) spark(owner.x, owner.y, '#4ade80', 1, 50, 0.5, 2); }
+            if (owner && owner.hp > 0 && dist(owner.x, owner.y, z.x, z.y) < z.r) { owner.hp = Math.min(owner.maxHp, owner.hp + (z.rate * dt) * HEALK); if (Math.random() < 0.2) spark(owner.x, owner.y, '#4ade80', 1, 50, 0.5, 2); }
         } else if (z.type === 'gravity') {
             players.forEach(p => {
                 if (p.id === z.owner || p.hp <= 0) return;
@@ -451,7 +451,7 @@ function updateAbilities(dt) {
         if (bu.t === undefined) continue;
         bu.t -= dt;
         const ow = players.find(q => q.id === bu.owner);
-        if (ow && combo(ow, 'jungle') && ow.hp > 0 && dist(ow.x, ow.y, bu.x, bu.y) < bu.r) ow.hp = Math.min(ow.maxHp, ow.hp + 3 * dt);
+        if (ow && combo(ow, 'jungle') && ow.hp > 0 && dist(ow.x, ow.y, bu.x, bu.y) < bu.r) ow.hp = Math.min(ow.maxHp, ow.hp + (3 * dt) * HEALK);
         if (bu.t <= 0) bushes.splice(i, 1);
     }
     // ---- Tường băng tạm thời ----
@@ -471,7 +471,7 @@ function hookHit(owner, target) {
     target.kx += Math.cos(a) * Math.min(1300, d * 4.5); target.ky += Math.sin(a) * Math.min(1300, d * 4.5);
     target.stun = Math.max(target.stun, 0.45);
     floatText(target.x, target.y - 30, 'BỊ KÉO!', '#facc15', 15);
-    if (combo(owner, 'hook_vampire')) { owner.hp = Math.min(owner.maxHp, owner.hp + 25); spark(owner.x, owner.y, '#4ade80', 6, 100); }
+    if (combo(owner, 'hook_vampire')) { owner.hp = Math.min(owner.maxHp, owner.hp + (25) * HEALK); spark(owner.x, owner.y, '#4ade80', 6, 100); }
     if (combo(owner, 'hook_shock')) owner.st.pendingShock = 0.3;
 }
 
@@ -561,7 +561,7 @@ defS('ammoDrop', '🎁', 'Thả Hộp Đạn', 16, 'ammo', 'Nạp đầy băng +
         w.reserve += w.magSize * (i === p.weaponIdx ? 2 : 1) + (combo(p, 'supplyDepot') ? w.magSize * 2 : 0);
         if (i === p.weaponIdx) { w.mag = effMag(p, w); w.reloading = false; }
     });
-    if (combo(p, 'scrounger')) { p.hp = Math.min(p.maxHp, p.hp + 30); floatText(p.x, p.y - 20, '+30', '#4ade80', 14); }
+    if (combo(p, 'scrounger')) { p.hp = Math.min(p.maxHp, p.hp + (30) * HEALK); floatText(p.x, p.y - 20, '+30', '#4ade80', 14); }
     ring(p.x, p.y, 5, 50, '#fbbf24', 0.4); AudioSys.playAt('pickup', p.x, p.y, 0.4);
 });
 

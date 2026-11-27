@@ -92,7 +92,7 @@ defS('roboStomp', '🦶', 'Dậm Đất', 8, 'engage', 'ROBOT: nhảy tới đi�
     startTravel(p, s.x, s.y, 0.45, 'umbLand', { fn: q => { enemiesOf(q).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, q.x, q.y) < 170 + e.radius) { dealDamage(e, 40 * formK(q), q.id, { melee: true, knock: 420, angle: Math.atan2(e.y - q.y, e.x - q.x) }); e.stun = Math.max(e.stun, 0.8); } }); ring(q.x, q.y, 10, 170, '#38bdf8', 0.5, 8); addShake(10); AudioSys.playAt('slam', q.x, q.y, 0.6); } }, 100);
 }, 260);
 defS('roboShield', '🛡️', 'Khiên Năng Lượng', 12, 'defend', 'ROBOT: vòm năng lượng 3 giây phá mọi viên đạn bay vào bán kính 95 và hồi 60 giáp robot.', p => {
-    p.roboDomeT = world.time + 3; if (p.form) p.form.hp = Math.min(p.form.maxHp, p.form.hp + 60);
+    p.roboDomeT = world.time + 3; if (p.form) p.form.hp = Math.min(p.form.maxHp, p.form.hp + 60 * HEALK);
     ring(p.x, p.y, 10, 95, '#7dd3fc', 0.5, 5); floatText(p.x, p.y - 50, '🛡 KHIÊN NĂNG LƯỢNG', '#7dd3fc', 14); AudioSys.playAt('rail', p.x, p.y, 0.4);
 });
 defS('titanLeap', '💥', 'Titan Giáng Thế', 8, 'engage', 'TITAN: nhảy cao giáng xuống điểm chọn: 50 sát thương vùng 180, hất văng.', p => {
@@ -101,7 +101,7 @@ defS('titanLeap', '💥', 'Titan Giáng Thế', 8, 'engage', 'TITAN: nhảy cao 
 }, 300);
 defS('titanRoar', '🗣️', 'Titan Gầm', 12, 'defend', 'TITAN: gầm lên — địch quanh 260 bị chậm mạnh 2.5 giây và giảm 30% sát thương; bạn nhận 80 giáp titan.', p => {
     enemiesOf(p).forEach(e => { if (dist(e.x, e.y, p.x, p.y) < 260 + e.radius) { e.st.slow = Math.max(e.st.slow || 0, 2.5); e.titanFearT = world.time + 2.5; floatText(e.x, e.y - 40, '😱 SỢ HÃI', '#fcd34d', 13); } });
-    if (p.form) p.form.hp = Math.min(p.form.maxHp + 80, p.form.hp + 80);
+    if (p.form) p.form.hp = Math.min(p.form.maxHp + 80 * HEALK, p.form.hp + 80 * HEALK);
     ring(p.x, p.y, 10, 260, '#f59e0b', 0.6, 8); ring(p.x, p.y, 10, 180, '#fde68a', 0.5, 5); addShake(8); AudioSys.playAt('alarm', p.x, p.y, 0.4);
     floatText(p.x, p.y - 56, '🗣 TITAN GẦM!', '#fcd34d', 16);
 });

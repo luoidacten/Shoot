@@ -462,7 +462,7 @@ function updateTactics(dt) {
         // Medkit
         if (p.medkit && gameState === 'PLAYING') {
             const idle = world.time - (p.lastHurt || -10);
-            if (idle > 2.5 && p.hp < p.maxHp) { p.hp = Math.min(p.maxHp, p.hp + Math.min(10, 1.5 + (idle - 2.5) * 1.5) * dt); if (Math.random() < 0.1) spark(p.x, p.y, '#4ade80', 1, 50, 0.5, 2); }
+            if (idle > 2.5 && p.hp < p.maxHp) { p.hp = Math.min(p.maxHp, p.hp + (Math.min(10, 1.5 + (idle - 2.5) * 1.5) * dt) * HEALK); if (Math.random() < 0.1) spark(p.x, p.y, '#4ade80', 1, 50, 0.5, 2); }
         }
         // Xạ Thủ Liên Đạn
         if (p.dualShooter) {

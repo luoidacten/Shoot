@@ -208,7 +208,7 @@ function umbAttack(p, w, a, charge, mult, isSuper) {
         const hit = arcFoes(p, a, reach, pw ? Math.PI / 1.7 : Math.PI / 2.2);
         hit.forEach(e => {
             dealDamage(e, dmg * 1.15, p.id, { angle: Math.atan2(e.y - p.y, e.x - p.x), knock: 180, melee: true }); p.stats.hits++;
-            if (pw) { e.stun = Math.max(e.stun, 0.35); p.hp = Math.min(p.maxHp, p.hp + 6); ring(e.x, e.y, 4, 34, '#f0abfc', 0.3, 3); }
+            if (pw) { e.stun = Math.max(e.stun, 0.35); p.hp = Math.min(p.maxHp, p.hp + (6) * HEALK); ring(e.x, e.y, 4, 34, '#f0abfc', 0.3, 3); }
         });
         if (hit.length) { reduceDurability(p, w, 1); hitStop(pw ? 0.07 : 0.04); addShake(pw ? 5 : 3); }
         hitDecoysObs(p, p.x + Math.cos(a) * 60, p.y + Math.sin(a) * 60, 40, dmg);

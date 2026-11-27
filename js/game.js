@@ -118,7 +118,7 @@ function updatePlayer(p, dt) {
     if (bush && p.bushStalker) speed *= 1.2;
     if (p.bushStalker) { if (bush) p.wasInBush = true; else if (p.wasInBush) { p.wasInBush = false; p.st.ambushBush = 2; } }
     if (combo(p, 'nomad') && dist(p.x, p.y, world.zone.x, world.zone.y) > world.zone.r) speed *= 1.25;
-    if (p.lavaWalker && zones.some(z => z.type === 'lava' && lavaActive(z) && dist(p.x, p.y, z.x, z.y) < z.r)) { speed *= 1.3; if (combo(p, 'magma')) p.hp = Math.min(p.maxHp, p.hp + 6 * dt); }
+    if (p.lavaWalker && zones.some(z => z.type === 'lava' && lavaActive(z) && dist(p.x, p.y, z.x, z.y) < z.r)) { speed *= 1.3; if (combo(p, 'magma')) p.hp = Math.min(p.maxHp, p.hp + (6 * dt) * HEALK); }
     if (p.st.haste > 0 && Math.random() < 0.3) particles.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 0.3, maxLife: 0.3, color: hexA(p.color, 0.35), size: p.radius * 0.8 });
     const tvx = input.move.x * speed, tvy = input.move.y * speed;
     const accel = (world.ice || p.onIce) ? 2.2 : 16;
@@ -149,7 +149,7 @@ function updatePlayer(p, dt) {
     p.stillT = moving ? 0 : (p.stillT || 0) + dt; // Cố Thủ / Tổ Bắn Tỉa / Lính Gác
     if (p.ghost) { if (!moving && !input.a) p.ghostT += dt; else p.ghostT = Math.max(0, p.ghostT - dt * 3); }
     // Tái tạo
-    if (p.regen && world.time - p.lastHurt > p.regenDelay && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + (combo(p, 'regen_vamp') ? 8 : 5) * dt);
+    if (p.regen && world.time - p.lastHurt > p.regenDelay && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + ((combo(p, 'regen_vamp') ? 8 : 5) * dt) * HEALK);
 
     // Nam châm
     if (p.magnet) crates.forEach(c => {
