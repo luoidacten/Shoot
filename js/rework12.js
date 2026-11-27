@@ -112,7 +112,7 @@ updatePartyExtras = function (dt) {
         const F = p.vtFort; if (F && F.until <= now) { p.vtFort = null; const D = Math.min(320, F.abs + 30), a = p.angle; enemiesOf(p).forEach(e => { if (dist(e.x, e.y, p.x, p.y) < 320 + e.radius && Math.abs(angleDiff(Math.atan2(e.y - p.y, e.x - p.x), a)) < 0.6) dealDamage(e, D * vD(p), p.id, { knock: 500, angle: a }); }); W12.push({ kind: 'fortWave', owner: p.id, a, t: 0.5, T: 0.5 }); addShake(8); AudioSys.playAt('explosion', p.x, p.y, 0.6); floatText(p.x, p.y - 50, `🛡️ PHẢN KÍCH ${Math.round(D)}`, '#7dd3fc', 16); }
     });
     for (let i = W12.length - 1; i >= 0; i--) {
-        const f = W12[i], o = players.find(q => q.id === f.owner); if (!o) { W12.splice(i, 1); continue; }
+        const f = W12[i]; if (!f) continue; const o = players.find(q => q.id === f.owner); if (!o) { W12.splice(i, 1); continue; }
         f.t -= dt;
         if (f.kind === 'trick') { const alive = decoys.includes(f.d) && f.d.hp > 0 && f.d.t > 0; if (!alive || f.t <= 0) { const x = f.d.x, y = f.d.y; enemiesOf(o).forEach(e => { if (dist(e.x, e.y, x, y) < 90 + e.radius) { e.stun = Math.max(e.stun, 0.8); floatText(e.x, e.y - 44, '🎩 BỊ LỪA!', '#f8fafc', 12); } }); smoke(x, y, 6, 'rgba(248,250,252,0.55)', 18); ring(x, y, 6, 90, '#f8fafc', 0.4, 4); const k = decoys.indexOf(f.d); if (k >= 0) decoys.splice(k, 1); W12.splice(i, 1); } continue; }
         if (f.kind === 'iceAge') { enemiesOf(o).forEach(e => { if (dist(e.x, e.y, f.x, f.y) < f.R + e.radius) { e.st.slow = Math.max(e.st.slow || 0, 0.3); e.vtIceIn = (e.vtIceBy === f ? e.vtIceIn || 0 : 0) + dt; e.vtIceBy = f; if (e.vtIceIn >= 1.2 && !(e.vtFrozenT > world.time)) { e.vtFrozenT = world.time + 1.5; e.st.root = Math.max(e.st.root || 0, 1.5); floatText(e.x, e.y - 44, '❄ ĐÓNG BĂNG', '#bae6fd', 13); ring(e.x, e.y, 4, 34, '#bae6fd', 0.4, 4); } } }); }
@@ -180,7 +180,7 @@ updatePartyExtras = function (dt) {
             bullets.splice(i, 1); spark(x, y, '#fdba74', 4, 120); AudioSys.playAt('block', x, y, 0.2);
         }
     }
-    for (let i = W12.length - 1; i >= 0; i--) { const f = W12[i]; if (f.kind === 'wallBolt' && f.t <= dt) { explode(f.x - Math.cos(f.a) * 6, f.y - Math.sin(f.a) * 6, f.owner, f.big ? 32 : 17, f.big ? 115 : 72); W12.splice(i, 1); } }
+    for (let i = W12.length - 1; i >= 0; i--) { const f = W12[i]; if (!f) continue; if (f.kind === 'wallBolt' && f.t <= dt) { explode(f.x - Math.cos(f.a) * 6, f.y - Math.sin(f.a) * 6, f.owner, f.big ? 32 : 17, f.big ? 115 : 72); W12.splice(i, 1); } }
 };
 const _drawW2FxR12b = drawW2Fx;
 drawW2Fx = function (now) {

@@ -151,7 +151,7 @@ function mdPhase3(p, a) { // lướt theo hướng chọn rồi mảnh tụ thà
         const free = rayFree(p.x, p.y, a, 560), ex = p.x + Math.cos(a) * free.d, ey = p.y + Math.sin(a) * free.d;
         W11.push({ kind: 'mdThrustBig', owner: p.id, x: p.x, y: p.y, a, L: free.d, t: 0.6, T: 0.6 });
         enemiesOf(p).forEach(e => { if (segDist(e.x, e.y, p.x, p.y, ex, ey) < e.radius + 38) { trueDamage(e, 140 * (p.meleeMult || 1), p.id); e.stun = Math.max(e.stun, 0.6); USK.push({ kind: 'xcut', x: e.x, y: e.y, a, t: 0.45, maxT: 0.45 }); floatText(e.x, e.y - 50, '🗡 VẠN NHẬN NHẤT KIẾM', '#f5d0fe', 14); } });
-        for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== p.id && segDist(b.x, b.y, p.x, p.y, ex, ey) < 40) bullets.splice(i, 1); }
+        for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== p.id && segDist(b.x, b.y, p.x, p.y, ex, ey) < 40) bullets.splice(i, 1); }
         p.kx -= Math.cos(a) * 140; p.ky -= Math.sin(a) * 140; flash('#a855f7', 0.12); addShake(12); hitStop(0.1); AudioSys.playAt('rail', p.x, p.y, 0.9); AudioSys.playAt('crit', p.x, p.y, 0.7);
     } });
     floatText(p.x, p.y - 56, '🗡 GIAI ĐOẠN 3 · VẠN NHẬN NHẤT KIẾM', '#e9d5ff', 16);
@@ -192,7 +192,7 @@ updatePartyExtras = function (dt) {
         else if (p._mdWas) { p._mdWas = false; p.mdP3 = world.time + 3; floatText(p.x, p.y - 64, '🗡 GĐ3: ĐÁNH THEO HƯỚNG ĐỂ LƯỚT & ĐÂM', '#f0abfc', 13); }
         if (p.isBot && p.mdP3 > world.time && w && w.id === 'MADAO' && world.time > p.mdP3 - 2.4) { const e = vtNear(p, 560); mdPhase3(p, e ? Math.atan2(e.y - p.y, e.x - p.x) : p.angle); }
         // Khiên năng lượng: chắn đạn phía trước
-        if (w && w.id === 'VANTUONG' && w.mods && vtCur(w) === 'eshield') for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner === p.id || b.explosive || dist(b.x, b.y, p.x, p.y) > p.radius + 26 || Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) > 0.9) continue; spark(b.x, b.y, '#7dd3fc', 4, 140); bullets.splice(j, 1); }
+        if (w && w.id === 'VANTUONG' && w.mods && vtCur(w) === 'eshield') for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner === p.id || b.explosive || dist(b.x, b.y, p.x, p.y) > p.radius + 26 || Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) > 0.9) continue; spark(b.x, b.y, '#7dd3fc', 4, 140); bullets.splice(j, 1); }
         // tia lazer liên tục
         const Bm = p.vtBeam; if (Bm) { Bm.t -= dt; Bm.tick += dt; if (Bm.tick >= 0.1) { Bm.tick = 0; Bm.end = vtBeamTick(p, p.angle, Bm.R, Bm.w, Bm.dmg); } if (Bm.t <= 0 || !w || w.id !== 'VANTUONG') p.vtBeam = null; }
         const Sw = p.vtSweep; if (Sw) { Sw.t -= dt; Sw.tick += dt; Sw.a = Sw.a0 + (1 - Sw.t / 0.6) * 2.1; if (Sw.tick >= 0.06) { Sw.tick = 0; Sw.end = vtBeamTick(p, Sw.a, 380, 10, 6 * vD(p)); } if (Sw.t <= 0) p.vtSweep = null; }
@@ -201,9 +201,9 @@ updatePartyExtras = function (dt) {
         if (p.vtFuse > world.time && w && w.id === 'VANTUONG' && w.mods) { const s = VT[vtOther(w)].buff.spd; if (s && p.moveMult === p._vtAfter) { p.moveMult *= s; p._vtAfter = p.moveMult; } }
     });
     for (let i = W11.length - 1; i >= 0; i--) {
-        const f = W11[i], o = players.find(q => q.id === f.owner); if (!o) { W11.splice(i, 1); continue; }
+        const f = W11[i]; if (!f) continue; const o = players.find(q => q.id === f.owner); if (!o) { W11.splice(i, 1); continue; }
         f.t -= dt;
-        if (f.kind === 'dome') { for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j], ow = players.find(q => q.id === b.owner); if (b.owner === o.id || (ow && sameTeam(o, ow))) continue; const d = dist(b.x, b.y, f.x, f.y); if (Math.abs(d - f.R) < 18 || d < f.R) { spark(b.x, b.y, '#7dd3fc', 4, 140); bullets.splice(j, 1); } } if (dist(o.x, o.y, f.x, f.y) < f.R) o.st.shieldT = Math.max(o.st.shieldT || 0, 0.2); }
+        if (f.kind === 'dome') { for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; const ow = players.find(q => q.id === b.owner); if (b.owner === o.id || (ow && sameTeam(o, ow))) continue; const d = dist(b.x, b.y, f.x, f.y); if (Math.abs(d - f.R) < 18 || d < f.R) { spark(b.x, b.y, '#7dd3fc', 4, 140); bullets.splice(j, 1); } } if (dist(o.x, o.y, f.x, f.y) < f.R) o.st.shieldT = Math.max(o.st.shieldT || 0, 0.2); }
         if (f.t <= 0) W11.splice(i, 1);
     }
 };

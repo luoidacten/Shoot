@@ -154,7 +154,7 @@ const _updateStrikes30 = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikes30(dt);
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i]; if (s.kind !== 'overSpot') continue;
+        const s = strikes[i]; if (!s) continue; if (s.kind !== 'overSpot') continue;
         const o = players.find(q => q.id === s.owner);
         if (o) enemiesOf(o).forEach(e => { if (e.hp > 0 && Math.abs(e.x - s.x) <= s.R && Math.abs(e.y - s.y) <= s.R) spotFor(e, o.id, 0.4); });
         if (s.t <= 0) strikes.splice(i, 1);

@@ -116,7 +116,7 @@ function phiAnh(p, R, dmg) { // nội tại: kiếm xoay chém vòng tròn
     W4FX.push({ kind: 'phiAnh', owner: p.id, R, t: 0.32, maxT: 0.32 });
     AudioSys.playAt('swing', p.x, p.y, 0.35);
     enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < R + e.radius) { dealDamage(e, dmg * w4MM(p), p.id, { melee: true, knock: 140, angle: Math.atan2(e.y - p.y, e.x - p.x) }); spark(e.x, e.y, '#e2e8f0', 6, 200); } });
-    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < R && Math.random() < 0.5) { spark(b.x, b.y, '#e2e8f0', 3, 140); bullets.splice(i, 1); } }
+    for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < R && Math.random() < 0.5) { spark(b.x, b.y, '#e2e8f0', 3, 140); bullets.splice(i, 1); } }
 }
 
 /* ============================== ÁM KHÍ ============================== */
@@ -219,7 +219,7 @@ function staffStrike(p, w, ang, mult) {
         W4FX.push({ kind: 'staffSpin', owner: p.id, t: 0.35, maxT: 0.35 });
         hit = enemiesOf(p).filter(e => !(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 112 + e.radius);
         hit.forEach(e => dealDamage(e, dmg * 1.5, p.id, { melee: true, knock: 480, angle: Math.atan2(e.y - p.y, e.x - p.x) }));
-        for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 115 && !b.explosive) { b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = Math.max(b.life, 0.6); b.color = '#fde68a'; } }
+        for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 115 && !b.explosive) { b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = Math.max(b.life, 0.6); b.color = '#fde68a'; } }
         ring(p.x, p.y, 8, 115, '#d6a15a', 0.35, 6); floatText(p.x, p.y - 34, 'XOAY GẬY!', '#fde68a', 13); AudioSys.playAt('whoosh', p.x, p.y, 0.6); addShake(4);
     }
     p.stats.hits += hit.length;
@@ -341,14 +341,14 @@ gunModCast = function (p) {
     return _gunModW4(p);
 };
 Object.assign(HT, {
-    AXECANNON: ['CUỒNG PHỦ ĐẠI PHÁO', p => axeHT(p)], AXEGUN: ['CUỒNG PHỦ SONG PHÁT', p => axeHT(p)],
+    AXECANNON: ['CUỒNG PHỦ ĐẠI PHÁO', p => axeFormHT(p)], AXEGUN: ['CUỒNG PHỦ SONG PHÁT', p => axeFormHT(p)],
     MOBGEAR: ['BÃO LƯỠI', p => { p.st.invuln = Math.max(p.st.invuln || 0, 0.9); startTravel(p, p.x, p.y, 0.9, null, null, 70); for (let k = 0; k < 3; k++) p.shotQueue.push({ t: 0.15 + k * 0.25, fn: () => { if (p.hp > 0) phiAnh(p, 160, 22); } }); floatText(p.x, p.y - 44, '🌪 BÃO LƯỠI', '#e2e8f0', 15); }],
     DARTS: ['TRUY HỒN CHÂM', p => { const T = enemiesOf(p).filter(e => dist(e.x, e.y, p.x, p.y) < 600 && targetable(p, e)).sort((u, v) => dist(p.x, p.y, u.x, u.y) - dist(p.x, p.y, v.x, v.y)).slice(0, 5); if (!T.length) { for (let i = -2; i <= 2; i++) needle(p, aimDir(p) + i * 0.08, { dmg: 18 * w4DM(p), silence: 1.5, speed: 34 }); } else T.forEach((e, i) => p.shotQueue.push({ t: i * 0.06, fn: () => { if (p.hp > 0 && e.hp > 0) needle(p, Math.atan2(e.y - p.y, e.x - p.x), { dmg: 20 * w4DM(p), silence: 1.5, speed: 36, range: 640 }); } })); floatText(p.x, p.y - 44, '🪡 TRUY HỒN CHÂM', '#f1f5f9', 15); }],
     URUMI: ['NGÀN LƯỠI MỀM', p => { const a = aimDir(p); [-0.5, -0.25, 0, 0.25, 0.5].forEach((o, i) => p.shotQueue.push({ t: i * 0.06, fn: () => { if (p.hp <= 0) return; const free = rayFree(p.x, p.y, a + o, 240); W2FX.push({ kind: 'whip', owner: p.id, a: a + o, len: free.d, t: 0.26, maxT: 0.26, col: '#f8fafc' }); lineFoes(p, a + o, free.d + 10, 12).forEach(e => trueDamage(e, 16 * w4MM(p), p.id)); AudioSys.playAt('swing', p.x, p.y, 0.3); } })); floatText(p.x, p.y - 44, '〰️ NGÀN LƯỠI MỀM', '#f8fafc', 15); }],
     SNAKESWORD: ['MÃNG XÀ TRIỀN', p => { const e = enemiesOf(p).filter(q => dist(q.x, q.y, p.x, p.y) < 260 && targetable(p, q)).sort((u, v) => dist(p.x, p.y, u.x, u.y) - dist(p.x, p.y, v.x, v.y))[0]; if (!e) { floatText(p.x, p.y - 34, 'Không có mục tiêu', '#94a3b8', 12); return; } W2FX.push({ kind: 'whip', owner: p.id, a: Math.atan2(e.y - p.y, e.x - p.x), len: dist(p.x, p.y, e.x, e.y), t: 0.5, maxT: 0.5, col: '#22c55e' }); e.st.root = Math.max(e.st.root || 0, 1.5); for (let k = 0; k < 3; k++) snakeHit(p, e, 12 * w4MM(p)); floatText(e.x, e.y - 60, '🐍 BỊ QUẤN', '#4ade80', 15); }],
-    STAFF: ['PHONG HOẢ LUÂN', p => { let k = 0; const tick = () => { if (p.hp <= 0 || k++ >= 8) return; W4FX.push({ kind: 'staffSpin', owner: p.id, t: 0.26, maxT: 0.26 }); enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 120 + e.radius) dealDamage(e, 9 * w4MM(p), p.id, { melee: true, knock: 260, angle: Math.atan2(e.y - p.y, e.x - p.x) }); }); for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 120 && !b.explosive) { b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = Math.max(b.life, 0.6); } } AudioSys.playAt('swing', p.x, p.y, 0.25); p.shotQueue.push({ t: 0.25, fn: tick }); }; tick(); floatText(p.x, p.y - 44, '🌀 PHONG HOẢ LUÂN', '#fde68a', 15); }]
+    STAFF: ['PHONG HOẢ LUÂN', p => { let k = 0; const tick = () => { if (p.hp <= 0 || k++ >= 8) return; W4FX.push({ kind: 'staffSpin', owner: p.id, t: 0.26, maxT: 0.26 }); enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 120 + e.radius) dealDamage(e, 9 * w4MM(p), p.id, { melee: true, knock: 260, angle: Math.atan2(e.y - p.y, e.x - p.x) }); }); for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 120 && !b.explosive) { b.owner = p.id; b.angle = Math.atan2(b.y - p.y, b.x - p.x); b.life = Math.max(b.life, 0.6); } } AudioSys.playAt('swing', p.x, p.y, 0.25); p.shotQueue.push({ t: 0.25, fn: tick }); }; tick(); floatText(p.x, p.y - 44, '🌀 PHONG HOẢ LUÂN', '#fde68a', 15); }]
 });
-function axeHT(p) {
+function axeFormHT(p) {
     const w = getCurrentWeapon(p), a = aimDir(p);
     if (isAxeForm(w)) { // Cuồng Phủ: xoay rìu hút địch rồi nổ theo số đạn
         W4FX.push({ kind: 'spinDash', owner: p.id, t: 1.2, maxT: 1.2 });

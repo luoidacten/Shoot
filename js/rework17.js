@@ -133,14 +133,14 @@ updatePartyExtras = function (dt) {
     _upeR17(dt);
     const now = world.time;
     for (let i = W17.length - 1; i >= 0; i--) {
-        const f = W17[i]; f.t -= dt; const o = players.find(q => q.id === f.owner);
+        const f = W17[i]; if (!f) continue; f.t -= dt; const o = players.find(q => q.id === f.owner);
         if (!o || f.t <= 0) { W17.splice(i, 1); continue; }
         if (f.kind === 'disc') {
             f.spin += dt; const sp = 760 * dt;
             if (!f.back) { const nx = f.x + Math.cos(f.a) * sp, ny = f.y + Math.sin(f.a) * sp; if (pointInObstacle(nx, ny, 4) || f.d >= f.max) { f.back = true; f.hit.clear(); } else { f.x = nx; f.y = ny; f.d += sp; } }
             else { const d = dist(f.x, f.y, o.x, o.y); if (d < 24 || o.hp <= 0) { W17.splice(i, 1); continue; } const b = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(b) * sp; f.y += Math.sin(b) * sp; }
             enemiesOf(o).forEach(e => { if (!f.hit.has(e.id) && !(e.air > 0) && dist(e.x, e.y, f.x, f.y) < e.radius + 22) { f.hit.add(e.id); dealDamage(e, 24 * (o.meleeMult || 1), o.id, { melee: true, knock: 160, angle: Math.atan2(e.y - f.y, e.x - f.x) }); e.st.slow = Math.max(e.st.slow || 0, 1); spark(e.x, e.y, '#fb923c', 8, 240); } });
-            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 26) { spark(b.x, b.y, '#fde68a', 3, 140); bullets.splice(j, 1); } }
+            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 26) { spark(b.x, b.y, '#fde68a', 3, 140); bullets.splice(j, 1); } }
             const ob = pointInObstacle(f.x, f.y, 10); if (ob && ob.wood) damageObstacle(ob, 6, o);
         }
     }
@@ -154,7 +154,7 @@ updatePartyExtras = function (dt) {
         // bão cưa
         if ((p.sawStormT || 0) > now) {
             p.sawStormTick = (p.sawStormTick || 0) + dt;
-            if (p.sawStormTick >= 0.1) { p.sawStormTick = 0; enemiesOf(p).forEach(e => { const d = dist(e.x, e.y, p.x, p.y); if (!(e.air > 0) && d < 100 + e.radius) { dealDamage(e, 7 * (p.meleeMult || 1), p.id, { melee: true, knock: 1 }); e.kx += (p.x - e.x) * 1.5; e.ky += (p.y - e.y) * 1.5; spark(e.x, e.y, '#fb923c', 2, 160); } }); for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 100) bullets.splice(j, 1); } }
+            if (p.sawStormTick >= 0.1) { p.sawStormTick = 0; enemiesOf(p).forEach(e => { const d = dist(e.x, e.y, p.x, p.y); if (!(e.air > 0) && d < 100 + e.radius) { dealDamage(e, 7 * (p.meleeMult || 1), p.id, { melee: true, knock: 1 }); e.kx += (p.x - e.x) * 1.5; e.ky += (p.y - e.y) * 1.5; spark(e.x, e.y, '#fb923c', 2, 160); } }); for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 100) bullets.splice(j, 1); } }
         } else if (p.sawStormT && p.sawStormT <= now) { p.sawStormT = 0; explode(p.x, p.y, p.id, 32, 120); floatText(p.x, p.y - 44, '💥 NỔ MÁY', '#fb923c', 14); }
         // Chỉ Huy: tự hồi máu
         if (isCmd(p) && now - (p.lastHurt || -9) > 3 && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + 4 * dt);

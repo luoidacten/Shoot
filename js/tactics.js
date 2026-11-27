@@ -490,7 +490,7 @@ function updateTactics(dt) {
     });
     // tên lửa: dẫn đường + nổ khi biến mất
     for (let i = missiles.length - 1; i >= 0; i--) {
-        const m = missiles[i], b = m.b, owner = players.find(q => q.id === m.owner);
+        const m = missiles[i]; if (!m) continue; const b = m.b, owner = players.find(q => q.id === m.owner);
         if (bullets.includes(b)) {
             if (m.guided && owner && owner.st.radarT > 0) {
                 const t = enemiesOf(owner).filter(e => isSpotted(e, owner.id)).sort((x, y) => dist(b.x, b.y, x.x, x.y) - dist(b.x, b.y, y.x, y.y))[0];

@@ -323,7 +323,7 @@ const _updateStrikes36 = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikes36(dt);
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i]; if (s.kind !== 'frostFire' || s.t > 0) continue;
+        const s = strikes[i]; if (!s) continue; if (s.kind !== 'frostFire' || s.t > 0) continue;
         strikes.splice(i, 1); const o = players.find(q => q.id === s.owner); if (!o) continue;
         ring(s.x, s.y, 10, 150, '#bae6fd', 0.4, 6); explosionFx(s.x, s.y, 90);
         enemiesOf(o).forEach(e => { if (dist(s.x, s.y, e.x, e.y) < 150 + e.radius) { dealDamage(e, 60, o.id, { angle: Math.atan2(e.y - s.y, e.x - s.x), knock: 120 }); e.stun = Math.max(e.stun, 1); e.st.slow = Math.max(e.st.slow || 0, 2); } });

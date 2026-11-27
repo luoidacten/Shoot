@@ -144,7 +144,7 @@ function cubeFire(p, w, ang, charge, mult) {
     else { meleeBook(p, w, ang, 22); p.kx += Math.cos(ang) * 150; p.ky += Math.sin(ang) * 150; slashes.push({ x: p.x, y: p.y, ownerId: p.id, angle: ang, range: 160 + p.radius, color: '#67e8f9', width: 7, life: 0.16, maxLife: 0.16, swing: 1, line: true }); lineFoes(p, ang, 160 + p.radius, 18).forEach(e => { dealDamage(e, dmg * 1.3, p.id, { melee: true, knock: 300, angle: ang }); p.stats.hits++; }); AudioSys.playAt('swing', p.x, p.y, 0.45); }
 }
 // dạng Khối: chắn đạn phía trước khi không đánh
-function cubeBlock(p, w) { if ((w.form || 0) !== 0 || world.time - (p.lastFireT || -9) < 0.35) return; for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner === p.id || dist(b.x, b.y, p.x, p.y) > p.radius + 28 || Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) > 0.9) continue; spark(b.x, b.y, '#a5f3fc', 4, 140); bullets.splice(i, 1); } }
+function cubeBlock(p, w) { if ((w.form || 0) !== 0 || world.time - (p.lastFireT || -9) < 0.35) return; for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner === p.id || dist(b.x, b.y, p.x, p.y) > p.radius + 28 || Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) > 0.9) continue; spark(b.x, b.y, '#a5f3fc', 4, 140); bullets.splice(i, 1); } }
 
 /* ============================== MÓC VÀO HỆ THỐNG ============================== */
 const _fireWeaponW5 = fireWeapon;
@@ -161,7 +161,7 @@ fireWeapon = function (p, w, ang, charge, enemy) {
 const _upeW5 = updatePartyExtras;
 updatePartyExtras = function (dt) {
     _upeW5(dt);
-    for (let i = W5FX.length - 1; i >= 0; i--) { const f = W5FX[i]; f.t -= dt; const o = players.find(q => q.id === f.owner); if (f.kind === 'mdBlade' && o && f.t > 0) updateMdBlade(f, o, dt); if (f.t <= 0) W5FX.splice(i, 1); }
+    for (let i = W5FX.length - 1; i >= 0; i--) { const f = W5FX[i]; if (!f) continue; f.t -= dt; const o = players.find(q => q.id === f.owner); if (f.kind === 'mdBlade' && o && f.t > 0) updateMdBlade(f, o, dt); if (f.t <= 0) W5FX.splice(i, 1); }
     if (gameState !== 'PLAYING' && gameState !== 'KO') return;
     players.forEach(p => { if (p.hp <= 0) return; const w = getCurrentWeapon(p); if (w && w.id === 'MULTICUBE') cubeBlock(p, w); if ((p.mdOrbT || 0) > world.time) mdOrbit(p, dt); });
 };
@@ -184,7 +184,7 @@ meleeTechCast = function (p) {
         ring(x, y, 10, 150, '#facc15', 0.5, 8); addShake(9); AudioSys.playAt('slam', x, y, 0.6); floatText(p.x, p.y - 44, '🔱 ĐỊNH HẢI THẦN CHÂM', '#facc15', 15);
         return;
     }
-    if (w.id === 'SANJIE') { p.sjSpinT = world.time + 2; W5FX.push({ kind: 'sjSpin', owner: p.id, t: 2, maxT: 2 }); for (let k = 0; k < 8; k++) p.shotQueue.push({ t: k * 0.25, fn: () => { if (p.hp <= 0) return; enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 120 + e.radius) dealDamage(e, 8 * w5MM(p), p.id, { melee: true, knock: 200, angle: Math.atan2(e.y - p.y, e.x - p.x) }); }); for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 120) { spark(b.x, b.y, '#fbbf24', 3, 140); bullets.splice(i, 1); } } } }); floatText(p.x, p.y - 44, '🌀 CUỒNG PHONG CÔN', '#fbbf24', 15); return; }
+    if (w.id === 'SANJIE') { p.sjSpinT = world.time + 2; W5FX.push({ kind: 'sjSpin', owner: p.id, t: 2, maxT: 2 }); for (let k = 0; k < 8; k++) p.shotQueue.push({ t: k * 0.25, fn: () => { if (p.hp <= 0) return; enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 120 + e.radius) dealDamage(e, 8 * w5MM(p), p.id, { melee: true, knock: 200, angle: Math.atan2(e.y - p.y, e.x - p.x) }); }); for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b) continue; if (b.owner !== p.id && dist(b.x, b.y, p.x, p.y) < 120) { spark(b.x, b.y, '#fbbf24', 3, 140); bullets.splice(i, 1); } } } }); floatText(p.x, p.y - 44, '🌀 CUỒNG PHONG CÔN', '#fbbf24', 15); return; }
     if (w.id === 'MULTICUBE') { // Khối Nổ: 6 mảnh văng ra 6 hướng rồi tụ lại
         for (let i = 0; i < 6; i++) W5FX.push({ kind: 'mdBlade', owner: p.id, x: p.x, y: p.y, a: i * Math.PI / 3, sp: 700, d: 0, max: 260, dmg: 22 * w5MM(p), t: 0.8, maxT: 0.8, cube: true });
         p.st.shield = Math.min(80, (p.st.shield || 0) + 30); p.st.shieldT = 4; ring(p.x, p.y, 8, 90, '#67e8f9', 0.4, 5); floatText(p.x, p.y - 44, '🧊 KHỐI NỔ', '#67e8f9', 15); AudioSys.playAt('explosion', p.x, p.y, 0.3);

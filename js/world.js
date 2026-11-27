@@ -212,7 +212,7 @@ function updateWorld(dt) {
         }
     }
     for (let i = airdrops.length - 1; i >= 0; i--) {
-        const d = airdrops[i]; d.t -= dt;
+        const d = airdrops[i]; if (!d) continue; d.t -= dt;
         if (d.t <= 0) {
             airdrops.splice(i, 1);
             crates.push(makeCrate(d.x, d.y, 'LEGEND'));
@@ -231,7 +231,7 @@ function updateWorld(dt) {
         meteors.push({ x, y, warningTime: 1.8, maxT: 1.8 });
     }
     for (let i = meteors.length - 1; i >= 0; i--) {
-        const m = meteors[i]; m.warningTime -= dt;
+        const m = meteors[i]; if (!m) continue; m.warningTime -= dt;
         if (m.warningTime <= 0) { explode(m.x, m.y, -1, 70, 120); meteors.splice(i, 1); }
     }
 

@@ -217,17 +217,17 @@ updatePartyExtras = function (dt) {
         if (p.hp <= 0) { p.sjWhirl = null; return; }
         const w = getCurrentWeapon(p);
         if (w && w.id === 'SANJIE' && (w.form || 0) % 2 === 1 && p.sjGuardT > world.time) // Tam Khúc: đỡ đạn phía trước
-            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner === p.id || b.explosive || dist(b.x, b.y, p.x, p.y) > p.radius + 34 || Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) > 1.0) continue; spark(b.x, b.y, '#fbbf24', 4, 140); bullets.splice(j, 1); }
+            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner === p.id || b.explosive || dist(b.x, b.y, p.x, p.y) > p.radius + 34 || Math.abs(angleDiff(Math.atan2(b.y - p.y, b.x - p.x), p.angle)) > 1.0) continue; spark(b.x, b.y, '#fbbf24', 4, 140); bullets.splice(j, 1); }
         const S = p.sjWhirl;
         if (S) { S.t -= dt; S.tick += dt; if (S.tick >= 0.1) { S.tick = 0; enemiesOf(p).forEach(e => { if (!(e.air > 0) && dist(e.x, e.y, p.x, p.y) < 112 + e.radius) dealDamage(e, 7 * w5MM(p), p.id, { melee: true, knock: 30, angle: Math.atan2(e.y - p.y, e.x - p.x) }); }); AudioSys.playAt('swing', p.x, p.y, 0.15); } if (S.t <= 0) p.sjWhirl = null; }
     });
     for (let i = W9.length - 1; i >= 0; i--) {
-        const f = W9[i], o = players.find(q => q.id === f.owner); if (!o) { W9.splice(i, 1); continue; }
+        const f = W9[i]; if (!f) continue; const o = players.find(q => q.id === f.owner); if (!o) { W9.splice(i, 1); continue; }
         f.t -= dt;
         if (f.kind === 'tornado') { // lốc kiếm: hút và hất tung mọi kẻ trên đường
             const st = 520 * dt; f.x += Math.cos(f.a) * st; f.y += Math.sin(f.a) * st; f.d += st;
             enemiesOf(o).forEach(e => { if (f.hit.has(e.id) || e.air > 0) return; const d = dist(e.x, e.y, f.x, f.y); if (d < 95 + e.radius) { const b = Math.atan2(f.y - e.y, f.x - e.x), k = Math.min(d, 380 * dt); if (!pointInObstacle(e.x + Math.cos(b) * k, e.y + Math.sin(b) * k, e.radius)) { e.x += Math.cos(b) * k; e.y += Math.sin(b) * k; } } if (d < 42 + e.radius) { f.hit.add(e.id); dealDamage(e, 35 * k5M(o), o.id, { melee: true, knock: 1 }); k5Lift(o, e, f.a, 0.9); } });
-            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 60) bullets.splice(j, 1); }
+            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner !== o.id && dist(b.x, b.y, f.x, f.y) < 60) bullets.splice(j, 1); }
             if (f.d >= f.max || pointInObstacle(f.x, f.y, 10)) { W9.splice(i, 1); continue; }
         }
         if (f.t <= 0) W9.splice(i, 1);

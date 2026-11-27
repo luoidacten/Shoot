@@ -227,7 +227,7 @@ const _updateStrikes18 = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikes18(dt);
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i];
+        const s = strikes[i]; if (!s) continue;
         if (s.kind === 'paraLand' && s.t <= 0) {
             strikes.splice(i, 1); const o = players.find(q => q.id === s.owner);
             if (o && o.hp > 0) { const d = summon(o, 'para', s.x, s.y); d.home = { x: d.x, y: d.y }; if (has(o, 'radioman')) { d.hp += 15; d.maxHp += 15; } ring(s.x, s.y, 6, 50, '#a3e635', 0.4, 3); smoke(s.x, s.y, 5, 'rgba(160,170,150,0.4)', 16); }

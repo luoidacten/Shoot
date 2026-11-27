@@ -74,7 +74,7 @@ function napalmStrike(p, ang) {
 /* ============================== CẬP NHẬT (máy chủ) ============================== */
 function updateStrikes(dt) {
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i], o = players.find(q => q.id === s.owner);
+        const s = strikes[i]; if (!s) continue; const o = players.find(q => q.id === s.owner);
         s.t -= dt;
         if (s.kind === 'bomb') {
             if (s.t <= 0) { strikes.splice(i, 1); explode(s.x, s.y, s.owner, s.dmg, s.R); }
@@ -174,7 +174,7 @@ function castFlare(p, a) {
 const _updateStrikes10 = updateStrikes;
 updateStrikes = function (dt) {
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i];
+        const s = strikes[i]; if (!s) continue;
         if (s.kind === 'crate' && s.t - dt <= 0) { strikes.splice(i, 1); const o = players.find(q => q.id === s.owner), c = makeCrate(s.x, s.y, 'SUPPORT'); if (o && sCombo(o, 'medDrop')) c.look = 'mega'; crates.push(c); spark(s.x, s.y, '#22c55e', 12, 160); AudioSys.playAt('slam', s.x, s.y, 0.25); }
         else if (s.kind === 'flare') { const o = players.find(q => q.id === s.owner); if (o) enemiesOf(o).forEach(e => { if (dist(e.x, e.y, s.x, s.y) < 380) spotFor(e, o.id, 0.3); }); if (s.t - dt <= 0) strikes.splice(i, 1); else s.t -= dt; }
     }
@@ -209,7 +209,7 @@ botSpells = function (p, dt) {
     const e = enemyOf(p), d = e ? dist(p.x, p.y, e.x, e.y) : 1e9, vis = e && targetable(p, e), low = p.hp < p.maxHp * 0.4;
     const want = { miniStrike: vis && d > 150 && d < 420, flareScan: !vis && world.time > 5, mineField: vis && d < 260 && low, smokeLine: low && vis, supplyDrop: low && !vis,
         flareGun: !vis && world.time > 5, radio: vis && d > 150 && d < 420, landmine: vis && d < 200, adrenShot: low, armorKit: (p.armor || 0) < 20 && vis };
-    (p.spells || []).forEach((s, i) => { if (s.cd <= 0 && want[s.id] && Math.random() < 0.6) { p.angle = e ? Math.atan2(e.y - p.y, e.x - p.x) : p.angle; castSpell(p, i); } });
+    (p.spells || []).forEach((s, i) => { if (s.cd <= 0 && want[s.id] && Math.random() < 0.6) { const aa = e ? Math.atan2(e.y - p.y, e.x - p.x) : p.angle; if (isFinite(aa)) p.angle = aa; castSpell(p, i); } });
     (p.items || []).forEach((it, i) => { if (want[it.id] && Math.random() < 0.5) useItem(p, i); });
 };
 

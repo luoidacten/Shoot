@@ -78,7 +78,7 @@ const _updateStrikes23 = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikes23(dt);
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i];
+        const s = strikes[i]; if (!s) continue;
         if (s.kind === 'cellBurn') {
             if (s.t > 0) continue;
             const o = players.find(q => q.id === s.owner);
@@ -190,7 +190,7 @@ SPELLS.flareScan.cast = p => {
 const _updateStrikes23b = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikes23b(dt);
-    for (let i = strikes.length - 1; i >= 0; i--) { const s = strikes[i]; if (s.kind !== 'flare2') continue; const o = players.find(q => q.id === s.owner); if (o) enemiesOf(o).forEach(e => { if (dist(e.x, e.y, s.x, s.y) < FLARE_R) spotFor(e, o.id, 0.3); }); if (s.t <= 0) strikes.splice(i, 1); }
+    for (let i = strikes.length - 1; i >= 0; i--) { const s = strikes[i]; if (!s) continue; if (s.kind !== 'flare2') continue; const o = players.find(q => q.id === s.owner); if (o) enemiesOf(o).forEach(e => { if (dist(e.x, e.y, s.x, s.y) < FLARE_R) spotFor(e, o.id, 0.3); }); if (s.t <= 0) strikes.splice(i, 1); }
 };
 
 /* ============================== ROBOT CỦA MAP: trâu hơn + bộ đòn đánh thường riêng ============================== */

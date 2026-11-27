@@ -15,13 +15,14 @@ const GUN_BUFF_R15 = {};
 Object.keys(MAG_DMG_R15).forEach(id => { GUN_BUFF_R15[id] = Math.max(1, Math.round(MAG_TARGET_R15 / MAG_DMG_R15[id] * 100) / 100); });
 const SNIPER_HIT_R15 = 100;
 
-function gunWidR15(A, opts) { const b = opts && opts.bullet; if (b && b.wid) return b.wid; const w = getCurrentWeapon(A); return w && w.id; }
+// nguồn: chỉ ĐÒN BẮN THƯỜNG của súng (rework19 gắn nhãn); không áp cho kỹ năng / phép / vùng của thẻ khác
+function gunWidR15(A, opts, target) { if (typeof gunSrcR19 === 'function') return gunSrcR19(A, target, opts); const b = opts && opts.bullet; if (b && b.wid) return b.wid; const w = getCurrentWeapon(A); return w && w.id; }
 const _dealDamageR15 = dealDamage;
 dealDamage = function (target, dmg, attackerId, opts = {}) {
     if (target && target.hp > 0 && attackerId !== -1 && attackerId !== undefined) {
         const A = players.find(q => q.id === attackerId);
         if (A && A !== target) {
-            const wid = gunWidR15(A, opts);
+            const wid = gunWidR15(A, opts, target);
             if (wid === 'SNIPER' && opts.bullet && !opts.raw) return _dealDamageR15(target, SNIPER_HIT_R15, attackerId, Object.assign({}, opts, { raw: true }));
             if (!opts.raw && GUN_BUFF_R15[wid]) dmg *= GUN_BUFF_R15[wid];
         }
@@ -30,8 +31,8 @@ dealDamage = function (target, dmg, attackerId, opts = {}) {
 };
 const _trueDamageR15 = trueDamage;
 trueDamage = function (target, T, attackerId) {
-    const A = attackerId !== -1 && players.find(q => q.id === attackerId), w = A && A !== target && getCurrentWeapon(A);
-    return _trueDamageR15(target, T * ((w && GUN_BUFF_R15[w.id]) || 1), attackerId);
+    const A = attackerId !== -1 && players.find(q => q.id === attackerId), wid = A && A !== target ? gunWidR15(A, {}, target) : null;
+    return _trueDamageR15(target, T * ((wid && GUN_BUFF_R15[wid]) || 1), attackerId);
 };
 Object.keys(GUN_BUFF_R15).forEach(id => { const w = WEAPONS[id]; if (w && GUN_BUFF_R15[id] > 1 && w.desc !== undefined) w.desc = (w.desc || '') + ` (Sát thương ×${GUN_BUFF_R15[id]}: 2 băng = 1 mạng.)`; else if (w && GUN_BUFF_R15[id] > 1) w.desc = `Sát thương ×${GUN_BUFF_R15[id]}: 2 băng = 1 mạng.`; });
 WEAPONS.SNIPER.desc = (WEAPONS.SNIPER.desc || '') + ' Mỗi viên trúng gây đúng 100 sát thương (không chí mạng): trúng đủ 6 viên = 2 băng mới hạ 1 mạng.';

@@ -53,7 +53,7 @@ const _updateStrikes16 = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikes16(dt);
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i], o = players.find(q => q.id === s.owner);
+        const s = strikes[i]; if (!s) continue; const o = players.find(q => q.id === s.owner);
         if (s.kind === 'orbital') {
             if (s.t > 0) continue; // updateStrikes gốc đã trừ t
             if (!s.z) { s.z = { type: 'orbitalBeam', x: s.x, y: s.y, r: s.R, t: s.dur, maxT: s.dur, owner: s.owner, tick: 0 }; zones.push(s.z); flash('#c4b5fd', 0.2); addShake(14); AudioSys.playAt('rail', s.x, s.y, 0.8, 4000); }
@@ -235,7 +235,7 @@ const _updateStrikes17 = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikes17(dt);
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i];
+        const s = strikes[i]; if (!s) continue;
         if (s.kind === 'smokePlane') {
             if (s.t > 0) continue;
             if (!s.z) { s.z = { type: 'plane', x: s.sx, y: s.sy, r: 26, t: 9, maxT: 9, owner: s.owner, tick: 0, phase: Math.round(s.ang * 1000) }; zones.push(s.z); AudioSys.playAt('whoosh', s.ax, s.ay, 0.6, 3000); }

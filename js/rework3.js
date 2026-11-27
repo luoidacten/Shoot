@@ -142,13 +142,13 @@ updatePartyExtras = function (dt) {
         }
     });
     for (let i = W7.length - 1; i >= 0; i--) {
-        const f = W7[i], o = players.find(q => q.id === f.owner);
+        const f = W7[i]; if (!f) continue; const o = players.find(q => q.id === f.owner);
         if (!o) { W7.splice(i, 1); continue; }
         f.t -= dt;
         if (f.kind === 'gsWave') { // trăng máu bay xa, xuyên thấu, phá đạn
             const st = 820 * dt, prog = f.d / f.max, half = 50 + 50 * prog; f.x += Math.cos(f.a) * st; f.y += Math.sin(f.a) * st; f.d += st;
             enemiesOf(o).forEach(e => { if (f.hit.has(e.id) || e.air > 0) return; const rx = e.x - f.x, ry = e.y - f.y, along = rx * Math.cos(f.a) + ry * Math.sin(f.a), side = -rx * Math.sin(f.a) + ry * Math.cos(f.a); if (Math.abs(along) < 26 + e.radius && Math.abs(side) < half + e.radius) { f.hit.add(e.id); dealDamage(e, 72 * r3m(o), o.id, { melee: true, knock: 420, angle: f.a }); e.st.slow = Math.max(e.st.slow || 0, 1.2); spark(e.x, e.y, '#f43f5e', 14, 280); } });
-            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (b.owner === o.id) continue; const rx = b.x - f.x, ry = b.y - f.y; if (Math.abs(rx * Math.cos(f.a) + ry * Math.sin(f.a)) < 30 && Math.abs(-rx * Math.sin(f.a) + ry * Math.cos(f.a)) < half) bullets.splice(j, 1); }
+            for (let j = bullets.length - 1; j >= 0; j--) { const b = bullets[j]; if (!b) continue; if (b.owner === o.id) continue; const rx = b.x - f.x, ry = b.y - f.y; if (Math.abs(rx * Math.cos(f.a) + ry * Math.sin(f.a)) < 30 && Math.abs(-rx * Math.sin(f.a) + ry * Math.cos(f.a)) < half) bullets.splice(j, 1); }
             if (f.d >= f.max || pointInObstacle(f.x, f.y, 0)) { W7.splice(i, 1); W7.push({ kind: 'gsScar', owner: o.id, x0: f.x0, y0: f.y0, x1: f.x, y1: f.y, a: f.a, t: 1.1, T: 1.1, boom: false }); }
             continue;
         }

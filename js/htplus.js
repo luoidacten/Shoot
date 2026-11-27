@@ -48,7 +48,7 @@ const _updateStrikes35 = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikes35(dt);
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i]; if (s.kind !== 'htBurst2' && s.kind !== 'htSpiral') continue;
+        const s = strikes[i]; if (!s) continue; if (s.kind !== 'htBurst2' && s.kind !== 'htSpiral') continue;
         const o = players.find(q => q.id === s.owner); if (!o || o.hp <= 0) { strikes.splice(i, 1); continue; }
         s.tick -= dt;
         while (s.tick <= 0 && s.n > 0) {

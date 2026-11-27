@@ -19,7 +19,7 @@ const _updateStrikesR10 = updateStrikes;
 updateStrikes = function (dt) {
     _updateStrikesR10(dt);
     for (let i = strikes.length - 1; i >= 0; i--) {
-        const s = strikes[i]; if (s.kind !== 'vtOrbital' || s.t > 0) continue;
+        const s = strikes[i]; if (!s) continue; if (s.kind !== 'vtOrbital' || s.t > 0) continue;
         const o = players.find(q => q.id === s.owner);
         if (!s.z) { // giáng xuống: huỷ diệt tức thì + cháy tiếp
             s.z = { type: 'orbitalBeam2', x: s.x, y: s.y, r: s.R, t: s.dur, maxT: s.dur, owner: s.owner, tick: 0, pink: true }; zones.push(s.z);

@@ -12,11 +12,14 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 7. Tóm tắt bằng tiếng Việt: đã làm gì, số liệu test, hạn chế còn lại.
 
 ## Kiến trúc
-- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework18.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
+- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework19.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
 - **Biến toàn cục dùng chung giữa file** (`const/let` top-level). Hàm khai báo `function f(){}` có thể gán lại: mẫu wrapper
   `const _fR7 = f; f = function (...a) { ...; return _fR7(...a); };`
   → **tên biến lưu hàm cũ phải duy nhất** (dùng hậu tố `R7`, `R12`…). Trước khi thêm, grep trùng tên `const X\b` trong `js/*.js`.
 - File nạp SAU rework (`sandbox.js`, `battleground.js`, `fixes.js`) khai báo `POLY_WEPS`, `bgWin`, `drawPicker`… → muốn ghi đè thì làm trong `window.addEventListener('load', ...)`.
+- **Quy tắc vòng lặp duyệt ngược** `for (let i = A.length - 1; i >= 0; i--) { const x = A[i]; if (!x) continue; …` — hạ gục có thể kết thúc hiệp và XOÁ SẠCH mảng ngay giữa vòng lặp; luôn có chốt `if (!x) continue;` (đã thêm cho 84 vòng lặp cũ).
+- **Không tính góc từ người chưa xuất hiện** (Chiến trường có hồi sinh: `x/y` có thể `undefined` → `atan2` = NaN); rework19 có lưới an toàn nhưng code mới vẫn nên kiểm `isFinite`.
+- Muốn biết sát thương đến từ đâu (đòn thường / kỹ năng): dùng `gunSrcR19(A, target, opts)` / `isSkillDmgR19(opts)` (rework19).
 - Vòng lặp: `main.js loop → update(dt) (game.js) → draw()`. Lỗi bị nuốt bằng `console.error` → test phải bắt cả `console` error.
 
 ### Hook chính để bọc
@@ -64,6 +67,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 | `rework16.js` | **Độ bền**: cận chiến/khiên/đa hình mỗi đòn −1 dù trượt (bỏ −1 khi trúng), dò chặn đạn chung (`blockScanR16`, −max(2, dmg/8); khiên ×2), vũ khí combo = số đòn × 5 (`COMBO_LEN_R16`) |
 | `rework17.js` | **Cưa Máy làm lại** (`sawFire17`: rồ máy `sawRev`, nhiệt `sawHeat`/quá nhiệt `sawJam`, Xé Thịt, thả = Lao Cưa; Bậc Thầy Đĩa Cưa Bay, KTC Bão Cưa — `W17`); **buff Vạn Tượng** (sửa thẳng `VT[k].buff`, Điểm Đánh Dấu mạnh nhất) + **Chỉ Huy** (+200 máu, hồi chiêu −25%, +10% sát thương, tự hồi máu); **đầu gậy riêng 16 mould** (`VT_HEAD17`, ghi đè `ART2.VANTUONG`); **Huyền Cơ** chặn đạn: dạng Mở đứng yên, dạng Huyền Cơ chậm (bọc `blockBulletsArc`) |
 | `rework18.js` | **Gắn 17 âm nhóm C** (xem `AUDIO_MOI.md`): lớp đổi tên âm theo ngữ cảnh bọc `AudioSys.playAt/play` — ngăn xếp `SND_CTX18` (vũ khí / `VT:mould` / `S:kỹ năng` / `SP:phép`), bảng `SND_MAP18`, đoán theo người đứng tại chỗ phát; âm kèm: nổ đầu roi, đạn nảy (`updateBullets`), đóng băng (`frozenT`); thiếu file thì giữ âm cũ. Muốn gắn âm mới cho vũ khí: thêm dòng vào `SND_MAP18` |
+| `rework19.js` | **Sửa sau rà soát**: nhãn NGUỒN SÁT THƯƠNG (`SRC19`, `runCtx19`: đạn/vật ném/vùng/hàng đợi do đòn thường → `_atkW`, do kỹ năng/phép → `_skill`; `gunSrcR19`, `isSkillDmgR19`) → buff súng rework15 chỉ áp đòn bắn thường, nerf rework14 không áp kỹ năng; **lưới an toàn NaN** (góc, lực đẩy, toạ độ, âm thanh, góc đẩy lùi) |
 
 ## Hệ thống đã chốt với người dùng
 - **Máu cơ bản 600.** Vũ khí dễ trúng ×0.8 (Tesla, Phun Lửa, Súng Băng, Roi Điện, Urumi, Railgun, Shotgun, AR Giảm Thanh, Bộ Cơ Động, Đĩa Nảy, Nỏ Liên Châu, Minigun), Ma Đao (người dùng gọi "Ám đao") ×0.9. Ám Khí không giảm. Hỏa Mai 999.
@@ -79,6 +83,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 - **Bảng chiến thuật**: cấp 1 Mini / 2 Vùng / 3 Toàn map; Bản Đồ Nhỏ hoặc cầm Vạn Tượng +1 cấp (trừ đòn thường Điểm Đánh Dấu luôn Mini).
 
 ## Test (Playwright, Chromium có sẵn)
+- Rà soát: ESLint có sẵn (`/opt/node-tools/node_modules/eslint`, luật `no-undef`/`no-dupe-keys`…); acorn để phân tích tĩnh (hàm khai báo lại, gán đè không gọi hàm cũ, mục bảng trùng). Lỗi hiếm → chạy 3 trận Chiến trường song song ~3 phút và ghi `console.error` kèm stack.
 - Chạy server: `cd /home/user/Shoot && nohup python3 -m http.server 8765 >/dev/null 2>&1 &` (tắt thì khởi động lại).
 - Script mẫu trong `tools/tests/` (chép ra scratchpad rồi `node tXXX.js`). `_harness.js` = phần khung: mở sandbox, xoá vật cản, đặt `window.R(id)` (trang bị vũ khí `id`, reset người chơi + hình nộm `players[1..]`, trả về mảng hình nộm) và `window.D()` (sát thương hình nộm 1 đã nhận).
 - `audit.js [ID,ID]`: chạy mọi vũ khí × 4 hướng (đánh, giữ, Bậc Thầy/Trang Bị Phụ, KTC), báo sai hướng/hitbox; `audit_cards.js`: mọi thẻ kỹ năng. Nhiều cờ là nhiễu (chiêu vùng, đạn tản, chiêu trễ).

@@ -121,7 +121,7 @@ function explode(x, y, ownerId, dmgMax = 120, radius = 160) {
         if (dist(x, y, nx, ny) < radius) damageObstacle(o, dmgMax);
     });
     for (let i = crates.length - 1; i >= 0; i--) {
-        const c = crates[i];
+        const c = crates[i]; if (!c) continue;
         if (c.type === 'TRAP' && dist(x, y, c.x, c.y) < radius * 0.7) { crates.splice(i, 1); setTimeout(() => { if (gameState === 'PLAYING' || gameState === 'KO') explode(c.x, c.y, ownerId, 60, 130); }, 120); }
     }
     players.forEach(p => {
@@ -214,7 +214,7 @@ function openCrate(p, index) {
 /** Đạn */
 function updateBullets(dt) {
     for (let i = bullets.length - 1; i >= 0; i--) {
-        const b = bullets[i];
+        const b = bullets[i]; if (!b) continue;
         b.px = b.x; b.py = b.y;
         if (b.boomerang && updateBoomerang(b, dt)) { bullets.splice(i, 1); continue; }
         b.x += Math.cos(b.angle) * b.speed * 60 * dt; b.y += Math.sin(b.angle) * b.speed * 60 * dt;
@@ -255,7 +255,7 @@ function updateBullets(dt) {
         // bẫy
         if (!dead) {
             for (let c = crates.length - 1; c >= 0; c--) {
-                const cr = crates[c];
+                const cr = crates[c]; if (!cr) continue;
                 if (cr.type === 'TRAP' && dist(b.x, b.y, cr.x, cr.y) < cr.size * 0.7) { crates.splice(c, 1); explode(cr.x, cr.y, b.owner, 60, 130); dead = true; break; }
             }
         }
@@ -318,7 +318,7 @@ function updateBullets(dt) {
 /** Vật ném: lựu đạn, vũ khí bị ném */
 function updateItems(dt) {
     for (let i = items.length - 1; i >= 0; i--) {
-        const it = items[i];
+        const it = items[i]; if (!it) continue;
         if (it.custom) { if (updateCustomItem(it, dt)) items.splice(i, 1); continue; }
         if (it.fuse > 0) {
             it.fuse -= dt;
