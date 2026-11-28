@@ -391,7 +391,6 @@ updatePartyExtras = function (dt) {
     players.forEach(p => {
         if (p.doc21 && p.hp > 0) { if (p.doc21.until <= now) p.doc21 = null; else { p.doc21.tick += dt; if (p.doc21.tick >= 0.5) { p.doc21.tick = 0; trueDamage(p, 9, p.doc21.by); if (Math.random() < 0.5) spark(p.x, p.y, '#84cc16', 3, 90); } } }
         const w = p.hp > 0 && getCurrentWeapon(p);
-        if (w && w.id === 'AXEGUN') { w.form = 'axe'; w.type = 'MELEE'; w.range = 95; w.aim = 'arc'; }
     });
 };
 const _resetR21b = resetPlayerForRound;
