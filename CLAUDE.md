@@ -12,7 +12,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 7. Tóm tắt bằng tiếng Việt: đã làm gì, số liệu test, hạn chế còn lại.
 
 ## Kiến trúc
-- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework20.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
+- `index.html` nạp script theo thứ tự (cuối danh sách): `… weapons5.js, rework1.js … rework21.js, sandbox.js, battleground.js, fixes.js, icons.js, main.js`.
 - **Biến toàn cục dùng chung giữa file** (`const/let` top-level). Hàm khai báo `function f(){}` có thể gán lại: mẫu wrapper
   `const _fR7 = f; f = function (...a) { ...; return _fR7(...a); };`
   → **tên biến lưu hàm cũ phải duy nhất** (dùng hậu tố `R7`, `R12`…). Trước khi thêm, grep trùng tên `const X\b` trong `js/*.js`.
@@ -69,6 +69,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 | `rework18.js` | **Gắn 17 âm nhóm C** (xem `AUDIO_MOI.md`): lớp đổi tên âm theo ngữ cảnh bọc `AudioSys.playAt/play` — ngăn xếp `SND_CTX18` (vũ khí / `VT:mould` / `S:kỹ năng` / `SP:phép`), bảng `SND_MAP18`, đoán theo người đứng tại chỗ phát; âm kèm: nổ đầu roi, đạn nảy (`updateBullets`), đóng băng (`frozenT`); thiếu file thì giữ âm cũ. Muốn gắn âm mới cho vũ khí: thêm dòng vào `SND_MAP18` |
 | `rework19.js` | **Sửa sau rà soát**: nhãn NGUỒN SÁT THƯƠNG (`SRC19`, `runCtx19`: đạn/vật ném/vùng/hàng đợi do đòn thường → `_atkW`, do kỹ năng/phép → `_skill`; `gunSrcR19`, `isSkillDmgR19`) → buff súng rework15 chỉ áp đòn bắn thường, nerf rework14 không áp kỹ năng; **lưới an toàn NaN** (góc, lực đẩy, toạ độ, âm thanh, góc đẩy lùi) |
 | `rework20.js` | **Nhân theo tỉ lệ máu mới** `HEALK = 600/200 = 3`: hồi máu CỐ ĐỊNH đã sửa tại chỗ ở file gốc thành `(x) * HEALK` (34 chỗ; KHÔNG nhân hồi theo % máu / hút máu theo % sát thương); máu Robot/Titan/Mech ×HEALK; **sát thương kỹ năng/phép ×HEALK** (đòn trực tiếp, đạn/vật/vùng của kỹ năng, không kích do kỹ năng gọi `strikeOwner20`, cú đáp sau nhảy từ kỹ năng `_landSkill20`, triệu hồi `opts.summon`); khiên từ kỹ năng ×HEALK. Đòn đánh thường vũ khí KHÔNG đổi |
+| `rework21.js` | **Giáp ×HEALK** (`maxArmor` lúc reset + giáp nhận giữa hiệp `armorTick21`); **mô tả theo tỉ lệ mới** (`scaleDesc21` lúc `load`, dấu ẩn U+2063 chống nhân 2 lần); `drawSpinWep21(c,id,x,y,rot,scale,glow)` vẽ vật ném bằng hình vũ khí thật (Búa Sấm Ném); **Rìu Săn mới** (`agFire21`: chém nạp `w.ch` 0–2 nòng + Dấu Săn `ag21Mark`, giữ thả song nòng / rìu xoáy, Bậc Thầy Truy Săn, KTC Song Long); **Trường Kiếm Ngũ Hành** (`NH21`, `lsFire21`, `nhHit21`, Hoá Hành tương sinh, tương khắc +30%, đòn 3 riêng từng hệ, Bậc Thầy Ngũ Hành Luân Trảm, KTC theo hệ); vũ khí **Bùa** (`BUA`, `BUA_FX21` 10 phép, `w.nextFx`, giữ thả đổi lá); thẻ **Bậc Thầy Nguyên Tố** (`elemMaster`, `emProc21`, Ngũ Hành Hợp Nhất). Vật bay riêng `W21` (`step21`, tự gắn `_skill` nếu sinh trong kỹ năng) |
 
 ## Hệ thống đã chốt với người dùng
 - **Máu cơ bản 600.** Vũ khí dễ trúng ×0.8 (Tesla, Phun Lửa, Súng Băng, Roi Điện, Urumi, Railgun, Shotgun, AR Giảm Thanh, Bộ Cơ Động, Đĩa Nảy, Nỏ Liên Châu, Minigun), Ma Đao (người dùng gọi "Ám đao") ×0.9. Ám Khí không giảm. Hỏa Mai 999.
@@ -76,6 +77,7 @@ Game bắn súng top-down chạy trình duyệt, **vanilla JS**, không build. N
 - **Súng**: trúng hết 2 băng gốc = 600 (1 mạng); súng đã mạnh hơn thì giữ. Sniper: mỗi viên đúng 100 → đủ 6 viên. Không áp: Hỏa Mai, Boomerang, Súng Lưới, súng chiến thuật, đa hình.
 - **Độ bền**: mỗi đòn cận chiến/đa hình đều tốn (trúng hay trượt); chặn đạn tốn nhiều; vũ khí combo bền 5 lượt combo rồi gãy.
 - **Vạn Tượng buff** (rework17): mọi mould sát thương ×1.2, chịu đòn ×0.88, chạy ×1.05, độ bền 120; **Điểm Đánh Dấu mạnh nhất** (×1.5 / ×0.8 / ×1.12, dấu nổ ×1.25). **Chỉ Huy**: +200 máu, hồi chiêu −25%, +10% sát thương, hồi 4 máu/giây khi 3 giây không bị đánh.
+- **Trường Kiếm Ngũ Hành** (rework21): Kim nhanh/xuyên giáp/Kim Châm · Thủy tầm xa/chậm→đóng băng/Thủy Ba · Mộc hút máu/Dây Leo trói · Hỏa cháy cộng dồn/Hỏa Long · Thổ nặng/giảm 20% nhận/Địa Chấn + vách đá. Giữ thả = Hoá Hành Kim→Thủy→Mộc→Hỏa→Thổ. **Bùa**: 10 phép ngẫu nhiên, lá kế hiện trên tay. **Thẻ Bậc Thầy Nguyên Tố**: 45% kèm nguyên tố, đủ 5 hệ → Hợp Nhất. **Rìu Săn**: chém nạp 2 nòng → giữ thả bắn sát nách. **Giáp ×3**.
 - **Huyền Cơ**: dạng Mở chặn đạn → đứng yên 0.45s; dạng Huyền Cơ chặn đạn → chậm 0.9s.
 - **Vạn Tượng**: 16 mould = 12 thường (6 gần/6 xa) + 4 độc quyền Chỉ Huy (Khiên NL, Đầu Kiếm, Đầu Súng, Tia Lazer). Gậy thường luôn **1 gần + 1 xa**. Mỗi mould: đòn đánh `A`, buff, chiêu chuyển `S`, kỹ năng `K` (Bậc Thầy/Trang Bị Phụ), Ép Xung riêng. Thuộc nhánh vũ khí đa hình (`POLY_WEPS`).
 - **Kỹ Thuật Cao** của Vạn Tượng = đổi mould tức thì (mould Điểm Đánh Dấu: Tuyệt Diệt Quang, cạn gậy; Chỉ Huy: KTC hồi ×2 thay vì mất gậy). Đổi mould hồi chung 1s.
