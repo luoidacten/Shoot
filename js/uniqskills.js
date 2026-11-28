@@ -222,7 +222,7 @@ function updateUSK(dt) {
                 if (Math.random() < 0.6) particles.push({ x: f.x + (Math.random() - 0.5) * 120, y: f.y + (Math.random() - 0.5) * 120, vx: 0, vy: 0, life: 0.4, maxLife: 0.4, color: 'rgba(251,191,36,0.35)', size: 3 });
                 if (f.hov <= 0) { f.phase = 2; f.hit.clear(); }
             } else {
-                const d = dist(f.x, f.y, o.x, o.y); if (d <= sp + o.radius) { f.t = 0; continue; }
+                const d = dist(f.x, f.y, o.x, o.y); if (d <= sp + o.radius) { USK.splice(i, 1); continue; }
                 const a = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(a) * sp; f.y += Math.sin(a) * sp;
             }
             if (f.phase !== 1) { const e = uskHitFoe(o, f.x, f.y, 30, f.hit); if (e) { f.hit.add(e.id); dealDamage(e, 22 * uskDM(o), o.id, { knock: 160, angle: Math.atan2(e.y - f.y, e.x - f.x) }); } }
@@ -257,7 +257,7 @@ function updateUSK(dt) {
                 } else { const a = Math.atan2(f.ey - f.y, f.ex - f.x); f.x += Math.cos(a) * sp; f.y += Math.sin(a) * sp; }
             } else if (f.phase === 1) { f.wait -= dt; if (f.wait <= 0) { f.phase = 2; f.hit.clear(); } }
             else {
-                const d = dist(f.x, f.y, o.x, o.y); if (d <= sp * 1.1 + o.radius) { f.t = 0; ring(o.x, o.y, 4, 40, '#fde047', 0.3, 3); continue; }
+                const d = dist(f.x, f.y, o.x, o.y); if (d <= sp * 1.1 + o.radius) { ring(o.x, o.y, 4, 40, '#fde047', 0.3, 3); USK.splice(i, 1); continue; }
                 const a = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(a) * sp * 1.1; f.y += Math.sin(a) * sp * 1.1;
             }
             if (f.phase !== 1) { const e = uskHitFoe(o, f.x, f.y, 26, f.hit); if (e) { f.hit.add(e.id); dealDamage(e, 20 * uskMM(o), o.id, { melee: true, knock: 220, angle: Math.atan2(e.y - f.y, e.x - f.x) }); e.stun = Math.max(e.stun, 0.3); } }
@@ -306,7 +306,7 @@ drawW2Fx = function (now) {
         else if (f.kind === 'vortex') { ctx.save(); ctx.translate(f.x, f.y); if (f.phase === 1) { ctx.strokeStyle = 'rgba(251,191,36,0.35)'; ctx.lineWidth = 2; for (let j = 0; j < 3; j++) { ctx.beginPath(); ctx.arc(0, 0, 50 + j * 35, now * (4 - j) , now * (4 - j) + 4); ctx.stroke(); } } ctx.rotate(now * 20); ctx.fillStyle = '#f59e0b'; for (let j = 0; j < 2; j++) { ctx.rotate(Math.PI); ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(14, -6, 26, 4); ctx.quadraticCurveTo(12, 4, 0, 6); ctx.closePath(); ctx.fill(); } ctx.restore(); }
         else if (f.kind === 'guided') { ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.a); ctx.fillStyle = '#e5e7eb'; ctx.fillRect(-12, -4, 20, 8); ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(8, -4); ctx.lineTo(16, 0); ctx.lineTo(8, 4); ctx.fill(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(251,146,60,0.9)'; ctx.beginPath(); ctx.arc(-14, 0, 5 + Math.random() * 3, 0, Math.PI * 2); ctx.fill(); ctx.restore(); const o = players.find(q => q.id === f.owner); if (o && o === localPlayer()) { ctx.strokeStyle = 'rgba(251,146,60,0.25)'; ctx.setLineDash([4, 8]); ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x + Math.cos(f.a) * 120, f.y + Math.sin(f.a) * 120); ctx.stroke(); ctx.setLineDash([]); } }
         else if (f.kind === 'sticky') { const blink = (f.stuckTo !== undefined || f.stuck) && Math.sin(now * 30) > 0; ctx.fillStyle = blink ? '#fef08a' : '#ef4444'; ctx.beginPath(); ctx.arc(f.x, f.y, 4, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x - Math.cos(f.a) * 14, f.y - Math.sin(f.a) * 14); ctx.stroke(); if (f.stuckTo !== undefined || f.stuck) { ctx.strokeStyle = 'rgba(249,115,22,0.4)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(f.x, f.y, 85 * (1 - Math.max(0, f.fuse) / 1.4), 0, Math.PI * 2); ctx.stroke(); } }
-        else if (f.kind === 'hammer') { ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.phase === 1 ? 0 : now * 16); ctx.fillStyle = '#78716c'; ctx.fillRect(-3, -2, 26, 4); ctx.fillStyle = '#d6d3d1'; ctx.fillRect(-14, -10, 16, 20); ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 1.2; ctx.strokeRect(-14, -10, 16, 20); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = `rgba(253,224,71,${0.4 + Math.random() * 0.4})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(-6, 0, 16, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+        else if (f.kind === 'hammer') { if (typeof drawSpinWep21 === 'function') drawSpinWep21(ctx, 'HAMMER', f.x, f.y, f.phase === 1 ? -Math.PI / 2 : now * 16, 1.7, '#fde047'); }
         else if (f.kind === 'mark') { const e = players.find(q => q.id === f.tid); if (e) { ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(now * 3); ctx.strokeStyle = `rgba(252,165,165,${0.5 + (1 - k) * 0.5})`; ctx.lineWidth = 2; const r = e.radius + 8 + k * 16; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke(); for (let j = 0; j < 4; j++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.moveTo(r - 6, 0); ctx.lineTo(r + 6, 0); ctx.stroke(); } ctx.restore(); } }
     });
     ctx.restore();
